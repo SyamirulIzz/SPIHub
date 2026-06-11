@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { LEAVE_REQUESTS } from "@/lib/mock-data"
 
 export default function ApplyLeavePage() {
   const router = useRouter()
@@ -25,6 +26,8 @@ export default function ApplyLeavePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
+  const [leaveType, setLeaveType] = useState<string>("")
+  const [reason, setReason] = useState("")
 
   useEffect(() => {
     setMounted(true)
@@ -34,10 +37,10 @@ export default function ApplyLeavePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!startDate || !endDate) {
+    if (!startDate || !endDate || !leaveType) {
       toast({
         title: "Ralat",
-        description: "Sila pilih tarikh mula dan tarikh tamat.",
+        description: "Sila lengkapkan semua maklumat permohonan.",
         variant: "destructive"
       })
       return
@@ -45,27 +48,41 @@ export default function ApplyLeavePage() {
     
     setIsSubmitting(true)
     
-    // Simulating API call
+    // Simulate saving to localStorage
+    const savedRequests = JSON.parse(localStorage.getItem('simulated_leave_requests') || JSON.stringify(LEAVE_REQUESTS))
+    const newRequest = {
+      id: `leave-${Date.now()}`,
+      userId: currentUser.id,
+      leaveType: leaveType as any,
+      startDate: format(startDate, "yyyy-MM-dd"),
+      endDate: format(endDate, "yyyy-MM-dd"),
+      reason: reason,
+      status: 'PENDING'
+    }
+    
+    const updatedRequests = [newRequest, ...savedRequests]
+    localStorage.setItem('simulated_leave_requests', JSON.stringify(updatedRequests))
+
     setTimeout(() => {
       toast({
         title: "Permohonan Dihantar",
-        description: "Permohonan cuti anda telah berjaya dihantar untuk kelulusan.",
+        description: "Permohonan cuti anda telah berjaya direkodkan.",
       })
       setIsSubmitting(false)
       router.push("/leave")
-    }, 1500)
+    }, 1000)
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <header className="space-y-4">
         <Button variant="ghost" onClick={() => router.push("/leave")} className="gap-2 -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4" />
           Back to Leave Log
         </Button>
         <div>
-          <h1 className="text-3xl font-bold font-headline text-foreground">Apply For Leave</h1>
-          <p className="text-muted-foreground mt-1">Please fill in the details for your leave application.</p>
+          <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Apply For Leave</h1>
+          <p className="text-sm text-muted-foreground mt-1">Sila isi butiran permohonan cuti anda.</p>
         </div>
       </header>
 
@@ -81,7 +98,7 @@ export default function ApplyLeavePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="leaveType">Leave Type</Label>
-                <Select required>
+                <Select required onValueChange={setLeaveType}>
                   <SelectTrigger id="leaveType" className="bg-secondary/30 border-border">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -97,7 +114,7 @@ export default function ApplyLeavePage() {
                 <Label htmlFor="balance">AL available Balance</Label>
                 <Input 
                   id="balance" 
-                  value={`${currentUser.annualLeaveLimit - 4.5} Days`} 
+                  value={`${currentUser.annualLeaveLimit} Days`} 
                   disabled 
                   className="bg-secondary/10 border-border font-bold text-accent"
                 />
@@ -165,21 +182,19 @@ export default function ApplyLeavePage() {
               <Label htmlFor="reason">Reason / Description</Label>
               <Textarea 
                 id="reason" 
-                placeholder="State the purpose of your leave application..." 
-                className="min-h-[120px] bg-secondary/30 border-border"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Tujuan permohonan cuti..." 
+                className="min-h-[100px] bg-secondary/30 border-border"
                 required
               />
             </div>
-            
-            <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 text-[11px] text-muted-foreground">
-              <strong>Notice:</strong> Applications for more than 3 days should be submitted at least 1 week in advance. For Medical Leave, you will be required to upload an MC slip in the main dashboard after this application is approved.
-            </div>
           </CardContent>
-          <CardFooter className="bg-secondary/10 border-t border-border p-6 flex justify-between gap-4">
-            <Button type="button" variant="outline" onClick={() => router.push("/leave")} className="flex-1">
+          <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">
+            <Button type="button" variant="outline" onClick={() => router.push("/leave")} className="w-full md:flex-1">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+            <Button type="submit" disabled={isSubmitting} className="w-full md:flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
               <Send className="w-4 h-4" />
               {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>

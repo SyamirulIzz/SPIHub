@@ -20,99 +20,76 @@ export default function Dashboard() {
   const { currentUser, isLoaded } = useCurrentUser()
   const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
+  const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     const savedClaims = localStorage.getItem('simulated_claims')
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
+    const savedMovements = localStorage.getItem('simulated_movements')
+    
     if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
     if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
+    if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
   }, [])
   
   if (!isLoaded || !mounted) return null
 
-  const pendingClaims = syncedClaims.filter(c => c.status === 'PENDING').length
-  const openTickets = TICKETS.filter(t => t.status === 'Open' || t.status === 'In Progress').length
-  const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE').length
-  const staffOnSite = MOVEMENTS.filter(m => m.status === 'PENDING' || m.status === 'COMPLETED').length
+  const pendingClaimsCount = syncedClaims.filter(c => c.status === 'PENDING').length
+  const openTicketsCount = TICKETS.filter(t => t.status !== 'Resolved').length
+  const activeProjectsCount = PROJECTS.filter(p => p.status === 'ACTIVE').length
+  const staffOnSiteCount = syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').length
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-headline text-foreground">Operational Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, <span className="text-accent font-semibold">{currentUser.name}</span>. Perubahan status cuti/tuntutan disegerakkan secara real-time.</p>
+          <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Operational Dashboard</h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+            Hi, <span className="text-accent font-semibold">{currentUser.name}</span>. Data dikemaskini secara automatik.
+          </p>
         </div>
-        <div className="flex items-center gap-3 bg-secondary/50 p-3 rounded-xl border border-border">
-          <TrendingUp className="text-accent w-5 h-5" />
+        <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-xl border border-border max-w-fit">
+          <TrendingUp className="text-accent w-4 h-4" />
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Company KPI</span>
-            <span className="text-sm font-bold text-foreground">98.2% Efficiency</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-bold">Company KPI</span>
+            <span className="text-xs font-bold text-foreground">98.2% Efficiency</span>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Active Projects" 
-          value={activeProjects.toString()} 
-          icon={Briefcase} 
-          description="Across all departments" 
-          color="indigo" 
-        />
-        <StatCard 
-          title="Open Tickets" 
-          value={openTickets.toString()} 
-          icon={TicketIcon} 
-          description="Requiring attention" 
-          color="cyan" 
-        />
-        <StatCard 
-          title="Pending Claims" 
-          value={pendingClaims.toString()} 
-          icon={WalletIcon} 
-          description="Waiting for approval" 
-          color="amber" 
-        />
-        <StatCard 
-          title="Staff On-Site" 
-          value={staffOnSite.toString()} 
-          icon={MapPin} 
-          description="Current client visits" 
-          color="emerald" 
-        />
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <StatCard title="Projects" value={activeProjectsCount.toString()} icon={Briefcase} color="indigo" />
+        <StatCard title="Tickets" value={openTicketsCount.toString()} icon={TicketIcon} color="cyan" />
+        <StatCard title="Claims" value={pendingClaimsCount.toString()} icon={WalletIcon} color="amber" />
+        <StatCard title="On-Site" value={staffOnSiteCount.toString()} icon={MapPin} color="emerald" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2 bg-card border-border shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
+            <CardTitle className="text-lg font-headline flex items-center gap-2">
               <CalendarCheck2 className="text-primary w-5 h-5" />
-              Recent Staff Movements
+              Latest Staff Movements
             </CardTitle>
-            <CardDescription>Latest out-of-office activity logs</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {MOVEMENTS.map((mov) => {
+            <div className="space-y-3">
+              {syncedMovements.slice(0, 5).map((mov) => {
                 const user = USERS.find(u => u.id === mov.userId)
-                const project = PROJECTS.find(p => p.id === mov.projectId)
                 return (
-                  <div key={mov.id} className="flex items-start justify-between p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/30 transition-all cursor-default group">
-                    <div className="flex gap-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                  <div key={mov.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">
                         {user?.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{user?.name}</p>
-                        <p className="text-xs text-muted-foreground font-medium">{project?.name} &bull; {mov.destination}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground truncate">{user?.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{mov.destination}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-accent/80 uppercase tracking-tighter">{mov.category.replace('_', ' ')}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">{new Date(mov.startDate).toLocaleDateString()}</p>
-                    </div>
+                    <Badge variant="outline" className="text-[8px] uppercase">{mov.status}</Badge>
                   </div>
                 )
               })}
@@ -122,48 +99,34 @@ export default function Dashboard() {
 
         <Card className="bg-card border-border shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
+            <CardTitle className="text-lg font-headline flex items-center gap-2">
               <Users className="text-accent w-5 h-5" />
-              Department Load
+              Quick Stats
             </CardTitle>
-            <CardDescription>Personnel distribution</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-6">
+          <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Engineering</span>
-                  <span className="font-bold">12 Staff</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold">
+                  <span>Leave Utilization</span>
+                  <span>65%</span>
                 </div>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: '70%' }}></div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Operations</span>
-                  <span className="font-bold">5 Staff</span>
-                </div>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-accent" style={{ width: '40%' }}></div>
+                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: '65%' }}></div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Management</span>
-                  <span className="font-bold">3 Staff</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold">
+                  <span>Claims Processed</span>
+                  <span>RM 12,400</span>
                 </div>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500" style={{ width: '25%' }}></div>
+                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                  <div className="h-full bg-accent" style={{ width: '45%' }}></div>
                 </div>
               </div>
             </div>
-            
-            <div className="mt-4 p-4 rounded-xl bg-accent/10 border border-accent/20">
-              <p className="text-sm font-medium text-accent">Internal Memo</p>
-              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                All staff are reminded to submit medical claims before the 25th of each month for payroll processing.
-              </p>
+            <div className="p-3 rounded-lg bg-accent/5 border border-accent/20 text-[10px] text-muted-foreground italic leading-relaxed">
+              "Sila pastikan semua log pergerakan dikemaskini setiap hari sebelum jam 5 petang."
             </div>
           </CardContent>
         </Card>
@@ -172,7 +135,7 @@ export default function Dashboard() {
   )
 }
 
-function StatCard({ title, value, icon: Icon, description, color }: any) {
+function StatCard({ title, value, icon: Icon, color }: any) {
   const colorMap: any = {
     indigo: "text-primary bg-primary/10 border-primary/20",
     cyan: "text-accent bg-accent/10 border-accent/20",
@@ -181,22 +144,16 @@ function StatCard({ title, value, icon: Icon, description, color }: any) {
   }
 
   return (
-    <Card className="bg-card border-border shadow-lg overflow-hidden relative group">
-      <div className={cn("absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full blur-3xl opacity-20 bg-current transition-all group-hover:opacity-40", colorMap[color]?.split(' ')[0])}></div>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          {title}
-        </CardTitle>
+    <Card className="bg-card border-border shadow-lg overflow-hidden relative group p-4">
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{title}</span>
+          <span className="text-xl md:text-2xl font-bold font-headline text-foreground mt-1">{value}</span>
+        </div>
         <div className={cn("p-2 rounded-lg border", colorMap[color])}>
           <Icon className="h-4 w-4" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-headline text-foreground">{value}</div>
-        <p className="text-[10px] text-muted-foreground mt-1 font-medium italic">
-          {description}
-        </p>
-      </CardContent>
+      </div>
     </Card>
   )
 }

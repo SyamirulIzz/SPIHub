@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Send, MapPin, Briefcase, Calendar as CalendarIcon, Clock, Users, Truck } from "lucide-react"
-import { PROJECTS } from "@/lib/mock-data"
+import { PROJECTS, MOVEMENTS } from "@/lib/mock-data"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
@@ -26,10 +26,17 @@ export default function LogMovementPage() {
   const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  const [projectId, setProjectId] = useState("")
+  const [category, setCategory] = useState("")
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
   const [startTime, setStartTime] = useState("09:00")
   const [endTime, setEndTime] = useState("17:00")
+  const [destination, setDestination] = useState("")
+  const [purpose, setPurpose] = useState("")
+  const [contactPerson, setContactPerson] = useState("")
+  const [transportation, setTransportation] = useState("")
+  const [claimable, setClaimable] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -39,34 +46,57 @@ export default function LogMovementPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!startDate) {
-      toast({ title: "Ralat", description: "Sila pilih tarikh mula.", variant: "destructive" })
+    if (!startDate || !projectId || !category || !destination) {
+      toast({ title: "Ralat", description: "Sila lengkapkan maklumat wajib.", variant: "destructive" })
       return
     }
     
     setIsSubmitting(true)
     
-    // Simulating API call
+    // Simulate saving to localStorage
+    const savedMovements = JSON.parse(localStorage.getItem('simulated_movements') || JSON.stringify(MOVEMENTS))
+    const newMovement = {
+      id: `mov-${Date.now()}`,
+      userId: currentUser.id,
+      projectId: projectId,
+      startDate: `${format(startDate, "yyyy-MM-dd")}T${startTime}:00`,
+      endDate: `${format(endDate || startDate, "yyyy-MM-dd")}T${endTime}:00`,
+      allDay: false,
+      destination: destination,
+      purpose: purpose,
+      description: "",
+      category: category as any,
+      contactPerson: contactPerson,
+      contactOrg: "",
+      transportation: transportation as any,
+      claimable: claimable,
+      movementType: 'OUT' as any,
+      status: 'PENDING' as any
+    }
+    
+    const updatedMovements = [newMovement, ...savedMovements]
+    localStorage.setItem('simulated_movements', JSON.stringify(updatedMovements))
+
     setTimeout(() => {
       toast({
         title: "Pergerakan Direkod",
-        description: "Maklumat pergerakan anda telah berjaya dihantar untuk rekod sistem.",
+        description: "Maklumat pergerakan anda telah berjaya dihantar.",
       })
       setIsSubmitting(false)
       router.push("/movements")
-    }, 1500)
+    }, 1000)
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <header className="space-y-4">
         <Button variant="ghost" onClick={() => router.push("/movements")} className="gap-2 -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4" />
           Back to Movement Log
         </Button>
         <div>
-          <h1 className="text-3xl font-bold font-headline text-foreground">Log New Movement</h1>
-          <p className="text-muted-foreground mt-1">Record your field assignments, client meetings, or site visits.</p>
+          <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Log New Movement</h1>
+          <p className="text-sm text-muted-foreground mt-1">Record your site visits or client meetings.</p>
         </div>
       </header>
 
@@ -84,7 +114,7 @@ export default function LogMovementPage() {
                 <Label htmlFor="project" className="flex items-center gap-2">
                   <Briefcase className="w-3.5 h-3.5" /> Project / Job
                 </Label>
-                <Select required>
+                <Select required onValueChange={setProjectId}>
                   <SelectTrigger id="project" className="bg-secondary/30 border-border">
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
@@ -97,7 +127,7 @@ export default function LogMovementPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Movement Category</Label>
-                <Select required>
+                <Select required onValueChange={setCategory}>
                   <SelectTrigger id="category" className="bg-secondary/30 border-border">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -127,7 +157,7 @@ export default function LogMovementPage() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "PPP") : <span>Date</span>}
+                        {startDate ? format(startDate, "dd/MM/yy") : <span>Date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
@@ -138,7 +168,7 @@ export default function LogMovementPage() {
                     type="time" 
                     value={startTime} 
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-[120px] bg-secondary/30 border-border" 
+                    className="w-[100px] bg-secondary/30 border-border text-xs" 
                   />
                 </div>
               </div>
@@ -157,7 +187,7 @@ export default function LogMovementPage() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "PPP") : <span>Date</span>}
+                        {endDate ? format(endDate, "dd/MM/yy") : <span>Date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
@@ -168,7 +198,7 @@ export default function LogMovementPage() {
                     type="time" 
                     value={endTime} 
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="w-[120px] bg-secondary/30 border-border" 
+                    className="w-[100px] bg-secondary/30 border-border text-xs" 
                   />
                 </div>
               </div>
@@ -176,68 +206,48 @@ export default function LogMovementPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="destination">Destination Address</Label>
-                <Input id="destination" placeholder="e.g. AADK HQ, Kajang / Client Office Name" required className="bg-secondary/30 border-border" />
+                <Label htmlFor="destination">Destination</Label>
+                <Input id="destination" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="e.g. AADK HQ, Kajang" required className="bg-secondary/30 border-border" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="purpose">Purpose of Movement</Label>
-                <Input id="purpose" placeholder="e.g. System UAT, Server Delivery, Weekly Meeting" required className="bg-secondary/30 border-border" />
+                <Label htmlFor="purpose">Purpose</Label>
+                <Input id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="e.g. System Installation" required className="bg-secondary/30 border-border" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="contactPerson" className="flex items-center gap-2">
-                  <Users className="w-3.5 h-3.5" /> Client Contact Person
-                </Label>
-                <Input id="contactPerson" placeholder="Name of person at site" className="bg-secondary/30 border-border" />
+                <Label htmlFor="contactPerson">Client Contact</Label>
+                <Input id="contactPerson" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} placeholder="Name of person at site" className="bg-secondary/30 border-border" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="transportation" className="flex items-center gap-2">
-                  <Truck className="w-3.5 h-3.5" /> Transportation
-                </Label>
-                <Select required>
+                <Label htmlFor="transportation">Transportation</Label>
+                <Select required onValueChange={setTransportation}>
                   <SelectTrigger id="transportation" className="bg-secondary/30 border-border">
                     <SelectValue placeholder="Select mode" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    <SelectItem value="CAR">Company Car / Private Car</SelectItem>
+                    <SelectItem value="CAR">Private/Company Car</SelectItem>
                     <SelectItem value="MOTORCYCLE">Motorcycle</SelectItem>
-                    <SelectItem value="PUBLIC_TRANSPORT">Public Transport / Grab</SelectItem>
+                    <SelectItem value="PUBLIC_TRANSPORT">Grab/Public Transport</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Detailed Description</Label>
-              <Textarea 
-                id="description" 
-                placeholder="Briefly explain what tasks will be carried out..." 
-                className="min-h-[100px] bg-secondary/30 border-border"
-              />
-            </div>
-
             <div className="flex items-center space-x-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
-              <Checkbox id="claimable" />
+              <Checkbox id="claimable" checked={claimable} onCheckedChange={(checked) => setClaimable(!!checked)} />
               <div className="grid gap-1.5 leading-none">
-                <label
-                  htmlFor="claimable"
-                  className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-primary"
-                >
-                  This movement is claimable
-                </label>
-                <p className="text-[10px] text-muted-foreground">
-                  Tick this if you plan to submit travel/mileage claims later. Evidence will be required.
-                </p>
+                <label htmlFor="claimable" className="text-sm font-bold text-primary">This movement is claimable</label>
+                <p className="text-[10px] text-muted-foreground">Tick this if you plan to submit travel claims later.</p>
               </div>
             </div>
           </CardContent>
-          <CardFooter className="bg-secondary/10 border-t border-border p-6 flex justify-between gap-4">
-            <Button type="button" variant="outline" onClick={() => router.push("/movements")} className="flex-1">
+          <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">
+            <Button type="button" variant="outline" onClick={() => router.push("/movements")} className="w-full md:flex-1">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+            <Button type="submit" disabled={isSubmitting} className="w-full md:flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
               <Send className="w-4 h-4" />
               {isSubmitting ? "Processing..." : "Log Movement"}
             </Button>
