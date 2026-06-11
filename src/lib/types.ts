@@ -39,7 +39,9 @@ export interface StaffMovement {
   transportation: 'CAR' | 'MOTORCYCLE' | 'PUBLIC_TRANSPORT';
   claimable: boolean;
   movementType: 'OUT' | 'IN';
-  status: 'COMPLETED' | 'PENDING' | 'CANCELLED';
+  status: 'COMPLETED' | 'PENDING' | 'CANCELLED' | 'APPROVED';
+  approvedBy?: string;
+  evidenceUrl?: string;
 }
 
 export interface LeaveRequest {

@@ -117,7 +117,9 @@ export const MOVEMENTS: StaffMovement[] = [
     transportation: 'CAR',
     claimable: true,
     movementType: 'OUT',
-    status: 'COMPLETED'
+    status: 'COMPLETED',
+    approvedBy: 'Ahmad Manager',
+    evidenceUrl: 'https://picsum.photos/seed/mov1/800/600'
   },
   {
     id: 'mov-2',
@@ -153,7 +155,8 @@ export const MOVEMENTS: StaffMovement[] = [
     transportation: 'CAR',
     claimable: true,
     movementType: 'OUT',
-    status: 'PENDING'
+    status: 'APPROVED',
+    approvedBy: 'Siti HOD'
   },
   {
     id: 'mov-4',
@@ -189,7 +192,9 @@ export const MOVEMENTS: StaffMovement[] = [
     transportation: 'CAR',
     claimable: false,
     movementType: 'OUT',
-    status: 'COMPLETED'
+    status: 'COMPLETED',
+    approvedBy: 'Ahmad Manager',
+    evidenceUrl: 'https://picsum.photos/seed/mov5/800/600'
   }
 ];
 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -6,26 +5,48 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MOVEMENTS, PROJECTS, USERS } from "@/lib/mock-data"
-import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter, MoreVertical, Edit2, XCircle } from "lucide-react"
+import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter, MoreVertical, Edit2, XCircle, FileText, CheckCircle2, ShieldCheck, Eye } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import { useCurrentUser } from "@/hooks/use-current-user"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import Image from "next/image"
 
 export default function MovementsPage() {
   const [mounted, setMounted] = useState(false)
+  const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
+  const [movementLogs, setMovementLogs] = useState(MOVEMENTS)
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_movements')
+    if (saved) {
+      setMovementLogs(JSON.parse(saved))
+    }
   }, [])
 
-  if (!mounted) return null
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('simulated_movements', JSON.stringify(movementLogs))
+    }
+  }, [movementLogs, mounted])
 
-  const handleAction = (action: string, movId: string) => {
+  if (!isLoaded || !mounted) return null
+
+  const canApproveMovements = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+
+  const handleStatusUpdate = (id: string, status: 'APPROVED' | 'CANCELLED' | 'COMPLETED', userName: string) => {
+    setMovementLogs(prev => prev.map(mov => 
+      mov.id === id ? { ...mov, status, approvedBy: currentUser.name } : mov
+    ))
+
     toast({
-      title: "Log Dikemaskini",
-      description: `Tindakan ${action} pada log ${movId} berjaya disimulasikan.`,
+      title: "Status Dikemaskini",
+      description: `Pergerakan untuk ${userName} telah dikemaskini kepada status ${status}.`,
+      variant: status === 'CANCELLED' ? "destructive" : "default",
     })
   }
 
@@ -58,16 +79,16 @@ export default function MovementsPage() {
               <TableHeader>
                 <TableRow className="bg-secondary/5">
                   <TableHead>Staff</TableHead>
-                  <TableHead>Project / Destination</TableHead>
+                  <TableHead>Destination</TableHead>
                   <TableHead>Schedule</TableHead>
-                  <TableHead>Transport</TableHead>
-                  <TableHead>Purpose</TableHead>
+                  <TableHead>Evidence</TableHead>
+                  <TableHead>Approver</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {MOVEMENTS.map((mov) => {
+                {movementLogs.map((mov) => {
                   const user = USERS.find(u => u.id === mov.userId)
                   const project = PROJECTS.find(p => p.id === mov.projectId)
                   const dateObj = new Date(mov.startDate)
@@ -79,15 +100,18 @@ export default function MovementsPage() {
                           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center font-bold text-xs text-primary">
                             {user?.name.charAt(0)}
                           </div>
-                          <span className="font-semibold">{user?.name}</span>
+                          <div className="flex flex-col">
+                             <span className="font-semibold">{user?.name}</span>
+                             <span className="text-[10px] text-muted-foreground">{project?.name}</span>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-accent uppercase tracking-tighter">{project?.name}</span>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-2.5 h-2.5" /> {mov.destination}
+                          <span className="text-xs text-foreground flex items-center gap-1">
+                            <MapPin className="w-2.5 h-2.5 text-accent" /> {mov.destination}
                           </span>
+                          <span className="text-[10px] text-muted-foreground italic mt-0.5 line-clamp-1">"{mov.purpose}"</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -99,38 +123,91 @@ export default function MovementsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-[9px] gap-1.5 uppercase font-bold tracking-widest border-border text-muted-foreground group-hover:text-foreground">
-                          {mov.transportation === 'CAR' ? <Truck className="w-2.5 h-2.5" /> : <Users className="w-2.5 h-2.5" />}
-                          {mov.transportation}
-                        </Badge>
+                        {mov.evidenceUrl ? (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[10px] font-bold text-accent hover:bg-accent/10">
+                                <FileText className="w-3 h-3" /> View Proof
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-xl bg-card border-border">
+                              <DialogHeader>
+                                <DialogTitle className="font-headline">Dokumen Bukti Pergerakan</DialogTitle>
+                              </DialogHeader>
+                              <div className="relative aspect-video rounded-xl overflow-hidden border border-border mt-4">
+                                <Image src={mov.evidenceUrl} alt="Movement Proof" fill className="object-cover" />
+                              </div>
+                              <div className="mt-4 p-3 bg-secondary/30 rounded-lg border border-border">
+                                <p className="text-xs text-muted-foreground">Lokasi: <span className="text-foreground font-bold">{mov.destination}</span></p>
+                                <p className="text-xs text-muted-foreground mt-1">Tujuan: <span className="text-foreground font-bold">{mov.purpose}</span></p>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground italic">No evidence</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <p className="text-xs text-muted-foreground line-clamp-1 italic">"{mov.purpose}"</p>
+                        <div className="flex items-center gap-1.5 text-[10px] font-medium">
+                          {mov.approvedBy ? (
+                            <>
+                              <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                              <span className="text-foreground">{mov.approvedBy}</span>
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground italic">Not yet approved</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge className={cn(
                           "text-[9px] font-bold tracking-widest px-2 py-0.5",
-                          mov.status === 'COMPLETED' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          mov.status === 'COMPLETED' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : 
+                          mov.status === 'APPROVED' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
+                          mov.status === 'CANCELLED' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                          "bg-amber-500/10 text-amber-500 border-amber-500/20"
                         )}>
                           {mov.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-card border-border">
-                              <DropdownMenuItem onClick={() => handleAction("Kemaskini Log", mov.id)} className="text-xs gap-2">
-                                <Edit2 className="w-3 h-3" /> Edit Movement
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleAction("Batal Pergerakan", mov.id)} className="text-xs gap-2 text-red-500 focus:bg-red-500/10">
-                                <XCircle className="w-3 h-3" /> Cancel Log
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                         </DropdownMenu>
+                         <div className="flex justify-end gap-1">
+                            {canApproveMovements && mov.status === 'PENDING' && (
+                              <>
+                                <Button 
+                                  onClick={() => handleStatusUpdate(mov.id, 'APPROVED', user?.name || '')}
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  onClick={() => handleStatusUpdate(mov.id, 'CANCELLED', user?.name || '')}
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <MoreVertical className="w-3.5 h-3.5" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-card border-border">
+                                  <DropdownMenuItem onClick={() => handleStatusUpdate(mov.id, 'COMPLETED', user?.name || '')} className="text-xs gap-2">
+                                    <CheckCircle2 className="w-3 h-3" /> Mark Completed
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => toast({ title: "Edit", description: "Fungsi edit akan datang." })} className="text-xs gap-2">
+                                    <Edit2 className="w-3 h-3" /> Edit Movement
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                         </div>
                       </TableCell>
                     </TableRow>
                   )
@@ -140,7 +217,7 @@ export default function MovementsPage() {
           </CardContent>
         </Card>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="bg-secondary/20 border-border">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -148,8 +225,8 @@ export default function MovementsPage() {
                     <Briefcase className="w-5 h-5" />
                  </div>
                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Client Meetings</p>
-                    <p className="text-xl font-bold">12 Total</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Deployment Status</p>
+                    <p className="text-xl font-bold">{movementLogs.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').length} Active</p>
                  </div>
               </div>
             </CardContent>
