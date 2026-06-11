@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -5,16 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MOVEMENTS, PROJECTS, USERS } from "@/lib/mock-data"
-import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter } from "lucide-react"
+import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter, MoreVertical, Edit2, XCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MovementsPage() {
   const [mounted, setMounted] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  if (!mounted) return null
+
+  const handleAction = (action: string, movId: string) => {
+    toast({
+      title: "Log Dikemaskini",
+      description: `Tindakan ${action} pada log ${movId} berjaya disimulasikan.`,
+    })
+  }
 
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-left-2 duration-500">
@@ -23,7 +36,7 @@ export default function MovementsPage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Staff Movement Log</h1>
           <p className="text-muted-foreground mt-1">Track and coordinate field deployments and client meetings.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+        <Button onClick={() => toast({ title: "Modul Pergerakan", description: "Borang pergerakan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
           <Plus className="w-4 h-4" />
           Log New Movement
         </Button>
@@ -49,7 +62,8 @@ export default function MovementsPage() {
                   <TableHead>Schedule</TableHead>
                   <TableHead>Transport</TableHead>
                   <TableHead>Purpose</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -78,9 +92,9 @@ export default function MovementsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-[10px] font-mono">
-                          <div>{mounted ? dateObj.toLocaleDateString() : mov.startDate.split('T')[0]}</div>
+                          <div>{dateObj.toLocaleDateString()}</div>
                           <div className="text-muted-foreground">
-                            {mounted ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : mov.startDate.split('T')[1].substring(0, 5)}
+                            {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
                       </TableCell>
@@ -93,13 +107,30 @@ export default function MovementsPage() {
                       <TableCell>
                         <p className="text-xs text-muted-foreground line-clamp-1 italic">"{mov.purpose}"</p>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell>
                         <Badge className={cn(
                           "text-[9px] font-bold tracking-widest px-2 py-0.5",
                           mov.status === 'COMPLETED' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                         )}>
                           {mov.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-card border-border">
+                              <DropdownMenuItem onClick={() => handleAction("Kemaskini Log", mov.id)} className="text-xs gap-2">
+                                <Edit2 className="w-3 h-3" /> Edit Movement
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleAction("Batal Pergerakan", mov.id)} className="text-xs gap-2 text-red-500 focus:bg-red-500/10">
+                                <XCircle className="w-3 h-3" /> Cancel Log
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   )

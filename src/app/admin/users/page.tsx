@@ -11,14 +11,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react"
 
 export default function UserManagementPage() {
   const { currentUser, isLoaded } = useCurrentUser()
+  const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
 
-  if (!isLoaded) return null
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isLoaded || !mounted) return null
 
   if (currentUser.role !== 'ADMIN') {
     return redirect("/")
+  }
+
+  const handleAction = (action: string, userName: string) => {
+    toast({
+      title: "Tindakan Berjaya",
+      description: `${action} untuk ${userName} telah diproses.`,
+    })
   }
 
   return (
@@ -28,7 +43,10 @@ export default function UserManagementPage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Personnel Directory</h1>
           <p className="text-muted-foreground mt-1">Manage company staff records, roles, and benefits.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white font-bold gap-2 shadow-xl shadow-primary/20">
+        <Button 
+          onClick={() => handleAction("Onboarding", "Staf Baru")}
+          className="bg-primary hover:bg-primary/90 text-white font-bold gap-2 shadow-xl shadow-primary/20"
+        >
           <UserPlus className="w-4 h-4" />
           Onboard New Staff
         </Button>
@@ -99,9 +117,9 @@ export default function UserManagementPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-card border-border">
-                            <DropdownMenuItem className="text-xs font-medium focus:text-accent">Edit Profile</DropdownMenuItem>
-                            <DropdownMenuItem className="text-xs font-medium focus:text-accent">Update Limits</DropdownMenuItem>
-                            <DropdownMenuItem className="text-xs font-medium text-red-500 focus:bg-red-500/10">Deactivate Account</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAction("Kemaskini Profil", user.name)} className="text-xs font-medium focus:text-accent">Edit Profile</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAction("Kemaskini Limit", user.name)} className="text-xs font-medium focus:text-accent">Update Limits</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAction("Deaktivasi Akaun", user.name)} className="text-xs font-medium text-red-500 focus:bg-red-500/10">Deactivate Account</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

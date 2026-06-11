@@ -9,13 +9,29 @@ import { useCurrentUser } from "@/hooks/use-current-user"
 import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react"
 
 export default function LeavePage() {
   const { currentUser, isLoaded } = useCurrentUser()
-  
-  if (!isLoaded) return null
+  const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isLoaded || !mounted) return null
 
   const isHODorAdmin = currentUser.role !== 'STAFF'
+
+  const handleApproval = (status: string, userName: string) => {
+    toast({
+      title: status === 'APPROVED' ? "Permohonan Diluluskan" : "Permohonan Ditolak",
+      description: `Status permohonan cuti untuk ${userName} telah dikemaskini.`,
+      variant: status === 'REJECTED' ? "destructive" : "default",
+    })
+  }
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -24,7 +40,7 @@ export default function LeavePage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Leave Management</h1>
           <p className="text-muted-foreground mt-1">Submit applications and manage team availability.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+        <Button onClick={() => toast({ title: "Modul Cuti", description: "Borang permohonan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
           <Plus className="w-4 h-4" />
           Apply For Leave
         </Button>
@@ -136,10 +152,10 @@ export default function LeavePage() {
                       <TableCell className="text-right">
                         {leave.status === 'PENDING' ? (
                           <div className="flex justify-end gap-1">
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10">
+                             <Button onClick={() => handleApproval('APPROVED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10">
                                <CheckCircle2 className="w-4 h-4" />
                              </Button>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:bg-red-500/10">
+                             <Button onClick={() => handleApproval('REJECTED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:bg-red-500/10">
                                <XCircle className="w-4 h-4" />
                              </Button>
                           </div>

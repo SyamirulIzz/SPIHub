@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,14 +12,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ClaimsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
-  const [selectedClaim, setSelectedClaim] = useState<any>(null)
+  const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
 
-  if (!isLoaded) return null
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isLoaded || !mounted) return null
 
   const isManagement = currentUser.role === 'ADMIN'
+
+  const handleClaimStatus = (status: string, claimId: string) => {
+    toast({
+      title: status === 'APPROVED' ? "Tuntutan Diluluskan" : "Tuntutan Ditolak",
+      description: `Rekod ${claimId} telah dikemaskini.`,
+      variant: status === 'REJECTED' ? "destructive" : "default",
+    })
+  }
 
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-right-2 duration-500">
@@ -28,7 +42,7 @@ export default function ClaimsPage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Medical & General Claims</h1>
           <p className="text-muted-foreground mt-1">Submit receipts and track reimbursement status.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+        <Button onClick={() => toast({ title: "Modul Muat Naik", description: "Borang tuntutan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
           <Upload className="w-4 h-4" />
           New Claim
         </Button>
@@ -138,16 +152,13 @@ export default function ClaimsPage() {
                                   fill 
                                   className="object-contain p-4 group-hover:scale-105 transition-transform"
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity">
-                                  <Button variant="outline" className="bg-background/80 border-border">View Original</Button>
-                                </div>
                               </div>
                               {isManagement && claim.status === 'PENDING' && (
                                 <div className="flex gap-4 pt-4">
-                                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-bold">
+                                  <Button onClick={() => handleClaimStatus('APPROVED', claim.id)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-bold">
                                     <Check className="w-4 h-4" /> Approve
                                   </Button>
-                                  <Button variant="destructive" className="flex-1 gap-2 font-bold">
+                                  <Button onClick={() => handleClaimStatus('REJECTED', claim.id)} variant="destructive" className="flex-1 gap-2 font-bold">
                                     <X className="w-4 h-4" /> Reject
                                   </Button>
                                 </div>
@@ -157,10 +168,10 @@ export default function ClaimsPage() {
                         </Dialog>
                         {isManagement && claim.status === 'PENDING' && (
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10">
+                            <Button onClick={() => handleClaimStatus('APPROVED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10">
                               <Check className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-500/10">
+                            <Button onClick={() => handleClaimStatus('REJECTED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-500/10">
                               <X className="w-4 h-4" />
                             </Button>
                           </div>
