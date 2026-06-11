@@ -1,5 +1,9 @@
+
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { CURRENT_USER, USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS } from "@/lib/mock-data"
+import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
 import { 
   Users, 
@@ -12,6 +16,10 @@ import {
 } from "lucide-react"
 
 export default function Dashboard() {
+  const { currentUser, isLoaded } = useCurrentUser()
+  
+  if (!isLoaded) return null
+
   const pendingClaims = CLAIMS.filter(c => c.status === 'PENDING').length
   const openTickets = TICKETS.filter(t => t.status === 'Open' || t.status === 'In Progress').length
   const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE').length
@@ -22,7 +30,7 @@ export default function Dashboard() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-foreground">Operational Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, <span className="text-accent font-semibold">{CURRENT_USER.name}</span>. Here is the company status today.</p>
+          <p className="text-muted-foreground mt-1">Welcome back, <span className="text-accent font-semibold">{currentUser.name}</span>. Here is the company status today.</p>
         </div>
         <div className="flex items-center gap-3 bg-secondary/50 p-3 rounded-xl border border-border">
           <TrendingUp className="text-accent w-5 h-5" />

@@ -1,24 +1,23 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { TICKETS, PROJECTS, USERS, CURRENT_USER } from "@/lib/mock-data"
+import { TICKETS, PROJECTS, USERS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { Ticket, Search, Plus, Sparkles, AlertCircle, Clock, CheckCircle2 } from "lucide-react"
 import { summarizeProjectTickets, ProjectTicketSummaryOutput } from "@/ai/flows/summarize-project-tickets"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
 export default function TicketsPage() {
+  const { currentUser, isLoaded } = useCurrentUser()
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summary, setSummary] = useState<ProjectTicketSummaryOutput | null>(null)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  if (!isLoaded) return null
 
   const handleSummarize = async () => {
     setIsSummarizing(true)
@@ -53,7 +52,7 @@ export default function TicketsPage() {
           <p className="text-muted-foreground mt-1">Manage technical issues and support tickets.</p>
         </div>
         <div className="flex items-center gap-3">
-          {(CURRENT_USER.role === 'ADMIN' || CURRENT_USER.role === 'HOD') && (
+          {(currentUser.role === 'ADMIN' || currentUser.role === 'HOD') && (
             <Button 
               onClick={handleSummarize} 
               disabled={isSummarizing}
@@ -169,7 +168,7 @@ export default function TicketsPage() {
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
                         <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {mounted ? new Date(ticket.createdAt).toLocaleDateString() : ticket.createdAt.split('T')[0]}
+                          {new Date(ticket.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ticket.description}</p>

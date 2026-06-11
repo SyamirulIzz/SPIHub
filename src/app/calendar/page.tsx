@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -5,17 +6,18 @@ import { Badge } from "@/components/ui/badge"
 import { 
   MOVEMENTS, 
   LEAVE_REQUESTS, 
-  USERS, 
-  CURRENT_USER 
+  USERS 
 } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { CalendarDays, Info, Filter } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
 export default function CalendarPage() {
-  // Aggregate data for the "Shared Team Calendar" view
-  // In a real app, this would be computed by month/week
+  const { currentUser, isLoaded } = useCurrentUser()
   
+  if (!isLoaded) return null
+
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-bottom-2 duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -54,7 +56,6 @@ export default function CalendarPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {/* High-density grid-based calendar simulation */}
             <div className="grid grid-cols-7 border-b border-border">
               {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (
                 <div key={day} className="py-2 text-center text-[10px] font-bold text-muted-foreground/60 border-r border-border last:border-r-0">
@@ -68,7 +69,6 @@ export default function CalendarPage() {
                 const dayNum = i + 1;
                 const dateStr = `2024-05-${dayNum.toString().padStart(2, '0')}`;
                 
-                // Filter movements for this day
                 const dayMovements = MOVEMENTS.filter(m => m.startDate.startsWith(dateStr));
                 const dayLeaves = LEAVE_REQUESTS.filter(l => l.startDate.startsWith(dateStr) && l.status === 'APPROVED');
 
@@ -91,8 +91,8 @@ export default function CalendarPage() {
                       })}
                       {dayLeaves.map(leave => {
                         const user = USERS.find(u => u.id === leave.userId);
-                        const isSelf = user?.id === CURRENT_USER.id;
-                        const canSeeDetail = CURRENT_USER.role !== 'STAFF' || isSelf;
+                        const isSelf = user?.id === currentUser.id;
+                        const canSeeDetail = currentUser.role !== 'STAFF' || isSelf;
 
                         return (
                           <div key={leave.id} className="text-[9px] px-1.5 py-1 rounded bg-accent/20 border-l-2 border-accent text-accent-foreground font-medium truncate">

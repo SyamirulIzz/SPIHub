@@ -1,10 +1,11 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { USERS, DEPARTMENTS, CURRENT_USER } from "@/lib/mock-data"
+import { USERS, DEPARTMENTS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -12,14 +13,11 @@ import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 export default function UserManagementPage() {
-  const [mounted, setMounted] = useState(false)
+  const { currentUser, isLoaded } = useCurrentUser()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  if (!isLoaded) return null
 
-  // Real security check would happen server-side
-  if (CURRENT_USER.role !== 'ADMIN') {
+  if (currentUser.role !== 'ADMIN') {
     return redirect("/")
   }
 
@@ -91,7 +89,7 @@ export default function UserManagementPage() {
                       </TableCell>
                       <TableCell className="text-sm font-semibold">{user.annualLeaveLimit} Days</TableCell>
                       <TableCell className="text-sm font-semibold text-accent">
-                        RM {mounted ? user.medicalClaimLimit.toLocaleString() : user.medicalClaimLimit}
+                        RM {user.medicalClaimLimit.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>

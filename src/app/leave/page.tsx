@@ -1,15 +1,21 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { LEAVE_REQUESTS, USERS, CURRENT_USER } from "@/lib/mock-data"
+import { LEAVE_REQUESTS, USERS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
 export default function LeavePage() {
-  const isHODorAdmin = CURRENT_USER.role !== 'STAFF'
+  const { currentUser, isLoaded } = useCurrentUser()
+  
+  if (!isLoaded) return null
+
+  const isHODorAdmin = currentUser.role !== 'STAFF'
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -30,7 +36,7 @@ export default function LeavePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Annual Leave</p>
-                <div className="text-3xl font-bold font-headline mt-1">{CURRENT_USER.annualLeaveLimit} Days</div>
+                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit} Days</div>
                 <p className="text-[10px] text-muted-foreground mt-1 italic">Total Allowance per Year</p>
               </div>
               <Palmtree className="text-indigo-500 w-8 h-8 opacity-40" />
@@ -56,7 +62,7 @@ export default function LeavePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining</p>
-                <div className="text-3xl font-bold font-headline mt-1">{CURRENT_USER.annualLeaveLimit - 4.5} Days</div>
+                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit - 4.5} Days</div>
                 <p className="text-[10px] text-muted-foreground mt-1 italic">Available to apply</p>
               </div>
               <Clock className="text-amber-500 w-8 h-8 opacity-40" />

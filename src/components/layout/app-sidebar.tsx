@@ -1,3 +1,4 @@
+
 "use client"
 
 import { 
@@ -8,8 +9,9 @@ import {
   Ticket, 
   WalletCards, 
   Users,
-  Settings,
-  ChevronRight
+  UserCircle2,
+  ChevronRight,
+  LogOut
 } from "lucide-react"
 import { 
   Sidebar, 
@@ -24,10 +26,12 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/sidebar"
-import { CURRENT_USER } from "@/lib/mock-data"
+import { USERS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const items = [
   {
@@ -77,7 +81,10 @@ const items = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { state } = useSidebar()
+  const { currentUser, switchUser, isLoaded } = useCurrentUser()
   
+  if (!isLoaded) return null
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-2xl">
       <SidebarHeader className="p-4">
@@ -101,7 +108,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.filter(item => item.roles.includes(CURRENT_USER.role)).map((item) => (
+              {items.filter(item => item.roles.includes(currentUser.role)).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title} className="group py-5 px-4 transition-all hover:bg-sidebar-accent/50">
                     <Link href={item.url} className="flex items-center gap-3">
@@ -123,17 +130,46 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-background/50">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0 border border-accent/30">
-            <span className="text-accent font-bold text-sm">{CURRENT_USER.name.charAt(0)}</span>
-          </div>
-          {state !== "collapsed" && (
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold truncate text-foreground">{CURRENT_USER.name}</span>
-              <span className="text-[10px] uppercase font-bold text-accent/80 tracking-tighter">{CURRENT_USER.role}</span>
-            </div>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-3 overflow-hidden w-full text-left hover:bg-sidebar-accent p-2 rounded-lg transition-colors">
+              <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0 border border-accent/30">
+                <span className="text-accent font-bold text-sm">{currentUser.name.charAt(0)}</span>
+              </div>
+              {state !== "collapsed" && (
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-semibold truncate text-foreground">{currentUser.name}</span>
+                  <span className="text-[10px] uppercase font-bold text-accent/80 tracking-tighter">{currentUser.role}</span>
+                </div>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[240px] bg-card border-border">
+            <DropdownMenuLabel>View As (Simulation)</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {USERS.map((u) => (
+              <DropdownMenuItem 
+                key={u.id} 
+                onClick={() => switchUser(u.id)}
+                className={cn(
+                  "flex flex-col items-start gap-1 py-2 cursor-pointer",
+                  u.id === currentUser.id && "bg-accent/10"
+                )}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <UserCircle2 className="w-4 h-4 text-accent" />
+                  <span className="font-bold text-sm">{u.name}</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground ml-6 uppercase">{u.role} &bull; {u.position}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-500 font-bold">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   )

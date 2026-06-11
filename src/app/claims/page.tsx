@@ -1,10 +1,12 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CLAIMS, USERS, CURRENT_USER } from "@/lib/mock-data"
+import { CLAIMS, USERS } from "@/lib/mock-data"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { WalletCards, Upload, FileText, Check, X, Eye, DollarSign, Calendar } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -12,14 +14,12 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 export default function ClaimsPage() {
+  const { currentUser, isLoaded } = useCurrentUser()
   const [selectedClaim, setSelectedClaim] = useState<any>(null)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  if (!isLoaded) return null
 
-  const isManagement = CURRENT_USER.role === 'ADMIN'
+  const isManagement = currentUser.role === 'ADMIN'
 
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-right-2 duration-500">
@@ -44,7 +44,7 @@ export default function ClaimsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold font-headline">RM 1,245.50</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Remaining from RM {CURRENT_USER.medicalClaimLimit.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Remaining from RM {currentUser.medicalClaimLimit.toLocaleString()}</p>
             <div className="h-1.5 w-full bg-secondary rounded-full mt-4 overflow-hidden">
                <div className="h-full bg-accent" style={{ width: '62%' }}></div>
             </div>
@@ -89,7 +89,7 @@ export default function ClaimsPage() {
                   <TableRow key={claim.id} className="hover:bg-secondary/20 transition-colors">
                     <TableCell className="font-semibold">{user?.name}</TableCell>
                     <TableCell className="text-xs">
-                      {mounted ? new Date(claim.date).toLocaleDateString() : claim.date}
+                      {new Date(claim.date).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-[9px] font-bold tracking-widest uppercase">
