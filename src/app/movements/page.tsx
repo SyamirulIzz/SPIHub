@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function MovementsPage() {
   const [mounted, setMounted] = useState(false)
@@ -57,9 +59,11 @@ export default function MovementsPage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Staff Movement Log</h1>
           <p className="text-muted-foreground mt-1">Track and coordinate field deployments and client meetings.</p>
         </div>
-        <Button onClick={() => toast({ title: "Modul Pergerakan", description: "Borang pergerakan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
-          <Plus className="w-4 h-4" />
-          Log New Movement
+        <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+          <Link href="/movements/log">
+            <Plus className="w-4 h-4" />
+            Log New Movement
+          </Link>
         </Button>
       </header>
 

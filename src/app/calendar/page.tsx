@@ -9,10 +9,12 @@ import {
   USERS 
 } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { CalendarDays, Info, Filter } from "lucide-react"
+import { CalendarDays, Info, Filter, Plus, Palmtree } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function CalendarPage() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -135,12 +137,16 @@ export default function CalendarPage() {
           </Card>
           
           <div className="flex flex-col justify-center gap-4">
-             <button className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-               Log New Movement
-             </button>
-             <button className="bg-secondary hover:bg-muted border border-border text-foreground font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-               Apply For Leave
-             </button>
+             <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold py-6 rounded-xl shadow-lg transition-all gap-2 text-lg">
+               <Link href="/movements/log">
+                 <Plus className="w-5 h-5" /> Log New Movement
+               </Link>
+             </Button>
+             <Button asChild variant="secondary" className="border border-border text-foreground font-bold py-6 rounded-xl shadow-lg transition-all gap-2 text-lg">
+               <Link href="/leave/apply">
+                 <Palmtree className="w-5 h-5" /> Apply For Leave
+               </Link>
+             </Button>
           </div>
         </div>
       </div>
