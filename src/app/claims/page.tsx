@@ -7,18 +7,26 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CLAIMS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { WalletCards, Upload, FileText, Check, X, Eye, DollarSign, Calendar } from "lucide-react"
+import { Upload, Check, X, Eye, DollarSign, Calendar as CalendarIcon, FileText } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { format } from "date-fns"
 
 export default function ClaimsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [claimsList, setClaimsList] = useState(CLAIMS)
+  const [isAdding, setIsAdding] = useState(false)
+  const [claimDate, setClaimDate] = useState<Date>()
 
   useEffect(() => {
     setMounted(true)
@@ -50,6 +58,15 @@ export default function ClaimsPage() {
     })
   }
 
+  const handleAddClaim = (e: React.FormEvent) => {
+    e.preventDefault()
+    toast({
+      title: "Tuntutan Dihantar",
+      description: "Permohonan tuntutan anda telah berjaya dihantar untuk pengesahan."
+    })
+    setIsAdding(false)
+  }
+
   const approvedTotal = claimsList
     .filter(c => c.userId === currentUser.id && c.status === 'APPROVED')
     .reduce((sum, c) => sum + c.amount, 0)
@@ -63,10 +80,77 @@ export default function ClaimsPage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Medical & General Claims</h1>
           <p className="text-muted-foreground mt-1">Submit receipts and track reimbursement status.</p>
         </div>
-        <Button onClick={() => toast({ title: "Modul Muat Naik", description: "Borang tuntutan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
-          <Upload className="w-4 h-4" />
-          New Claim
-        </Button>
+        
+        <Dialog open={isAdding} onOpenChange={setIsAdding}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+              <Upload className="w-4 h-4" />
+              New Claim
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px] bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="font-headline">Submit New Reimbursement</DialogTitle>
+              <CardDescription>Fill in the expense details and upload your receipt.</CardDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddClaim} className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 flex flex-col">
+                  <Label>Date of Expense</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "justify-start text-left font-normal bg-secondary/30 border-border",
+                          !claimDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {claimDate ? format(claimDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
+                      <Calendar mode="single" selected={claimDate} onSelect={setClaimDate} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Select required>
+                    <SelectTrigger className="bg-secondary/30 border-border">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      <SelectItem value="MEDICAL">Medical</SelectItem>
+                      <SelectItem value="TRAVEL">Travel / Fuel</SelectItem>
+                      <SelectItem value="GENERAL">General Expense</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (RM)</Label>
+                <Input id="amount" type="number" step="0.01" placeholder="0.00" className="bg-secondary/30 border-border" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="desc">Description</Label>
+                <Input id="desc" placeholder="e.g. Fever checkup, Toll to Kajang" className="bg-secondary/30 border-border" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Receipt File</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground hover:text-accent hover:border-accent/50 transition-colors cursor-pointer">
+                  <Upload className="w-8 h-8 mb-2" />
+                  <span className="text-xs font-medium">Click to upload receipt (JPG/PNG/PDF)</span>
+                </div>
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
+                <Button type="submit" className="bg-primary hover:bg-primary/90 text-white font-bold">Submit Claim</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -89,7 +173,7 @@ export default function ClaimsPage() {
         <Card className="bg-card border-border shadow-lg">
           <CardHeader className="pb-3">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <Calendar className="w-3 h-3 text-primary" />
+              <CalendarIcon className="w-3.5 h-3.5 text-primary" />
               Pending Processing
             </CardTitle>
           </CardHeader>
