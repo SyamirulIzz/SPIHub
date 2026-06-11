@@ -4,12 +4,17 @@ export const DEPARTMENTS: Department[] = [
   { id: 'dept-1', name: 'Software Engineering' },
   { id: 'dept-2', name: 'Operations & Logistics' },
   { id: 'dept-3', name: 'Management' },
+  { id: 'dept-4', name: 'Human Resources' },
+  { id: 'dept-5', name: 'Finance' },
 ];
 
 export const PROJECTS: Project[] = [
   { id: 'proj-1', name: 'Projek AADK', description: 'National Anti-Drugs Agency System Upgrade', status: 'ACTIVE' },
   { id: 'proj-2', name: 'SPI Internal Portal', description: 'Internal operations hub', status: 'ACTIVE' },
   { id: 'proj-3', name: 'Cloud Migration', description: 'Legacy server migration', status: 'ON_HOLD' },
+  { id: 'proj-4', name: 'Smart City API', description: 'Integration with municipal data', status: 'ACTIVE' },
+  { id: 'proj-5', name: 'E-Procurement V3', description: 'B2B procurement platform', status: 'COMPLETED' },
+  { id: 'proj-6', name: 'Mobile Attendance', description: 'Geofencing attendance app', status: 'ACTIVE' },
 ];
 
 export const USERS: User[] = [
@@ -53,6 +58,46 @@ export const USERS: User[] = [
     annualLeaveLimit: 14,
     medicalClaimLimit: 1000
   },
+  { 
+    id: 'user-5', 
+    name: 'Farah HR', 
+    email: 'farah@systemprotocol.com', 
+    role: 'HOD', 
+    departmentId: 'dept-4',
+    position: 'HR Manager',
+    annualLeaveLimit: 18,
+    medicalClaimLimit: 1200
+  },
+  { 
+    id: 'user-6', 
+    name: 'Lim Frontend', 
+    email: 'lim@systemprotocol.com', 
+    role: 'STAFF', 
+    departmentId: 'dept-1',
+    position: 'Frontend Engineer',
+    annualLeaveLimit: 14,
+    medicalClaimLimit: 1000
+  },
+  { 
+    id: 'user-7', 
+    name: 'Devi Backend', 
+    email: 'devi@systemprotocol.com', 
+    role: 'STAFF', 
+    departmentId: 'dept-1',
+    position: 'Backend Specialist',
+    annualLeaveLimit: 14,
+    medicalClaimLimit: 1000
+  },
+  { 
+    id: 'user-8', 
+    name: 'Hafiz Finance', 
+    email: 'hafiz@systemprotocol.com', 
+    role: 'STAFF', 
+    departmentId: 'dept-5',
+    position: 'Accountant',
+    annualLeaveLimit: 14,
+    medicalClaimLimit: 1000
+  },
 ];
 
 export const MOVEMENTS: StaffMovement[] = [
@@ -91,6 +136,60 @@ export const MOVEMENTS: StaffMovement[] = [
     claimable: true,
     movementType: 'OUT',
     status: 'PENDING'
+  },
+  {
+    id: 'mov-3',
+    userId: 'user-6',
+    projectId: 'proj-4',
+    startDate: '2024-05-17T14:00:00',
+    endDate: '2024-05-17T16:00:00',
+    allDay: false,
+    destination: 'Cyberjaya Council',
+    purpose: 'Requirement Gathering',
+    description: 'Meeting with UI/UX stakeholders.',
+    category: 'CLIENT_MEETING',
+    contactPerson: 'Mr. Tan',
+    contactOrg: 'MBSJ',
+    transportation: 'CAR',
+    claimable: true,
+    movementType: 'OUT',
+    status: 'PENDING'
+  },
+  {
+    id: 'mov-4',
+    userId: 'user-7',
+    projectId: 'proj-1',
+    startDate: '2024-05-18T09:00:00',
+    endDate: '2024-05-20T18:00:00',
+    allDay: true,
+    destination: 'Penang Tech Park',
+    purpose: 'Server Installation',
+    description: 'On-site installation and configuration.',
+    category: 'OUTSTATION',
+    contactPerson: 'Siva',
+    contactOrg: 'DataPoint',
+    transportation: 'PUBLIC_TRANSPORT',
+    claimable: true,
+    movementType: 'OUT',
+    status: 'PENDING'
+  },
+  {
+    id: 'mov-5',
+    userId: 'user-2',
+    projectId: 'proj-5',
+    startDate: '2024-05-15T11:00:00',
+    endDate: '2024-05-15T13:00:00',
+    allDay: false,
+    destination: 'Damansara Heights',
+    purpose: 'Final Handover',
+    description: 'Closing project documentation and signatures.',
+    category: 'CLIENT_MEETING',
+    contactPerson: 'Pn. Zahara',
+    contactOrg: 'Global Trade',
+    transportation: 'CAR',
+    claimable: false,
+    movementType: 'OUT',
+    status: 'COMPLETED'
   }
 ];
 
@@ -112,6 +211,33 @@ export const LEAVE_REQUESTS: LeaveRequest[] = [
     endDate: '2024-05-20',
     reason: 'Fever and cold',
     status: 'PENDING'
+  },
+  {
+    id: 'leave-3',
+    userId: 'user-6',
+    leaveType: 'EMERGENCY',
+    startDate: '2024-05-15',
+    endDate: '2024-05-15',
+    reason: 'Car breakdown',
+    status: 'REJECTED'
+  },
+  {
+    id: 'leave-4',
+    userId: 'user-7',
+    leaveType: 'ANNUAL',
+    startDate: '2024-07-10',
+    endDate: '2024-07-15',
+    reason: 'Personal trip',
+    status: 'PENDING'
+  },
+  {
+    id: 'leave-5',
+    userId: 'user-8',
+    leaveType: 'MEDICAL',
+    startDate: '2024-05-12',
+    endDate: '2024-05-13',
+    reason: 'Dental surgery',
+    status: 'APPROVED'
   }
 ];
 
@@ -137,6 +263,39 @@ export const TICKETS: ProjectTicket[] = [
     severity: 'Low',
     status: 'Open',
     createdAt: '2024-05-12T09:45:00'
+  },
+  {
+    id: 'tick-3',
+    projectId: 'proj-4',
+    createdBy: 'user-6',
+    assignedTo: 'user-7',
+    subject: 'API Authentication Failure',
+    description: 'Integration layer returning 401 for valid tokens.',
+    severity: 'High',
+    status: 'Open',
+    createdAt: '2024-05-14T15:30:00'
+  },
+  {
+    id: 'tick-4',
+    projectId: 'proj-2',
+    createdBy: 'user-1',
+    assignedTo: 'user-5',
+    subject: 'HR Dashboard Layout Shift',
+    description: 'The charts are overlapping the sidebar on Firefox.',
+    severity: 'Medium',
+    status: 'Resolved',
+    createdAt: '2024-05-08T10:00:00'
+  },
+  {
+    id: 'tick-5',
+    projectId: 'proj-6',
+    createdBy: 'user-3',
+    assignedTo: 'user-6',
+    subject: 'GPS Lag on Android',
+    description: 'Check-in takes more than 10 seconds to detect location.',
+    severity: 'Medium',
+    status: 'In Progress',
+    createdAt: '2024-05-13T08:15:00'
   }
 ];
 
@@ -160,8 +319,37 @@ export const CLAIMS: ReimbursementClaim[] = [
     description: 'Parking & Toll reimbursement for AADK trip',
     receiptUrl: 'https://picsum.photos/seed/claim2/600/800',
     status: 'PENDING'
+  },
+  {
+    id: 'claim-3',
+    userId: 'user-6',
+    date: '2024-05-10',
+    amount: 45.00,
+    category: 'TRAVEL',
+    description: 'Grab to Client Meeting (MBSJ)',
+    receiptUrl: 'https://picsum.photos/seed/claim3/600/800',
+    status: 'APPROVED'
+  },
+  {
+    id: 'claim-4',
+    userId: 'user-7',
+    date: '2024-05-12',
+    amount: 250.00,
+    category: 'MEDICAL',
+    description: 'Specialist Consultation',
+    receiptUrl: 'https://picsum.photos/seed/claim4/600/800',
+    status: 'REJECTED'
+  },
+  {
+    id: 'claim-5',
+    userId: 'user-8',
+    date: '2024-05-15',
+    amount: 15.00,
+    category: 'GENERAL',
+    description: 'Office stationery (Markers)',
+    receiptUrl: 'https://picsum.photos/seed/claim5/600/800',
+    status: 'PENDING'
   }
 ];
 
-// Current session simulation
-export const CURRENT_USER = USERS[0]; // Let's simulate being the Admin (Ahmad Manager)
+export const CURRENT_USER = USERS[0];

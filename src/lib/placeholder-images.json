@@ -11,6 +11,24 @@
       "description": "General claim receipt for parking and toll",
       "imageUrl": "https://picsum.photos/seed/claim2/600/800",
       "imageHint": "parking receipt"
+    },
+    {
+      "id": "claim-3-receipt",
+      "description": "Transportation e-receipt for Grab",
+      "imageUrl": "https://picsum.photos/seed/claim3/600/800",
+      "imageHint": "grab receipt"
+    },
+    {
+      "id": "claim-4-receipt",
+      "description": "Specialist hospital invoice",
+      "imageUrl": "https://picsum.photos/seed/claim4/600/800",
+      "imageHint": "hospital invoice"
+    },
+    {
+      "id": "claim-5-receipt",
+      "description": "Stationery purchase receipt",
+      "imageUrl": "https://picsum.photos/seed/claim5/600/800",
+      "imageHint": "shop receipt"
     }
   ]
 }
