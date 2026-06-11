@@ -21,11 +21,21 @@ export default function LeavePage() {
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_leave_requests')
+    if (saved) {
+      setRequests(JSON.parse(saved))
+    }
   }, [])
+
+  // Simpan ke localStorage setiap kali requests berubah
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('simulated_leave_requests', JSON.stringify(requests))
+    }
+  }, [requests, mounted])
 
   if (!isLoaded || !mounted) return null
 
-  // Hanya HOD dan ADMIN (CEO) yang boleh memproses permohonan
   const canApprove = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
   const handleApproval = (id: string, status: 'APPROVED' | 'REJECTED', userName: string) => {
@@ -35,10 +45,14 @@ export default function LeavePage() {
 
     toast({
       title: status === 'APPROVED' ? "Permohonan Diluluskan" : "Permohonan Ditolak",
-      description: `Status permohonan cuti untuk ${userName} telah berjaya dikemaskini kepada ${status}.`,
+      description: `Status permohonan cuti untuk ${userName} telah berjaya dikemaskini kepada ${status} dan akan diselaraskan ke Kalendar.`,
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
+
+  const takenDays = requests
+    .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
+    .length // Simplified calculation for mock
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -73,8 +87,8 @@ export default function LeavePage() {
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Taken</p>
-                <div className="text-3xl font-bold font-headline mt-1">4.5 Days</div>
+                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Taken (Approved)</p>
+                <div className="text-3xl font-bold font-headline mt-1">{takenDays} Days</div>
                 <p className="text-[10px] text-muted-foreground mt-1 italic">Utilized Balance</p>
               </div>
               <CheckCircle2 className="text-emerald-500 w-8 h-8 opacity-40" />
@@ -87,7 +101,7 @@ export default function LeavePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining</p>
-                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit - 4.5} Days</div>
+                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit - takenDays} Days</div>
                 <p className="text-[10px] text-muted-foreground mt-1 italic">Available to apply</p>
               </div>
               <Clock className="text-amber-500 w-8 h-8 opacity-40" />
@@ -200,6 +214,7 @@ export default function LeavePage() {
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             Medical Leave (MC) must be accompanied by a valid digital certificate.
             Only HODs and Management (CEO) are authorized to Approve or Reject applications.
+            Semua permohonan yang diluluskan akan dipaparkan secara automatik dalam Kalendar Berpusat.
           </p>
         </div>
       </div>

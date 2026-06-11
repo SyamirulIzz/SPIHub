@@ -12,18 +12,29 @@ import { useCurrentUser } from "@/hooks/use-current-user"
 import { CalendarDays, Info, Filter } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 export default function CalendarPage() {
   const { currentUser, isLoaded } = useCurrentUser()
+  const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
+  const [mounted, setMounted] = useState(false)
   
-  if (!isLoaded) return null
+  useEffect(() => {
+    setMounted(true)
+    const savedLeaves = localStorage.getItem('simulated_leave_requests')
+    if (savedLeaves) {
+      setSyncedLeaves(JSON.parse(savedLeaves))
+    }
+  }, [])
+
+  if (!isLoaded || !mounted) return null
 
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-bottom-2 duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-foreground">Shared Team Calendar</h1>
-          <p className="text-muted-foreground mt-1">Real-time availability and movement coordination.</p>
+          <p className="text-muted-foreground mt-1">Real-time availability and movement coordination (Synced with Leave & Movements).</p>
         </div>
         <div className="flex items-center gap-2">
           <Tabs defaultValue="all" className="w-[300px]">
@@ -50,7 +61,7 @@ export default function CalendarPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded bg-accent"></div>
-                  <span className="text-muted-foreground">Leave</span>
+                  <span className="text-muted-foreground">Leave (Approved Only)</span>
                 </div>
               </div>
             </div>
@@ -70,7 +81,7 @@ export default function CalendarPage() {
                 const dateStr = `2024-05-${dayNum.toString().padStart(2, '0')}`;
                 
                 const dayMovements = MOVEMENTS.filter(m => m.startDate.startsWith(dateStr));
-                const dayLeaves = LEAVE_REQUESTS.filter(l => l.startDate.startsWith(dateStr) && l.status === 'APPROVED');
+                const dayLeaves = syncedLeaves.filter(l => l.startDate.startsWith(dateStr) && l.status === 'APPROVED');
 
                 return (
                   <div key={i} className="min-h-[120px] p-2 border-r border-b border-border last:border-r-0 hover:bg-secondary/10 transition-colors group">
@@ -118,7 +129,7 @@ export default function CalendarPage() {
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-2">
               <p>• <span className="text-foreground font-semibold">Privacy Filter:</span> Standard staff only see "[Name] - On Leave". Detailed categories (AL, MC, EL) are restricted to HODs and Management.</p>
-              <p>• <span className="text-foreground font-semibold">Real-time Sync:</span> Movements logged in Modul 1 appear instantly here.</p>
+              <p>• <span className="text-foreground font-semibold">Real-time Sync:</span> Kalendar ini disegerakkan secara automatik dengan modul Pengurusan Cuti. Hanya cuti berstatus "APPROVED" sahaja dipaparkan.</p>
               <p>• <span className="text-foreground font-semibold">Site Visit Highlight:</span> Blue entries denote off-site client engagements.</p>
             </CardContent>
           </Card>

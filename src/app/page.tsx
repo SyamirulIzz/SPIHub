@@ -2,9 +2,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS } from "@/lib/mock-data"
+import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 import { 
   Users, 
   Briefcase, 
@@ -17,10 +18,21 @@ import {
 
 export default function Dashboard() {
   const { currentUser, isLoaded } = useCurrentUser()
-  
-  if (!isLoaded) return null
+  const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
+  const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
+  const [mounted, setMounted] = useState(false)
 
-  const pendingClaims = CLAIMS.filter(c => c.status === 'PENDING').length
+  useEffect(() => {
+    setMounted(true)
+    const savedClaims = localStorage.getItem('simulated_claims')
+    const savedLeaves = localStorage.getItem('simulated_leave_requests')
+    if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
+    if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
+  }, [])
+  
+  if (!isLoaded || !mounted) return null
+
+  const pendingClaims = syncedClaims.filter(c => c.status === 'PENDING').length
   const openTickets = TICKETS.filter(t => t.status === 'Open' || t.status === 'In Progress').length
   const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE').length
   const staffOnSite = MOVEMENTS.filter(m => m.status === 'PENDING' || m.status === 'COMPLETED').length
@@ -30,7 +42,7 @@ export default function Dashboard() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-foreground">Operational Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, <span className="text-accent font-semibold">{currentUser.name}</span>. Here is the company status today.</p>
+          <p className="text-muted-foreground mt-1">Welcome back, <span className="text-accent font-semibold">{currentUser.name}</span>. Perubahan status cuti/tuntutan disegerakkan secara real-time.</p>
         </div>
         <div className="flex items-center gap-3 bg-secondary/50 p-3 rounded-xl border border-border">
           <TrendingUp className="text-accent w-5 h-5" />
@@ -170,7 +182,7 @@ function StatCard({ title, value, icon: Icon, description, color }: any) {
 
   return (
     <Card className="bg-card border-border shadow-lg overflow-hidden relative group">
-      <div className={cn("absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full blur-3xl opacity-20 bg-current transition-all group-hover:opacity-40", colorMap[color].split(' ')[0])}></div>
+      <div className={cn("absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full blur-3xl opacity-20 bg-current transition-all group-hover:opacity-40", colorMap[color]?.split(' ')[0])}></div>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           {title}

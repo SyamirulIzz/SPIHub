@@ -22,11 +22,20 @@ export default function ClaimsPage() {
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_claims')
+    if (saved) {
+      setClaimsList(JSON.parse(saved))
+    }
   }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('simulated_claims', JSON.stringify(claimsList))
+    }
+  }, [claimsList, mounted])
 
   if (!isLoaded || !mounted) return null
 
-  // Hanya HOD dan ADMIN (CEO) yang boleh memproses tuntutan
   const canProcessClaims = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
   const handleClaimStatus = (id: string, status: 'APPROVED' | 'REJECTED', claimId: string) => {
@@ -40,6 +49,12 @@ export default function ClaimsPage() {
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
+
+  const approvedTotal = claimsList
+    .filter(c => c.userId === currentUser.id && c.status === 'APPROVED')
+    .reduce((sum, c) => sum + c.amount, 0)
+    
+  const remainingLimit = currentUser.medicalClaimLimit - approvedTotal
 
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-right-2 duration-500">
@@ -63,10 +78,10 @@ export default function ClaimsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-headline">RM 1,245.50</div>
+            <div className="text-3xl font-bold font-headline">RM {remainingLimit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
             <p className="text-[10px] text-muted-foreground mt-1">Remaining from RM {currentUser.medicalClaimLimit.toLocaleString()}</p>
             <div className="h-1.5 w-full bg-secondary rounded-full mt-4 overflow-hidden">
-               <div className="h-full bg-accent" style={{ width: '62%' }}></div>
+               <div className="h-full bg-accent" style={{ width: `${(remainingLimit/currentUser.medicalClaimLimit)*100}%` }}></div>
             </div>
           </CardContent>
         </Card>
@@ -79,8 +94,10 @@ export default function ClaimsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-headline">RM 120.00</div>
-            <p className="text-[10px] text-muted-foreground mt-1">2 claims awaiting verification</p>
+            <div className="text-3xl font-bold font-headline">
+              RM {claimsList.filter(c => c.status === 'PENDING').reduce((s, c) => s + c.amount, 0).toFixed(2)}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">{claimsList.filter(c => c.status === 'PENDING').length} claims awaiting verification</p>
           </CardContent>
         </Card>
       </div>
