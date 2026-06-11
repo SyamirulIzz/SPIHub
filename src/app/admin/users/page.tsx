@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,12 @@ import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 export default function UserManagementPage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Real security check would happen server-side
   if (CURRENT_USER.role !== 'ADMIN') {
     return redirect("/")
@@ -83,7 +90,9 @@ export default function UserManagementPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm font-semibold">{user.annualLeaveLimit} Days</TableCell>
-                      <TableCell className="text-sm font-semibold text-accent">RM {user.medicalClaimLimit.toLocaleString()}</TableCell>
+                      <TableCell className="text-sm font-semibold text-accent">
+                        RM {mounted ? user.medicalClaimLimit.toLocaleString() : user.medicalClaimLimit}
+                      </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
