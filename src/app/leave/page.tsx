@@ -38,6 +38,12 @@ export default function LeavePage() {
 
   const canApprove = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
+  // Filter requests based on role
+  // Admin and HOD see all, Staff see only their own
+  const visibleRequests = (currentUser.role === 'ADMIN' || currentUser.role === 'HOD')
+    ? requests
+    : requests.filter(r => r.userId === currentUser.id)
+
   const handleApproval = (id: string, status: 'APPROVED' | 'REJECTED', userName: string) => {
     setRequests(prev => prev.map(req => 
       req.id === id ? { ...req, status } : req
@@ -113,8 +119,12 @@ export default function LeavePage() {
       <Card className="bg-card border-border overflow-hidden">
         <CardHeader className="bg-secondary/10 border-b border-border py-4 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-lg font-headline">Leave Request Log</CardTitle>
-            <CardDescription>Track and manage staff leave applications.</CardDescription>
+            <CardTitle className="text-lg font-headline">
+              {canApprove ? "Leave Request Log" : "My Leave History"}
+            </CardTitle>
+            <CardDescription>
+              {canApprove ? "Track and manage staff leave applications." : "Track your personal leave applications."}
+            </CardDescription>
           </div>
           <div className="flex gap-2">
             <Badge variant="secondary" className="bg-secondary/40 border-border text-[10px]">ALL HISTORY</Badge>
@@ -133,7 +143,7 @@ export default function LeavePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requests.map((leave) => {
+              {visibleRequests.map((leave) => {
                 const user = USERS.find(u => u.id === leave.userId)
                 return (
                   <TableRow key={leave.id} className="hover:bg-secondary/20 transition-colors">
@@ -195,13 +205,20 @@ export default function LeavePage() {
                         </div>
                       ) : (
                         <span className="text-[10px] text-muted-foreground font-medium italic">
-                          {leave.status === 'PENDING' ? 'Read-only (Staff)' : 'Processed'}
+                          {leave.status === 'PENDING' ? 'Waiting' : 'Processed'}
                         </span>
                       )}
                     </TableCell>
                   </TableRow>
                 )
               })}
+              {visibleRequests.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground italic">
+                    Tiada rekod permohonan cuti ditemui.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
