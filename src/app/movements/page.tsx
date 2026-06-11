@@ -85,10 +85,9 @@ export default function MovementsPage() {
                   <TableHead>Staff</TableHead>
                   <TableHead>Destination</TableHead>
                   <TableHead>Schedule</TableHead>
-                  <TableHead>Evidence</TableHead>
                   <TableHead>Approver</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">Approvals & Proof</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -127,31 +126,6 @@ export default function MovementsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {mov.evidenceUrl ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[10px] font-bold text-accent hover:bg-accent/10">
-                                <FileText className="w-3 h-3" /> View Proof
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-xl bg-card border-border">
-                              <DialogHeader>
-                                <DialogTitle className="font-headline">Dokumen Bukti Pergerakan</DialogTitle>
-                              </DialogHeader>
-                              <div className="relative aspect-video rounded-xl overflow-hidden border border-border mt-4">
-                                <Image src={mov.evidenceUrl} alt="Movement Proof" fill className="object-cover" />
-                              </div>
-                              <div className="mt-4 p-3 bg-secondary/30 rounded-lg border border-border">
-                                <p className="text-xs text-muted-foreground">Lokasi: <span className="text-foreground font-bold">{mov.destination}</span></p>
-                                <p className="text-xs text-muted-foreground mt-1">Tujuan: <span className="text-foreground font-bold">{mov.purpose}</span></p>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground italic">No evidence</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
                         <div className="flex items-center gap-1.5 text-[10px] font-medium">
                           {mov.approvedBy ? (
                             <>
@@ -175,7 +149,29 @@ export default function MovementsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                         <div className="flex justify-end gap-1">
+                         <div className="flex justify-end items-center gap-1">
+                            {mov.evidenceUrl && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-accent hover:bg-accent/10" title="View Evidence">
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-xl bg-card border-border">
+                                  <DialogHeader>
+                                    <DialogTitle className="font-headline">Dokumen Bukti Pergerakan</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="relative aspect-video rounded-xl overflow-hidden border border-border mt-4">
+                                    <Image src={mov.evidenceUrl} alt="Movement Proof" fill className="object-cover" />
+                                  </div>
+                                  <div className="mt-4 p-3 bg-secondary/30 rounded-lg border border-border">
+                                    <p className="text-xs text-muted-foreground">Lokasi: <span className="text-foreground font-bold">{mov.destination}</span></p>
+                                    <p className="text-xs text-muted-foreground mt-1">Tujuan: <span className="text-foreground font-bold">{mov.purpose}</span></p>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+                            
                             {canApproveMovements && mov.status === 'PENDING' && (
                               <>
                                 <Button 
@@ -183,6 +179,7 @@ export default function MovementsPage() {
                                   variant="ghost" 
                                   size="icon" 
                                   className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                                  title="Approve"
                                 >
                                   <CheckCircle2 className="w-4 h-4" />
                                 </Button>
@@ -191,11 +188,13 @@ export default function MovementsPage() {
                                   variant="ghost" 
                                   size="icon" 
                                   className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                                  title="Reject"
                                 >
                                   <XCircle className="w-4 h-4" />
                                 </Button>
                               </>
                             )}
+                            
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-7 w-7">
