@@ -1,7 +1,7 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
