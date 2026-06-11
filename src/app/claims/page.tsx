@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CLAIMS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Upload, Check, X, Eye, DollarSign, Calendar as CalendarIcon, FileText } from "lucide-react"
+import { Upload, Check, X, Eye, DollarSign, Calendar as CalendarIcon } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -115,7 +115,7 @@ export default function ClaimsPage() {
           <DialogContent className="sm:max-w-[500px] bg-card border-border">
             <DialogHeader>
               <DialogTitle className="font-headline">Submit New Reimbursement</DialogTitle>
-              <CardDescription>Fill in the expense details.</CardDescription>
+              <CardDescription>Fill in the expense details and upload receipt.</CardDescription>
             </DialogHeader>
             <form onSubmit={handleAddClaim} className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -162,6 +162,12 @@ export default function ClaimsPage() {
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Fever checkup" className="bg-secondary/30 border-border" required />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Upload className="w-3.5 h-3.5" /> Receipt Document
+                </Label>
+                <Input type="file" required className="bg-secondary/30 border-border cursor-pointer file:bg-primary file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:mr-2 text-xs" />
               </div>
               <DialogFooter className="pt-4 gap-2">
                 <Button type="button" variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>

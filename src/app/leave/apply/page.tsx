@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Send, Calendar as CalendarIcon, FileText } from "lucide-react"
+import { ArrowLeft, Send, Calendar as CalendarIcon, FileText, Upload } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
@@ -186,6 +186,21 @@ export default function ApplyLeavePage() {
                 </Popover>
               </div>
             </div>
+
+            {leaveType === 'MEDICAL' && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Label htmlFor="mc_document" className="flex items-center gap-2">
+                  <Upload className="w-3.5 h-3.5" /> Medical Certificate (MC) Document
+                </Label>
+                <Input 
+                  id="mc_document" 
+                  type="file" 
+                  className="bg-secondary/30 border-border cursor-pointer file:bg-primary file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:mr-2"
+                  required
+                />
+                <p className="text-[10px] text-muted-foreground italic">Sila lampirkan salinan MC yang sah.</p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="reason">Reason / Description</Label>

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Send, MapPin, Briefcase, Calendar as CalendarIcon, Clock, Users, Truck } from "lucide-react"
+import { ArrowLeft, Send, MapPin, Briefcase, Calendar as CalendarIcon, Clock, Upload } from "lucide-react"
 import { PROJECTS, MOVEMENTS } from "@/lib/mock-data"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -48,7 +48,6 @@ export default function LogMovementPage() {
 
   if (!isLoaded || !mounted) return null
 
-  // Filter only active projects
   const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -77,7 +76,8 @@ export default function LogMovementPage() {
       transportation: transportation as any,
       claimable: claimable,
       movementType: 'OUT' as any,
-      status: 'PENDING' as any
+      status: 'PENDING' as any,
+      evidenceUrl: 'https://picsum.photos/seed/upload/800/600' // Simulated upload
     }
     
     const updatedMovements = [newMovement, ...savedMovements]
@@ -248,10 +248,6 @@ export default function LogMovementPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="contactPerson">Client Contact</Label>
-                <Input id="contactPerson" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} placeholder="Name of person at site" className="bg-secondary/30 border-border" />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="transportation">Transportation</Label>
                 <Select required onValueChange={setTransportation}>
                   <SelectTrigger id="transportation" className="bg-secondary/30 border-border">
@@ -263,6 +259,12 @@ export default function LogMovementPage() {
                     <SelectItem value="PUBLIC_TRANSPORT">Grab/Public Transport</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="evidence" className="flex items-center gap-2">
+                  <Upload className="w-3.5 h-3.5" /> Travel Evidence (Receipts/Photos)
+                </Label>
+                <Input id="evidence" type="file" className="bg-secondary/30 border-border text-xs cursor-pointer file:bg-primary file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:mr-2" />
               </div>
             </div>
 
