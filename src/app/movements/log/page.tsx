@@ -48,6 +48,9 @@ export default function LogMovementPage() {
 
   if (!isLoaded || !mounted) return null
 
+  // Filter only active projects
+  const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!startDate || !projectId || !category || !destination) {
@@ -119,10 +122,10 @@ export default function LogMovementPage() {
                 </Label>
                 <Select required onValueChange={setProjectId}>
                   <SelectTrigger id="project" className="bg-secondary/30 border-border">
-                    <SelectValue placeholder="Select project" />
+                    <SelectValue placeholder="Select active project" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    {PROJECTS.map(p => (
+                    {activeProjects.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -225,8 +228,17 @@ export default function LogMovementPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="destination">Destination</Label>
-                <Input id="destination" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="e.g. AADK HQ, Kajang" required className="bg-secondary/30 border-border" />
+                <Label htmlFor="destination">Destination (Active Projects)</Label>
+                <Select required onValueChange={setDestination}>
+                  <SelectTrigger id="destination" className="bg-secondary/30 border-border">
+                    <SelectValue placeholder="Select project destination" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    {activeProjects.map(p => (
+                      <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="purpose">Purpose</Label>
