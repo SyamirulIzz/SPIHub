@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 
 export default function LeavePage() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -40,9 +41,11 @@ export default function LeavePage() {
           <h1 className="text-3xl font-bold font-headline text-foreground">Leave Management</h1>
           <p className="text-muted-foreground mt-1">Submit applications and manage team availability.</p>
         </div>
-        <Button onClick={() => toast({ title: "Modul Cuti", description: "Borang permohonan baru akan dibuka." })} className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
-          <Plus className="w-4 h-4" />
-          Apply For Leave
+        <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+          <Link href="/leave/apply">
+            <Plus className="w-4 h-4" />
+            Apply For Leave
+          </Link>
         </Button>
       </header>
 
