@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,11 @@ import { cn } from "@/lib/utils"
 
 export default function ClaimsPage() {
   const [selectedClaim, setSelectedClaim] = useState<any>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const isManagement = CURRENT_USER.role === 'ADMIN'
 
@@ -83,7 +88,9 @@ export default function ClaimsPage() {
                 return (
                   <TableRow key={claim.id} className="hover:bg-secondary/20 transition-colors">
                     <TableCell className="font-semibold">{user?.name}</TableCell>
-                    <TableCell className="text-xs">{new Date(claim.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-xs">
+                      {mounted ? new Date(claim.date).toLocaleDateString() : claim.date}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-[9px] font-bold tracking-widest uppercase">
                         {claim.category}

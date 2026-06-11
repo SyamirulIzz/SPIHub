@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils"
 
 export default function MovementsPage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <div className="p-8 space-y-8 animate-in slide-in-from-left-2 duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -49,6 +56,8 @@ export default function MovementsPage() {
                 {MOVEMENTS.map((mov) => {
                   const user = USERS.find(u => u.id === mov.userId)
                   const project = PROJECTS.find(p => p.id === mov.projectId)
+                  const dateObj = new Date(mov.startDate)
+                  
                   return (
                     <TableRow key={mov.id} className="hover:bg-secondary/20 group">
                       <TableCell>
@@ -69,8 +78,10 @@ export default function MovementsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-[10px] font-mono">
-                          <div>{new Date(mov.startDate).toLocaleDateString()}</div>
-                          <div className="text-muted-foreground">{new Date(mov.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                          <div>{mounted ? dateObj.toLocaleDateString() : mov.startDate.split('T')[0]}</div>
+                          <div className="text-muted-foreground">
+                            {mounted ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : mov.startDate.split('T')[1].substring(0, 5)}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>

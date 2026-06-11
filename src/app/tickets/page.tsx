@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,11 +14,15 @@ import { cn } from "@/lib/utils"
 export default function TicketsPage() {
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summary, setSummary] = useState<ProjectTicketSummaryOutput | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSummarize = async () => {
     setIsSummarizing(true)
     try {
-      // Transforming our local tickets to match Genkit schema
       const ticketsInput = TICKETS.map(t => ({
         ticketId: t.id,
         subject: t.subject,
@@ -164,7 +168,9 @@ export default function TicketsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {mounted ? new Date(ticket.createdAt).toLocaleDateString() : ticket.createdAt.split('T')[0]}
+                        </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ticket.description}</p>
                       <div className="flex items-center gap-4">
