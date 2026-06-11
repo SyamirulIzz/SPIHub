@@ -79,7 +79,7 @@ export default function ApplyLeavePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="balance">Available Balance</Label>
+                <Label htmlFor="balance">AL available Balance</Label>
                 <Input 
                   id="balance" 
                   value={`${currentUser.annualLeaveLimit - 4.5} Days`} 
