@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "claim-1-receipt",
+      "description": "Medical receipt from Poliklinik",
+      "imageUrl": "https://picsum.photos/seed/claim1/600/800",
+      "imageHint": "medical receipt"
+    },
+    {
+      "id": "claim-2-receipt",
+      "description": "General claim receipt for parking and toll",
+      "imageUrl": "https://picsum.photos/seed/claim2/600/800",
+      "imageHint": "parking receipt"
+    }
+  ]
 }
