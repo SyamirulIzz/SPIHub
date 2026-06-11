@@ -18,6 +18,7 @@ export default function ClaimsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [claimsList, setClaimsList] = useState(CLAIMS)
 
   useEffect(() => {
     setMounted(true)
@@ -25,12 +26,17 @@ export default function ClaimsPage() {
 
   if (!isLoaded || !mounted) return null
 
-  const isManagement = currentUser.role === 'ADMIN'
+  // Hanya HOD dan ADMIN (CEO) yang boleh memproses tuntutan
+  const canProcessClaims = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
-  const handleClaimStatus = (status: string, claimId: string) => {
+  const handleClaimStatus = (id: string, status: 'APPROVED' | 'REJECTED', claimId: string) => {
+    setClaimsList(prev => prev.map(claim => 
+      claim.id === id ? { ...claim, status } : claim
+    ))
+
     toast({
       title: status === 'APPROVED' ? "Tuntutan Diluluskan" : "Tuntutan Ditolak",
-      description: `Rekod ${claimId} telah dikemaskini.`,
+      description: `Rekod tuntutan ${claimId} telah dikemaskini kepada status ${status}.`,
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
@@ -97,7 +103,7 @@ export default function ClaimsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {CLAIMS.map((claim) => {
+              {claimsList.map((claim) => {
                 const user = USERS.find(u => u.id === claim.userId)
                 return (
                   <TableRow key={claim.id} className="hover:bg-secondary/20 transition-colors">
@@ -153,12 +159,12 @@ export default function ClaimsPage() {
                                   className="object-contain p-4 group-hover:scale-105 transition-transform"
                                 />
                               </div>
-                              {isManagement && claim.status === 'PENDING' && (
+                              {canProcessClaims && claim.status === 'PENDING' && (
                                 <div className="flex gap-4 pt-4">
-                                  <Button onClick={() => handleClaimStatus('APPROVED', claim.id)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-bold">
+                                  <Button onClick={() => handleClaimStatus(claim.id, 'APPROVED', claim.id)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-bold">
                                     <Check className="w-4 h-4" /> Approve
                                   </Button>
-                                  <Button onClick={() => handleClaimStatus('REJECTED', claim.id)} variant="destructive" className="flex-1 gap-2 font-bold">
+                                  <Button onClick={() => handleClaimStatus(claim.id, 'REJECTED', claim.id)} variant="destructive" className="flex-1 gap-2 font-bold">
                                     <X className="w-4 h-4" /> Reject
                                   </Button>
                                 </div>
@@ -166,12 +172,12 @@ export default function ClaimsPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        {isManagement && claim.status === 'PENDING' && (
+                        {canProcessClaims && claim.status === 'PENDING' && (
                           <div className="flex gap-1">
-                            <Button onClick={() => handleClaimStatus('APPROVED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10">
+                            <Button onClick={() => handleClaimStatus(claim.id, 'APPROVED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10">
                               <Check className="w-4 h-4" />
                             </Button>
-                            <Button onClick={() => handleClaimStatus('REJECTED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-500/10">
+                            <Button onClick={() => handleClaimStatus(claim.id, 'REJECTED', claim.id)} variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-500/10">
                               <X className="w-4 h-4" />
                             </Button>
                           </div>

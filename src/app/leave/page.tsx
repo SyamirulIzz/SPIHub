@@ -17,6 +17,7 @@ export default function LeavePage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [requests, setRequests] = useState(LEAVE_REQUESTS)
 
   useEffect(() => {
     setMounted(true)
@@ -24,12 +25,17 @@ export default function LeavePage() {
 
   if (!isLoaded || !mounted) return null
 
-  const isHODorAdmin = currentUser.role !== 'STAFF'
+  // Hanya HOD dan ADMIN (CEO) yang boleh memproses permohonan
+  const canApprove = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
-  const handleApproval = (status: string, userName: string) => {
+  const handleApproval = (id: string, status: 'APPROVED' | 'REJECTED', userName: string) => {
+    setRequests(prev => prev.map(req => 
+      req.id === id ? { ...req, status } : req
+    ))
+
     toast({
       title: status === 'APPROVED' ? "Permohonan Diluluskan" : "Permohonan Ditolak",
-      description: `Status permohonan cuti untuk ${userName} telah dikemaskini.`,
+      description: `Status permohonan cuti untuk ${userName} telah berjaya dikemaskini kepada ${status}.`,
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
@@ -94,7 +100,7 @@ export default function LeavePage() {
         <CardHeader className="bg-secondary/10 border-b border-border py-4 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg font-headline">Leave Request Log</CardTitle>
-            <CardDescription>Track the status of your internal permohonan.</CardDescription>
+            <CardDescription>Track and manage staff leave applications.</CardDescription>
           </div>
           <div className="flex gap-2">
             <Badge variant="secondary" className="bg-secondary/40 border-border text-[10px]">ALL HISTORY</Badge>
@@ -109,11 +115,11 @@ export default function LeavePage() {
                 <TableHead>Duration</TableHead>
                 <TableHead>Reason</TableHead>
                 <TableHead>Status</TableHead>
-                {isHODorAdmin && <TableHead className="text-right">Approvals</TableHead>}
+                <TableHead className="text-right">Approvals</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {LEAVE_REQUESTS.map((leave) => {
+              {requests.map((leave) => {
                 const user = USERS.find(u => u.id === leave.userId)
                 return (
                   <TableRow key={leave.id} className="hover:bg-secondary/20 transition-colors">
@@ -151,22 +157,34 @@ export default function LeavePage() {
                         {leave.status}
                       </Badge>
                     </TableCell>
-                    {isHODorAdmin && (
-                      <TableCell className="text-right">
-                        {leave.status === 'PENDING' ? (
-                          <div className="flex justify-end gap-1">
-                             <Button onClick={() => handleApproval('APPROVED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10">
-                               <CheckCircle2 className="w-4 h-4" />
-                             </Button>
-                             <Button onClick={() => handleApproval('REJECTED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:bg-red-500/10">
-                               <XCircle className="w-4 h-4" />
-                             </Button>
-                          </div>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground font-medium italic">Processed</span>
-                        )}
-                      </TableCell>
-                    )}
+                    <TableCell className="text-right">
+                      {canApprove && leave.status === 'PENDING' ? (
+                        <div className="flex justify-end gap-1">
+                           <Button 
+                             onClick={() => handleApproval(leave.id, 'APPROVED', user?.name || '')} 
+                             variant="ghost" 
+                             size="icon" 
+                             className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                             title="Approve Leave"
+                           >
+                             <CheckCircle2 className="w-4 h-4" />
+                           </Button>
+                           <Button 
+                             onClick={() => handleApproval(leave.id, 'REJECTED', user?.name || '')} 
+                             variant="ghost" 
+                             size="icon" 
+                             className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                             title="Reject Leave"
+                           >
+                             <XCircle className="w-4 h-4" />
+                           </Button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground font-medium italic">
+                          {leave.status === 'PENDING' ? 'Read-only (Staff)' : 'Processed'}
+                        </span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 )
               })}
@@ -180,8 +198,8 @@ export default function LeavePage() {
         <div>
           <h4 className="text-sm font-bold text-accent">Leave Policy Reminder</h4>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Medical Leave (MC) must be accompanied by a valid digital certificate uploaded within 24 hours of the request.
-            Annual Leave applications should be submitted at least 3 days in advance for approval by HOD.
+            Medical Leave (MC) must be accompanied by a valid digital certificate.
+            Only HODs and Management (CEO) are authorized to Approve or Reject applications.
           </p>
         </div>
       </div>
