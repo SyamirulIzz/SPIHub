@@ -38,6 +38,10 @@ export default function LogMovementPage() {
   const [transportation, setTransportation] = useState("")
   const [claimable, setClaimable] = useState(false)
 
+  // Popover states to close after selection
+  const [isStartOpen, setIsStartOpen] = useState(false)
+  const [isEndOpen, setIsEndOpen] = useState(false)
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -53,7 +57,6 @@ export default function LogMovementPage() {
     
     setIsSubmitting(true)
     
-    // Simulate saving to localStorage
     const savedMovements = JSON.parse(localStorage.getItem('simulated_movements') || JSON.stringify(MOVEMENTS))
     const newMovement = {
       id: `mov-${Date.now()}`,
@@ -147,7 +150,7 @@ export default function LogMovementPage() {
                   <CalendarIcon className="w-3.5 h-3.5" /> Start Date
                 </Label>
                 <div className="flex gap-2">
-                  <Popover>
+                  <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
@@ -161,7 +164,15 @@ export default function LogMovementPage() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                      <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={(date) => {
+                          setStartDate(date)
+                          setIsStartOpen(false)
+                        }}
+                        initialFocus
+                      />
                     </PopoverContent>
                   </Popover>
                   <Input 
@@ -177,7 +188,7 @@ export default function LogMovementPage() {
                   <Clock className="w-3.5 h-3.5" /> Expected End
                 </Label>
                 <div className="flex gap-2">
-                  <Popover>
+                  <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
@@ -191,7 +202,15 @@ export default function LogMovementPage() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                      <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={(date) => {
+                          setEndDate(date)
+                          setIsEndOpen(false)
+                        }}
+                        initialFocus
+                      />
                     </PopoverContent>
                   </Popover>
                   <Input 

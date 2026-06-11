@@ -29,6 +29,10 @@ export default function ApplyLeavePage() {
   const [leaveType, setLeaveType] = useState<string>("")
   const [reason, setReason] = useState("")
 
+  // Popover states to close them after selection
+  const [isStartOpen, setIsStartOpen] = useState(false)
+  const [isEndOpen, setIsEndOpen] = useState(false)
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -48,7 +52,6 @@ export default function ApplyLeavePage() {
     
     setIsSubmitting(true)
     
-    // Simulate saving to localStorage
     const savedRequests = JSON.parse(localStorage.getItem('simulated_leave_requests') || JSON.stringify(LEAVE_REQUESTS))
     const newRequest = {
       id: `leave-${Date.now()}`,
@@ -126,7 +129,7 @@ export default function ApplyLeavePage() {
                 <Label className="flex items-center gap-2 mb-2">
                   <CalendarIcon className="w-3.5 h-3.5" /> Start Date
                 </Label>
-                <Popover>
+                <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -143,7 +146,10 @@ export default function ApplyLeavePage() {
                     <Calendar
                       mode="single"
                       selected={startDate}
-                      onSelect={setStartDate}
+                      onSelect={(date) => {
+                        setStartDate(date)
+                        setIsStartOpen(false)
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -153,7 +159,7 @@ export default function ApplyLeavePage() {
                 <Label className="flex items-center gap-2 mb-2">
                   <CalendarIcon className="w-3.5 h-3.5" /> End Date
                 </Label>
-                <Popover>
+                <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -170,7 +176,10 @@ export default function ApplyLeavePage() {
                     <Calendar
                       mode="single"
                       selected={endDate}
-                      onSelect={setEndDate}
+                      onSelect={(date) => {
+                        setEndDate(date)
+                        setIsEndOpen(false)
+                      }}
                       initialFocus
                     />
                   </PopoverContent>

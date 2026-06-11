@@ -30,6 +30,9 @@ export default function ClaimsPage() {
   const [category, setCategory] = useState("")
   const [amount, setAmount] = useState("")
   const [desc, setDesc] = useState("")
+  
+  // Popover state to close after selection
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -118,7 +121,7 @@ export default function ClaimsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 flex flex-col">
                   <Label>Date</Label>
-                  <Popover>
+                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("justify-start text-left font-normal bg-secondary/30 border-border text-xs", !claimDate && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-3 w-3" />
@@ -126,7 +129,15 @@ export default function ClaimsPage() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar mode="single" selected={claimDate} onSelect={setClaimDate} initialFocus />
+                      <Calendar 
+                        mode="single" 
+                        selected={claimDate} 
+                        onSelect={(date) => {
+                          setClaimDate(date)
+                          setIsCalendarOpen(false)
+                        }} 
+                        initialFocus 
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
