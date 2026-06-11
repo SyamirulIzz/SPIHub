@@ -31,7 +31,6 @@ export default function ClaimsPage() {
   const [amount, setAmount] = useState("")
   const [desc, setDesc] = useState("")
   
-  // Popover state to close after selection
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   useEffect(() => {
@@ -50,7 +49,14 @@ export default function ClaimsPage() {
 
   if (!isLoaded || !mounted) return null
 
-  const canProcessClaims = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+  const isAdmin = currentUser.role === 'ADMIN'
+  const canProcessClaims = isAdmin // Only Admin can approve based on your request
+
+  // Filter claims based on role
+  // Admin sees all, HOD and Staff see only their own
+  const visibleClaims = isAdmin 
+    ? claimsList 
+    : claimsList.filter(c => c.userId === currentUser.id)
 
   const handleClaimStatus = (id: string, status: 'APPROVED' | 'REJECTED', claimantName: string) => {
     setClaimsList(prev => prev.map(claim => 
@@ -102,7 +108,9 @@ export default function ClaimsPage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Medical & General Claims</h1>
-          <p className="text-sm text-muted-foreground mt-1">Submit receipts and track status.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isAdmin ? "Review company-wide claims and approvals." : "Submit receipts and track your personal claims."}
+          </p>
         </div>
         
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
@@ -183,7 +191,7 @@ export default function ClaimsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <DollarSign className="w-3 h-3 text-accent" />
-              Benefit Balance
+              My Benefit Balance
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -195,7 +203,9 @@ export default function ClaimsPage() {
 
       <Card className="bg-card border-border overflow-hidden">
         <CardHeader className="border-b border-border bg-secondary/10">
-          <CardTitle className="text-lg font-headline">Claims History</CardTitle>
+          <CardTitle className="text-lg font-headline">
+            {isAdmin ? "All Company Claims" : "My Claims History"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           <Table>
@@ -210,7 +220,7 @@ export default function ClaimsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {claimsList.map((claim) => {
+              {visibleClaims.map((claim) => {
                 const user = USERS.find(u => u.id === claim.userId)
                 return (
                   <TableRow key={claim.id} className="hover:bg-secondary/10 transition-colors">
@@ -253,6 +263,13 @@ export default function ClaimsPage() {
                   </TableRow>
                 )
               })}
+              {visibleClaims.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground italic">
+                    Tiada rekod tuntutan ditemui.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
