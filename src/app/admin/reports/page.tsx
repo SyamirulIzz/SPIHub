@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { USERS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
+import { USERS, CLAIMS, LEAVE_REQUESTS, MOVEMENTS } from "@/lib/mock-data"
 import { 
   BarChart3, 
   Users, 
@@ -22,13 +24,18 @@ import {
   MapPin,
   Clock,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Download,
+  FileSpreadsheet,
+  FileDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminReportsPage() {
   const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   
   // Data State
@@ -109,11 +116,59 @@ export default function AdminReportsPage() {
     return { leaveRecords, totalClaimsApproved, categoryExpenses };
   }, [mounted, syncedUsers, syncedLeaves, syncedClaims]);
 
+  const handleExportPDF = () => {
+    toast({
+      title: "Menjana Laporan PDF",
+      description: "Sila tunggu sebentar sementara kami menyediakan dokumen anda.",
+    });
+    setTimeout(() => {
+      window.print();
+    }, 1000);
+  };
+
+  const handleExportExcel = () => {
+    if (!reportsData) return;
+
+    toast({
+      title: "Mengeksport ke Excel",
+      description: "Data sedang ditukar ke format CSV/Excel.",
+    });
+
+    // Generate CSV content
+    const headers = ["No", "Name", "CF 2025", "Additional", "Prorated June 2026", "Total Entitlement", "Taken", "Current Balance", "Unpaid Leave"];
+    const rows = reportsData.leaveRecords.map((r, i) => [
+      i + 1,
+      r.name,
+      r.cf,
+      r.additional,
+      r.proratedEntitlement,
+      r.totalEntitlement,
+      r.taken,
+      r.balance,
+      r.unpaid
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SPI_Leave_Report_June_2026.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="p-8 space-y-8 animate-in fade-in duration-700 print:p-0">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
             <BarChart3 className="text-primary w-7 h-7" />
@@ -124,6 +179,24 @@ export default function AdminReportsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-lg">
+                <Download className="w-4 h-4" />
+                Download Report
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card border-border w-48">
+              <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
+                <FileDown className="w-4 h-4 text-red-500" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                Export as Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Badge className="bg-primary/20 text-primary border-primary/30 h-7 px-3">ADMIN ACCESS</Badge>
           <div className="text-right">
              <p className="text-[10px] text-muted-foreground font-bold uppercase">Report Date</p>
@@ -133,7 +206,7 @@ export default function AdminReportsPage() {
       </header>
 
       {/* Top High-Level Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4">
         <StatSummaryCard title="Claims Approved" value={`RM ${reportsData?.totalClaimsApproved.toLocaleString()}`} icon={DollarSign} trend="+4.5% vs Last Month" color="text-emerald-500" />
         <StatSummaryCard title="Staff Count" value={syncedUsers.length.toString()} icon={Users} trend="Active Payroll" color="text-indigo-500" />
         <StatSummaryCard title="Active Assignments" value={syncedMovements.filter(m => m.status === 'APPROVED').length.toString()} icon={MapPin} trend="On-Site Deployment" color="text-cyan-500" />
@@ -141,7 +214,7 @@ export default function AdminReportsPage() {
       </div>
 
       <Tabs defaultValue="leave" className="space-y-6">
-        <TabsList className="bg-secondary/30 border border-border p-1 h-12">
+        <TabsList className="bg-secondary/30 border border-border p-1 h-12 print:hidden">
           <TabsTrigger value="leave" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Palmtree className="w-4 h-4" /> LEAVE RECORD
           </TabsTrigger>
@@ -155,7 +228,7 @@ export default function AdminReportsPage() {
 
         {/* Tab 1: Official Leave Record */}
         <TabsContent value="leave">
-          <Card className="bg-card border-border shadow-2xl overflow-hidden">
+          <Card className="bg-card border-border shadow-2xl overflow-hidden print:shadow-none print:border-none">
             <CardHeader className="bg-secondary/10 border-b border-border text-center py-6">
               <h2 className="text-lg font-bold font-headline uppercase tracking-widest">SYSTEM PROTOCOL INFORMATION SDN BHD</h2>
               <p className="text-md font-bold mt-1">Leave Record</p>
@@ -195,7 +268,7 @@ export default function AdminReportsPage() {
                 </TableBody>
               </Table>
             </CardContent>
-            <div className="p-4 bg-secondary/5 border-t border-border flex justify-between items-center">
+            <div className="p-4 bg-secondary/5 border-t border-border flex justify-between items-center print:hidden">
                <p className="text-[10px] font-bold text-muted-foreground">**Data as at 09/06/2026</p>
                <div className="flex gap-4">
                   <Badge variant="outline" className="text-[9px] border-emerald-500/20 text-emerald-500">Auto-Calculated</Badge>
@@ -207,8 +280,8 @@ export default function AdminReportsPage() {
 
         {/* Tab 2: Financial Analytics */}
         <TabsContent value="claims">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-card border-border shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:grid-cols-3">
+            <Card className="bg-card border-border shadow-lg print:shadow-none">
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-emerald-500" /> Expenses by Category
@@ -221,7 +294,7 @@ export default function AdminReportsPage() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden">
+            <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden print:shadow-none print:md:col-span-2">
                <CardHeader className="bg-secondary/10 border-b border-border">
                   <CardTitle className="text-sm font-bold">Approved Financial Outflow</CardTitle>
                </CardHeader>
@@ -256,8 +329,8 @@ export default function AdminReportsPage() {
 
         {/* Tab 3: Operational Health */}
         <TabsContent value="ops">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="bg-card border-border">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2">
+              <Card className="bg-card border-border print:shadow-none">
                 <CardHeader>
                   <CardTitle className="text-lg font-headline flex items-center gap-2">
                     <FileText className="w-5 h-5 text-indigo-500" /> Site Deployment Overview
@@ -283,7 +356,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border overflow-hidden">
+              <Card className="bg-card border-border overflow-hidden print:shadow-none">
                 <CardHeader className="bg-secondary/10 border-b border-border">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Field Staff
@@ -315,17 +388,17 @@ export default function AdminReportsPage() {
 
 function StatSummaryCard({ title, value, icon: Icon, trend, color }: any) {
   return (
-    <Card className="bg-card border-border hover:border-primary/50 transition-all shadow-lg">
+    <Card className="bg-card border-border hover:border-primary/50 transition-all shadow-lg print:shadow-none print:border">
       <CardContent className="pt-6">
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
             <div className={cn("text-2xl font-bold font-headline", color)}>{value}</div>
-            <p className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold">
+            <p className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold print:hidden">
                {trend}
             </p>
           </div>
-          <div className={cn("p-2.5 rounded-xl bg-secondary/50 border border-border shadow-inner", color)}>
+          <div className={cn("p-2.5 rounded-xl bg-secondary/50 border border-border shadow-inner print:hidden", color)}>
             <Icon className="w-5 h-5" />
           </div>
         </div>
