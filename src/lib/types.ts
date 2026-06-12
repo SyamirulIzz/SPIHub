@@ -47,11 +47,12 @@ export interface StaffMovement {
 export interface LeaveRequest {
   id: string;
   userId: string;
-  leaveType: 'ANNUAL' | 'MEDICAL' | 'EMERGENCY';
+  leaveType: 'ANNUAL' | 'MEDICAL' | 'EMERGENCY' | 'UNPAID';
   startDate: string;
   endDate: string;
   reason: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  mcUrl?: string;
 }
 
 export interface ProjectTicket {

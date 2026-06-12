@@ -51,7 +51,8 @@ export default function ApplyLeavePage() {
       startDate: startDate,
       endDate: endDate,
       reason: reason,
-      status: 'PENDING'
+      status: 'PENDING' as any,
+      mcUrl: leaveType === 'MEDICAL' ? 'https://picsum.photos/seed/uploadedmc/600/800' : undefined
     }
     
     const updatedRequests = [newRequest, ...savedRequests]
@@ -105,9 +106,8 @@ export default function ApplyLeavePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="balance">AL available Balance</Label>
+                <Label>AL available Balance</Label>
                 <Input 
-                  id="balance" 
                   value={`${currentUser.annualLeaveLimit} Days`} 
                   disabled 
                   className="bg-secondary/10 border-border font-bold text-accent"
@@ -125,7 +125,7 @@ export default function ApplyLeavePage() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-secondary/30 border-border"
+                  className="bg-secondary/30 border-border h-10 px-3 py-2 text-sm"
                   required
                 />
               </div>
@@ -138,7 +138,7 @@ export default function ApplyLeavePage() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-secondary/30 border-border"
+                  className="bg-secondary/30 border-border h-10 px-3 py-2 text-sm"
                   required
                 />
               </div>

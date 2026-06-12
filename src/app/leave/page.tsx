@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -6,12 +5,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LEAVE_REQUESTS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info } from "lucide-react"
+import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import Image from "next/image"
 
 export default function LeavePage() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -27,7 +28,6 @@ export default function LeavePage() {
     }
   }, [])
 
-  // Simpan ke localStorage setiap kali requests berubah
   useEffect(() => {
     if (mounted) {
       localStorage.setItem('simulated_leave_requests', JSON.stringify(requests))
@@ -36,11 +36,9 @@ export default function LeavePage() {
 
   if (!isLoaded || !mounted) return null
 
-  const canApprove = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+  const isManagement = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
-  // Filter requests based on role
-  // Admin and HOD see all, Staff see only their own
-  const visibleRequests = (currentUser.role === 'ADMIN' || currentUser.role === 'HOD')
+  const visibleRequests = isManagement
     ? requests
     : requests.filter(r => r.userId === currentUser.id)
 
@@ -51,14 +49,14 @@ export default function LeavePage() {
 
     toast({
       title: status === 'APPROVED' ? "Permohonan Diluluskan" : "Permohonan Ditolak",
-      description: `Status permohonan cuti untuk ${userName} telah berjaya dikemaskini kepada ${status} dan akan diselaraskan ke Kalendar.`,
+      description: `Status permohonan cuti untuk ${userName} telah berjaya dikemaskini kepada ${status}.`,
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
 
   const takenDays = requests
     .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
-    .length // Simplified calculation for mock
+    .length
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -120,14 +118,11 @@ export default function LeavePage() {
         <CardHeader className="bg-secondary/10 border-b border-border py-4 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg font-headline">
-              {canApprove ? "Leave Request Log" : "My Leave History"}
+              {isManagement ? "Leave Request Log" : "My Leave History"}
             </CardTitle>
             <CardDescription>
-              {canApprove ? "Track and manage staff leave applications." : "Track your personal leave applications."}
+              {isManagement ? "Track and manage staff leave applications." : "Track your personal leave applications."}
             </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="secondary" className="bg-secondary/40 border-border text-[10px]">ALL HISTORY</Badge>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -137,9 +132,8 @@ export default function LeavePage() {
                 <TableHead>Employee</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Duration</TableHead>
-                <TableHead>Reason</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Approvals</TableHead>
+                <TableHead className="text-right">Docs & Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -168,9 +162,6 @@ export default function LeavePage() {
                         <span>{leave.endDate}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs italic text-muted-foreground/80 max-w-[200px] truncate">
-                      {leave.reason}
-                    </TableCell>
                     <TableCell>
                       <Badge className={cn(
                         "text-[9px] font-bold px-2 py-0.5",
@@ -182,39 +173,55 @@ export default function LeavePage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {canApprove && leave.status === 'PENDING' ? (
-                        <div className="flex justify-end gap-1">
-                           <Button 
-                             onClick={() => handleApproval(leave.id, 'APPROVED', user?.name || '')} 
-                             variant="ghost" 
-                             size="icon" 
-                             className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
-                             title="Approve Leave"
-                           >
-                             <CheckCircle2 className="w-4 h-4" />
-                           </Button>
-                           <Button 
-                             onClick={() => handleApproval(leave.id, 'REJECTED', user?.name || '')} 
-                             variant="ghost" 
-                             size="icon" 
-                             className="h-7 w-7 text-red-500 hover:bg-red-500/10"
-                             title="Reject Leave"
-                           >
-                             <XCircle className="w-4 h-4" />
-                           </Button>
-                        </div>
-                      ) : (
-                        <span className="text-[10px] text-muted-foreground font-medium italic">
-                          {leave.status === 'PENDING' ? 'Waiting' : 'Processed'}
-                        </span>
-                      )}
+                      <div className="flex justify-end items-center gap-2">
+                        {leave.mcUrl && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-accent hover:bg-accent/10" title="View MC">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md bg-card border-border">
+                              <DialogHeader>
+                                <DialogTitle className="font-headline text-sm">Salinan Sijil Sakit (MC)</DialogTitle>
+                              </DialogHeader>
+                              <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-border mt-4">
+                                <Image src={leave.mcUrl} alt="MC Document" fill className="object-contain" />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        
+                        {isManagement && leave.status === 'PENDING' && (
+                          <div className="flex gap-1">
+                             <Button 
+                               onClick={() => handleApproval(leave.id, 'APPROVED', user?.name || '')} 
+                               variant="ghost" 
+                               size="icon" 
+                               className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                               title="Approve"
+                             >
+                               <CheckCircle2 className="w-4 h-4" />
+                             </Button>
+                             <Button 
+                               onClick={() => handleApproval(leave.id, 'REJECTED', user?.name || '')} 
+                               variant="ghost" 
+                               size="icon" 
+                               className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                               title="Reject"
+                             >
+                               <XCircle className="w-4 h-4" />
+                             </Button>
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
               })}
               {visibleRequests.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground italic">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground italic">
                     Tiada rekod permohonan cuti ditemui.
                   </TableCell>
                 </TableRow>
@@ -229,9 +236,7 @@ export default function LeavePage() {
         <div>
           <h4 className="text-sm font-bold text-accent">Leave Policy Reminder</h4>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Medical Leave (MC) must be accompanied by a valid digital certificate.
-            Only HODs and Management (CEO) are authorized to Approve or Reject applications.
-            Semua permohonan yang diluluskan akan dipaparkan secara automatik dalam Kalendar Berpusat.
+            Hanya HOD dan CEO yang boleh meluluskan cuti. Sijil Sakit (MC) wajib disertakan untuk permohonan Medical Leave.
           </p>
         </div>
       </div>

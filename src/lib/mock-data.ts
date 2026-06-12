@@ -11,9 +11,7 @@ export const DEPARTMENTS: Department[] = [
 export const PROJECTS: Project[] = [
   { id: 'proj-1', name: 'Projek AADK', description: 'National Anti-Drugs Agency System Upgrade', status: 'ACTIVE' },
   { id: 'proj-2', name: 'SPI Internal Portal', description: 'Internal operations hub', status: 'ACTIVE' },
-  { id: 'proj-3', name: 'Cloud Migration', description: 'Legacy server migration', status: 'ON_HOLD' },
   { id: 'proj-4', name: 'Smart City API', description: 'Integration with municipal data', status: 'ACTIVE' },
-  { id: 'proj-5', name: 'E-Procurement V3', description: 'B2B procurement platform', status: 'COMPLETED' },
   { id: 'proj-6', name: 'Mobile Attendance', description: 'Geofencing attendance app', status: 'ACTIVE' },
 ];
 
@@ -136,45 +134,8 @@ export const MOVEMENTS: StaffMovement[] = [
     claimable: true,
     movementType: 'OUT',
     status: 'APPROVED',
-    approvedBy: 'Siti HOD'
-  },
-  {
-    id: 'mov-4',
-    userId: 'user-7',
-    projectId: 'proj-1',
-    startDate: '2024-05-18T09:00:00',
-    endDate: '2024-05-20T18:00:00',
-    allDay: true,
-    destination: 'Penang Tech Park',
-    purpose: 'Server Installation',
-    description: 'On-site installation and configuration.',
-    category: 'OUTSTATION',
-    contactPerson: 'Siva',
-    contactOrg: 'DataPoint',
-    transportation: 'PUBLIC_TRANSPORT',
-    claimable: true,
-    movementType: 'OUT',
-    status: 'PENDING'
-  },
-  {
-    id: 'mov-5',
-    userId: 'user-2',
-    projectId: 'proj-5',
-    startDate: '2024-05-15T11:00:00',
-    endDate: '2024-05-15T13:00:00',
-    allDay: false,
-    destination: 'Damansara Heights',
-    purpose: 'Final Handover',
-    description: 'Closing project documentation and signatures.',
-    category: 'CLIENT_MEETING',
-    contactPerson: 'Pn. Zahara',
-    contactOrg: 'Global Trade',
-    transportation: 'CAR',
-    claimable: false,
-    movementType: 'OUT',
-    status: 'COMPLETED',
-    approvedBy: 'Ahmad Manager',
-    evidenceUrl: 'https://picsum.photos/seed/mov5/800/600'
+    approvedBy: 'Siti HOD',
+    evidenceUrl: 'https://picsum.photos/seed/mov3/800/600'
   }
 ];
 
@@ -195,25 +156,8 @@ export const LEAVE_REQUESTS: LeaveRequest[] = [
     startDate: '2024-05-20',
     endDate: '2024-05-20',
     reason: 'Fever and cold',
-    status: 'PENDING'
-  },
-  {
-    id: 'leave-3',
-    userId: 'user-6',
-    leaveType: 'EMERGENCY',
-    startDate: '2024-05-15',
-    endDate: '2024-05-15',
-    reason: 'Car breakdown',
-    status: 'REJECTED'
-  },
-  {
-    id: 'leave-4',
-    userId: 'user-7',
-    leaveType: 'ANNUAL',
-    startDate: '2024-07-10',
-    endDate: '2024-07-15',
-    reason: 'Personal trip',
-    status: 'PENDING'
+    status: 'PENDING',
+    mcUrl: 'https://picsum.photos/seed/mc2/600/800'
   },
   {
     id: 'leave-5',
@@ -222,7 +166,8 @@ export const LEAVE_REQUESTS: LeaveRequest[] = [
     startDate: '2024-05-12',
     endDate: '2024-05-13',
     reason: 'Dental surgery',
-    status: 'APPROVED'
+    status: 'APPROVED',
+    mcUrl: 'https://picsum.photos/seed/mc5/600/800'
   }
 ];
 
@@ -239,17 +184,6 @@ export const TICKETS: ProjectTicket[] = [
     createdAt: '2024-05-10T11:20:00'
   },
   {
-    id: 'tick-2',
-    projectId: 'proj-1',
-    createdBy: 'user-4',
-    assignedTo: 'user-3',
-    subject: 'Broken Image on Dashboard',
-    description: 'Banner image is not loading on mobile views.',
-    severity: 'Low',
-    status: 'Open',
-    createdAt: '2024-05-12T09:45:00'
-  },
-  {
     id: 'tick-3',
     projectId: 'proj-4',
     createdBy: 'user-6',
@@ -259,28 +193,6 @@ export const TICKETS: ProjectTicket[] = [
     severity: 'High',
     status: 'Open',
     createdAt: '2024-05-14T15:30:00'
-  },
-  {
-    id: 'tick-4',
-    projectId: 'proj-2',
-    createdBy: 'user-1',
-    assignedTo: 'user-2',
-    subject: 'HR Dashboard Layout Shift',
-    description: 'The charts are overlapping the sidebar on Firefox.',
-    severity: 'Medium',
-    status: 'Resolved',
-    createdAt: '2024-05-08T10:00:00'
-  },
-  {
-    id: 'tick-5',
-    projectId: 'proj-6',
-    createdBy: 'user-3',
-    assignedTo: 'user-6',
-    subject: 'GPS Lag on Android',
-    description: 'Check-in takes more than 10 seconds to detect location.',
-    severity: 'Medium',
-    status: 'In Progress',
-    createdAt: '2024-05-13T08:15:00'
   }
 ];
 
@@ -314,26 +226,6 @@ export const CLAIMS: ReimbursementClaim[] = [
     description: 'Grab to Client Meeting (MBSJ)',
     receiptUrl: 'https://picsum.photos/seed/claim3/600/800',
     status: 'APPROVED'
-  },
-  {
-    id: 'claim-4',
-    userId: 'user-7',
-    date: '2024-05-12',
-    amount: 250.00,
-    category: 'MEDICAL',
-    description: 'Specialist Consultation',
-    receiptUrl: 'https://picsum.photos/seed/claim4/600/800',
-    status: 'REJECTED'
-  },
-  {
-    id: 'claim-5',
-    userId: 'user-3',
-    date: '2024-05-15',
-    amount: 15.00,
-    category: 'GENERAL',
-    description: 'Office stationery (Markers)',
-    receiptUrl: 'https://picsum.photos/seed/claim5/600/800',
-    status: 'PENDING'
   }
 ];
 
