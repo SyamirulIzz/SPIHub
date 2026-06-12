@@ -83,3 +83,10 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* Hybrid Mobile Fixes */
+@media (max-width: 768px) {
+  .sidebar-trigger-mobile {
+    display: flex;
+  }
+}

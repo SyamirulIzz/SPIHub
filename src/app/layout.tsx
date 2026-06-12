@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { MobileHeader } from "@/components/layout/mobile-header";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -23,11 +25,15 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground" suppressHydrationWarning>
         <SidebarProvider>
-          <div className="flex min-h-screen w-full">
+          <div className="flex min-h-screen w-full flex-col md:flex-row">
             <AppSidebar />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
+            <div className="flex-1 flex flex-col min-w-0">
+              <MobileHeader />
+              <main className="flex-1 overflow-auto pb-20 md:pb-0">
+                {children}
+              </main>
+              <BottomNav />
+            </div>
           </div>
         </SidebarProvider>
         <Toaster />
