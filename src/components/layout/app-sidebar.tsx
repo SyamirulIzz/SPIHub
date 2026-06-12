@@ -12,7 +12,8 @@ import {
   UserCircle2,
   ChevronRight,
   LogOut,
-  Briefcase
+  Briefcase,
+  BarChart3
 } from "lucide-react"
 import { 
   Sidebar, 
@@ -40,6 +41,12 @@ const items = [
     url: "/",
     icon: LayoutDashboard,
     roles: ['ADMIN', 'HOD', 'STAFF']
+  },
+  {
+    title: "Executive Reports",
+    url: "/admin/reports",
+    icon: BarChart3,
+    roles: ['ADMIN']
   },
   {
     title: "Centralized Calendar",
