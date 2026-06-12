@@ -124,7 +124,12 @@ export default function ApplyLeavePage() {
                   id="startDate"
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => {
+                    setStartDate(e.target.value)
+                    if (endDate && e.target.value > endDate) {
+                      setEndDate("")
+                    }
+                  }}
                   className="bg-secondary/30 border-border h-10 px-3 py-2 text-sm"
                   required
                 />
@@ -137,6 +142,7 @@ export default function ApplyLeavePage() {
                   id="endDate"
                   type="date"
                   value={endDate}
+                  min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   className="bg-secondary/30 border-border h-10 px-3 py-2 text-sm"
                   required

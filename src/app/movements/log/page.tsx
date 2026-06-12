@@ -148,7 +148,12 @@ export default function LogMovementPage() {
                     id="startDate"
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(e) => {
+                      setStartDate(e.target.value)
+                      if (endDate && e.target.value > endDate) {
+                        setEndDate("")
+                      }
+                    }}
                     className="flex-1 bg-secondary/30 border-border"
                     required
                   />
@@ -169,6 +174,7 @@ export default function LogMovementPage() {
                     id="endDate"
                     type="date"
                     value={endDate}
+                    min={startDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="flex-1 bg-secondary/30 border-border"
                     required
