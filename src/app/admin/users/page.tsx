@@ -6,16 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2 } from "lucide-react"
+import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2, Edit3 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 
 export default function UserManagementPage() {
+  const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
@@ -32,7 +33,8 @@ export default function UserManagementPage() {
   if (!isLoaded || !mounted) return null
 
   if (currentUser.role !== 'ADMIN') {
-    return redirect("/")
+    router.push("/")
+    return null
   }
 
   const handleAction = (action: string, userName: string) => {
@@ -125,8 +127,11 @@ export default function UserManagementPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-card border-border">
-                            <DropdownMenuItem onClick={() => handleAction("Kemaskini Profil", user.name)} className="text-xs font-medium focus:text-accent">Edit Profile</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAction("Kemaskini Limit", user.name)} className="text-xs font-medium focus:text-accent">Update Limits</DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/users/${user.id}/edit`} className="text-xs font-medium focus:text-accent flex items-center gap-2">
+                                <Edit3 className="w-3.5 h-3.5" /> Edit Profile
+                              </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAction("Deaktivasi Akaun", user.name)} className="text-xs font-medium text-red-500 focus:bg-red-500/10">Deactivate Account</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
