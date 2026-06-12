@@ -238,42 +238,42 @@ export default function AdminReportsPage() {
         </TabsList>
 
         {/* Tab 1: Official Leave Record */}
-        <TabsContent value="leave" className="print:m-0">
-          <Card className="bg-card border-border shadow-2xl overflow-hidden print:shadow-none print:border-none">
-            <CardHeader className="bg-secondary/10 border-b border-border text-center py-6">
+        <TabsContent value="leave" className="print:m-0 print:block">
+          <Card className="bg-card border-border shadow-2xl overflow-hidden print:shadow-none print:border print:border-slate-800 print:rounded-none">
+            <CardHeader className="bg-secondary/10 border-b border-border text-center py-6 print:bg-white print:text-black">
               <h2 className="text-lg font-bold font-headline uppercase tracking-widest">SYSTEM PROTOCOL INFORMATION SDN BHD</h2>
               <p className="text-md font-bold mt-1">Leave Record</p>
-              <p className="text-sm font-bold text-accent uppercase">Jun-2026</p>
+              <p className="text-sm font-bold text-accent uppercase print:text-black">Jun-2026</p>
             </CardHeader>
             <CardContent className="p-0">
-              <Table className="border-collapse">
-                <TableHeader className="bg-secondary/30">
-                  <TableRow className="border-y-2 border-border/50">
-                    <TableHead className="w-[40px] border-r text-center font-bold text-[10px] text-foreground">No</TableHead>
-                    <TableHead className="w-[280px] border-r font-bold text-[10px] text-foreground">Name</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Balance Leave <br/>carried from 2025 (A)</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Additional <br/>Leave (Raya)</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Entitlement Leave <br/>as at JUNE 2026 (Prorated) B</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1 bg-primary/5">Total Leave <br/>entitlement (A+B+Raya)</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Total Leave <br/>Taken as at 06/2026</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[10px] text-foreground leading-tight px-1 bg-accent/5">Balance Leave <br/>as at JUNE 2026</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[10px] text-foreground px-1">Unpaid Leave</TableHead>
-                    <TableHead className="text-center font-bold text-[10px] text-foreground px-1">Entitlement <br/>Leave per year</TableHead>
+              <Table className="border-collapse print:text-black print:w-full">
+                <TableHeader className="bg-secondary/30 print:bg-slate-100">
+                  <TableRow className="border-y-2 border-border/50 print:border-black">
+                    <TableHead className="w-[40px] border-r border-border print:border-black text-center font-bold text-[10px] text-foreground print:text-black">No</TableHead>
+                    <TableHead className="w-[280px] border-r border-border print:border-black font-bold text-[10px] text-foreground print:text-black">Name</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[9px] text-foreground leading-tight px-1 print:text-black">Balance Leave <br/>carried from 2025 (A)</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[9px] text-foreground leading-tight px-1 print:text-black">Additional <br/>Leave (Raya)</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[9px] text-foreground leading-tight px-1 print:text-black">Entitlement Leave <br/>as at JUNE 2026 (Prorated) B</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[9px] text-foreground leading-tight px-1 bg-primary/5 print:bg-slate-50 print:text-black">Total Leave <br/>entitlement (A+B+Raya)</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[9px] text-foreground leading-tight px-1 print:text-black">Total Leave <br/>Taken as at 06/2026</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[10px] text-foreground leading-tight px-1 bg-accent/5 print:bg-slate-50 print:text-black">Balance Leave <br/>as at JUNE 2026</TableHead>
+                    <TableHead className="border-r border-border print:border-black text-center font-bold text-[10px] text-foreground px-1 print:text-black">Unpaid Leave</TableHead>
+                    <TableHead className="text-center font-bold text-[10px] text-foreground px-1 print:text-black">Entitlement <br/>Leave per year</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {reportsData?.leaveRecords.map((record, index) => (
-                    <TableRow key={record.id} className="hover:bg-secondary/20 transition-colors border-b border-border/50">
-                      <TableCell className="border-r text-center text-[10px] py-2">{index + 1}</TableCell>
-                      <TableCell className="border-r font-bold text-[10px] py-2 uppercase tracking-tighter">{record.name}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2 font-medium">{record.cf}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2">{record.additional || "0"}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2">{record.proratedEntitlement}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2 font-bold bg-primary/5">{record.totalEntitlement}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2 text-red-500 font-bold">{record.taken}</TableCell>
-                      <TableCell className="border-r text-center text-[12px] py-2 font-extrabold text-emerald-500 bg-accent/5">{record.balance}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2">{record.unpaid || 0}</TableCell>
-                      <TableCell className="text-center text-[11px] py-2 font-bold">{record.annualLeaveLimit}</TableCell>
+                    <TableRow key={record.id} className="hover:bg-secondary/20 transition-colors border-b border-border/50 print:border-black print:hover:bg-transparent">
+                      <TableCell className="border-r border-border print:border-black text-center text-[10px] py-2">{index + 1}</TableCell>
+                      <TableCell className="border-r border-border print:border-black font-bold text-[10px] py-2 uppercase tracking-tighter">{record.name}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2 font-medium">{record.cf}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2">{record.additional || "0"}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2">{record.proratedEntitlement}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2 font-bold bg-primary/5 print:bg-transparent">{record.totalEntitlement}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2 text-red-500 font-bold">{record.taken}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[12px] py-2 font-extrabold text-emerald-500 bg-accent/5 print:bg-transparent print:text-black">{record.balance}</TableCell>
+                      <TableCell className="border-r border-border print:border-black text-center text-[11px] py-2">{record.unpaid || 0}</TableCell>
+                      <TableCell className="text-center border-border print:border-black text-[11px] py-2 font-bold">{record.annualLeaveLimit}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
