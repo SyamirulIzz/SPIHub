@@ -11,10 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Send, Calendar as CalendarIcon, FileText, Upload } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 import { LEAVE_REQUESTS } from "@/lib/mock-data"
 
 export default function ApplyLeavePage() {
@@ -23,13 +19,10 @@ export default function ApplyLeavePage() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [startDate, setStartDate] = useState<Date | undefined>()
-  const [endDate, setEndDate] = useState<Date | undefined>()
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [leaveType, setLeaveType] = useState<string>("")
   const [reason, setReason] = useState("")
-
-  const [isStartOpen, setIsStartOpen] = useState(false)
-  const [isEndOpen, setIsEndOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -55,8 +48,8 @@ export default function ApplyLeavePage() {
       id: `leave-${Date.now()}`,
       userId: currentUser.id,
       leaveType: leaveType as any,
-      startDate: format(startDate, "yyyy-MM-dd"),
-      endDate: format(endDate, "yyyy-MM-dd"),
+      startDate: startDate,
+      endDate: endDate,
       reason: reason,
       status: 'PENDING'
     }
@@ -124,72 +117,30 @@ export default function ApplyLeavePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 flex flex-col">
-                <Label className="flex items-center gap-2 mb-2">
+                <Label htmlFor="startDate" className="flex items-center gap-2 mb-2">
                   <CalendarIcon className="w-3.5 h-3.5" /> Start Date
                 </Label>
-                <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal bg-secondary/30 border-border",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={(date) => {
-                        setStartDate(date)
-                        setIsStartOpen(false)
-                      }}
-                      captionLayout="dropdown"
-                      startMonth={new Date(2020, 0)}
-                      endMonth={new Date(2030, 11)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input 
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
               </div>
               <div className="space-y-2 flex flex-col">
-                <Label className="flex items-center gap-2 mb-2">
+                <Label htmlFor="endDate" className="flex items-center gap-2 mb-2">
                   <CalendarIcon className="w-3.5 h-3.5" /> End Date
                 </Label>
-                <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal bg-secondary/30 border-border",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={(date) => {
-                        setEndDate(date)
-                        setIsEndOpen(false)
-                      }}
-                      captionLayout="dropdown"
-                      startMonth={new Date(2020, 0)}
-                      endMonth={new Date(2030, 11)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input 
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
               </div>
             </div>
 

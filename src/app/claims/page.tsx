@@ -6,18 +6,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CLAIMS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Upload, Check, X, Eye, DollarSign, Calendar as CalendarIcon } from "lucide-react"
+import { Upload, Check, X, Eye, DollarSign } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns"
 
 export default function ClaimsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -25,12 +22,10 @@ export default function ClaimsPage() {
   const [mounted, setMounted] = useState(false)
   const [claimsList, setClaimsList] = useState(CLAIMS)
   const [isAdding, setIsAdding] = useState(false)
-  const [claimDate, setClaimDate] = useState<Date | undefined>()
+  const [claimDate, setClaimDate] = useState("")
   const [category, setCategory] = useState("")
   const [amount, setAmount] = useState("")
   const [desc, setDesc] = useState("")
-  
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -49,7 +44,6 @@ export default function ClaimsPage() {
   if (!isLoaded || !mounted) return null
 
   const isAdmin = currentUser.role === 'ADMIN'
-  const canProcessClaims = isAdmin 
 
   const visibleClaims = isAdmin 
     ? claimsList 
@@ -81,7 +75,7 @@ export default function ClaimsPage() {
     const newClaim = {
       id: `claim-${Date.now()}`,
       userId: currentUser.id,
-      date: format(claimDate, "yyyy-MM-dd"),
+      date: claimDate,
       amount: parseFloat(amount),
       category: category as any,
       description: desc,
@@ -93,7 +87,7 @@ export default function ClaimsPage() {
     setIsAdding(false)
     setAmount("")
     setDesc("")
-    setClaimDate(undefined)
+    setClaimDate("")
 
     toast({
       title: "Tuntutan Dihantar",
@@ -132,33 +126,15 @@ export default function ClaimsPage() {
             <form onSubmit={handleAddClaim} className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 flex flex-col">
-                  <Label>Date</Label>
-                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        className={cn("justify-start text-left font-normal bg-secondary/30 border-border text-xs", !claimDate && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {claimDate ? format(claimDate, "dd/MM/yy") : <span>Pick Date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar 
-                        mode="single" 
-                        selected={claimDate} 
-                        onSelect={(date) => {
-                          setClaimDate(date)
-                          setIsCalendarOpen(false)
-                        }} 
-                        captionLayout="dropdown"
-                        startMonth={new Date(2020, 0)}
-                        endMonth={new Date(2030, 11)}
-                        initialFocus 
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label htmlFor="claimDate">Date</Label>
+                  <Input 
+                    id="claimDate"
+                    type="date"
+                    value={claimDate}
+                    onChange={(e) => setClaimDate(e.target.value)}
+                    className="bg-secondary/30 border-border"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
@@ -263,7 +239,7 @@ export default function ClaimsPage() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        {canProcessClaims && claim.status === 'PENDING' && (
+                        {isAdmin && claim.status === 'PENDING' && (
                           <div className="flex gap-1">
                             <Button onClick={() => handleClaimStatus(claim.id, 'APPROVED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-emerald-500"><Check className="w-3.5 h-3.5" /></Button>
                             <Button onClick={() => handleClaimStatus(claim.id, 'REJECTED', user?.name || '')} variant="ghost" size="icon" className="h-7 w-7 text-red-500"><X className="w-3.5 h-3.5" /></Button>

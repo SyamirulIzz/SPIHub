@@ -13,10 +13,6 @@ import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Send, MapPin, Briefcase, Calendar as CalendarIcon, Clock, Upload } from "lucide-react"
 import { PROJECTS, MOVEMENTS } from "@/lib/mock-data"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 
 export default function LogMovementPage() {
   const router = useRouter()
@@ -27,8 +23,8 @@ export default function LogMovementPage() {
   
   const [projectId, setProjectId] = useState("")
   const [category, setCategory] = useState("")
-  const [startDate, setStartDate] = useState<Date>()
-  const [endDate, setEndDate] = useState<Date>()
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [startTime, setStartTime] = useState("09:00")
   const [endTime, setEndTime] = useState("17:00")
   const [destination, setDestination] = useState("")
@@ -36,9 +32,6 @@ export default function LogMovementPage() {
   const [contactPerson, setContactPerson] = useState("")
   const [transportation, setTransportation] = useState("")
   const [claimable, setClaimable] = useState(false)
-
-  const [isStartOpen, setIsStartOpen] = useState(false)
-  const [isEndOpen, setIsEndOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -62,8 +55,8 @@ export default function LogMovementPage() {
       id: `mov-${Date.now()}`,
       userId: currentUser.id,
       projectId: projectId,
-      startDate: `${format(startDate, "yyyy-MM-dd")}T${startTime}:00`,
-      endDate: `${format(endDate || startDate, "yyyy-MM-dd")}T${endTime}:00`,
+      startDate: `${startDate}T${startTime}:00`,
+      endDate: `${endDate || startDate}T${endTime}:00`,
       allDay: false,
       destination: destination,
       purpose: purpose,
@@ -147,40 +140,18 @@ export default function LogMovementPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 flex flex-col">
-                <Label className="flex items-center gap-2 mb-2">
+                <Label htmlFor="startDate" className="flex items-center gap-2 mb-2">
                   <CalendarIcon className="w-3.5 h-3.5" /> Start Date
                 </Label>
                 <div className="flex gap-2">
-                  <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "flex-1 justify-start text-left font-normal bg-secondary/30 border-border",
-                          !startDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "dd/MM/yy") : <span>Date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            setStartDate(date)
-                            setIsStartOpen(false)
-                          }
-                        }}
-                        captionLayout="dropdown"
-                        startMonth={new Date(2020, 0)}
-                        endMonth={new Date(2030, 11)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input 
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="flex-1 bg-secondary/30 border-border"
+                    required
+                  />
                   <Input 
                     type="time" 
                     value={startTime} 
@@ -190,40 +161,18 @@ export default function LogMovementPage() {
                 </div>
               </div>
               <div className="space-y-2 flex flex-col">
-                <Label className="flex items-center gap-2 mb-2">
+                <Label htmlFor="endDate" className="flex items-center gap-2 mb-2">
                   <Clock className="w-3.5 h-3.5" /> Expected End
                 </Label>
                 <div className="flex gap-2">
-                  <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "flex-1 justify-start text-left font-normal bg-secondary/30 border-border",
-                          !endDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "dd/MM/yy") : <span>Date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            setEndDate(date)
-                            setIsEndOpen(false)
-                          }
-                        }}
-                        captionLayout="dropdown"
-                        startMonth={new Date(2020, 0)}
-                        endMonth={new Date(2030, 11)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input 
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="flex-1 bg-secondary/30 border-border"
+                    required
+                  />
                   <Input 
                     type="time" 
                     value={endTime} 
