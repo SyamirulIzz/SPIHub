@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -19,6 +20,7 @@ export default function NewTicketPage() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [syncedProjects, setSyncedProjects] = useState(PROJECTS)
 
   const [formData, setFormData] = useState({
     projectId: "",
@@ -29,6 +31,10 @@ export default function NewTicketPage() {
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_projects')
+    if (saved) {
+      setSyncedProjects(JSON.parse(saved))
+    }
   }, [])
 
   if (!isLoaded || !mounted) return null
@@ -105,7 +111,7 @@ export default function NewTicketPage() {
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    {PROJECTS.map(p => (
+                    {syncedProjects.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>

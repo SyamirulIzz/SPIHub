@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -20,6 +21,7 @@ export default function LogMovementPage() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [syncedProjects, setSyncedProjects] = useState(PROJECTS)
   
   const [projectId, setProjectId] = useState("")
   const [category, setCategory] = useState("")
@@ -35,11 +37,15 @@ export default function LogMovementPage() {
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_projects')
+    if (saved) {
+      setSyncedProjects(JSON.parse(saved))
+    }
   }, [])
 
   if (!isLoaded || !mounted) return null
 
-  const activeProjects = PROJECTS.filter(p => p.status === 'ACTIVE');
+  const activeProjects = syncedProjects.filter(p => p.status === 'ACTIVE');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

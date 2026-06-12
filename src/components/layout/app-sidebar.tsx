@@ -11,7 +11,8 @@ import {
   Users,
   UserCircle2,
   ChevronRight,
-  LogOut
+  LogOut,
+  Briefcase
 } from "lucide-react"
 import { 
   Sidebar, 
@@ -44,6 +45,12 @@ const items = [
     title: "Centralized Calendar",
     url: "/calendar",
     icon: CalendarDays,
+    roles: ['ADMIN', 'HOD', 'STAFF']
+  },
+  {
+    title: "Projects",
+    url: "/projects",
+    icon: Briefcase,
     roles: ['ADMIN', 'HOD', 'STAFF']
   },
   {

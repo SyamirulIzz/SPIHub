@@ -7,6 +7,7 @@ import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/l
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
 import { useState, useEffect, useMemo } from "react"
+import Link from "next/link"
 import { 
   Users, 
   Briefcase, 
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
   const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
   const [syncedTickets, setSyncedTickets] = useState(TICKETS)
+  const [syncedProjects, setSyncedProjects] = useState(PROJECTS)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -38,11 +40,13 @@ export default function Dashboard() {
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
     const savedMovements = localStorage.getItem('simulated_movements')
     const savedTickets = localStorage.getItem('simulated_tickets')
+    const savedProjects = localStorage.getItem('simulated_projects')
     
     if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
     if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
     if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
     if (savedTickets) setSyncedTickets(JSON.parse(savedTickets))
+    if (savedProjects) setSyncedProjects(JSON.parse(savedProjects))
   }, [])
 
   // Helper function to calculate duration in days
@@ -129,7 +133,7 @@ export default function Dashboard() {
 
   const pendingClaimsCount = syncedClaims.filter(c => c.status === 'PENDING').length
   const openTicketsCount = syncedTickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length
-  const activeProjectsCount = PROJECTS.filter(p => p.status === 'ACTIVE').length
+  const activeProjectsCount = syncedProjects.filter(p => p.status === 'ACTIVE').length
   const staffOnSiteCount = syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').length
 
   const isAdmin = currentUser.role === 'ADMIN'
@@ -170,10 +174,18 @@ export default function Dashboard() {
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <StatCard title="Projects" value={activeProjectsCount.toString()} icon={Briefcase} color="indigo" />
-        <StatCard title="Tickets" value={openTicketsCount.toString()} icon={TicketIcon} color="cyan" />
-        <StatCard title="Claims" value={pendingClaimsCount.toString()} icon={WalletIcon} color="amber" />
-        <StatCard title="On-Site" value={staffOnSiteCount.toString()} icon={MapPin} color="emerald" />
+        <Link href="/projects">
+          <StatCard title="Projects" value={activeProjectsCount.toString()} icon={Briefcase} color="indigo" />
+        </Link>
+        <Link href="/tickets">
+          <StatCard title="Tickets" value={openTicketsCount.toString()} icon={TicketIcon} color="cyan" />
+        </Link>
+        <Link href="/claims">
+          <StatCard title="Claims" value={pendingClaimsCount.toString()} icon={WalletIcon} color="amber" />
+        </Link>
+        <Link href="/movements">
+          <StatCard title="On-Site" value={staffOnSiteCount.toString()} icon={MapPin} color="emerald" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -254,7 +266,7 @@ function StatCard({ title, value, icon: Icon, color }: any) {
   }
 
   return (
-    <Card className="bg-card border-border shadow-lg overflow-hidden relative group p-4">
+    <Card className="bg-card border-border shadow-lg overflow-hidden relative group p-4 hover:border-primary/50 transition-colors">
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-col">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{title}</span>
