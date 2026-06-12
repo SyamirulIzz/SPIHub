@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, UserPlus, Shield, Building, Briefcase, DollarSign } from "lucide-react"
+import { ArrowLeft, UserPlus, Shield, Building, Briefcase, DollarSign, Calendar } from "lucide-react"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function NewStaffPage() {
@@ -28,7 +28,10 @@ export default function NewStaffPage() {
     role: "STAFF",
     annualLeaveLimit: "14",
     medicalClaimLimit: "1000",
-    salary: "0"
+    salary: "0",
+    carriedForward: "0",
+    additionalLeave: "0",
+    unpaidLeave: "0"
   })
 
   useEffect(() => {
@@ -63,6 +66,9 @@ export default function NewStaffPage() {
       annualLeaveLimit: parseInt(formData.annualLeaveLimit),
       medicalClaimLimit: parseInt(formData.medicalClaimLimit),
       salary: parseFloat(formData.salary),
+      carriedForward: parseFloat(formData.carriedForward),
+      additionalLeave: parseFloat(formData.additionalLeave),
+      unpaidLeave: parseFloat(formData.unpaidLeave),
       role: formData.role as any
     }
 
@@ -190,16 +196,57 @@ export default function NewStaffPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border-t border-border pt-6 mt-6">
+                <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" /> Official Leave Balances
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="annualLeave">Yearly Entitlement</Label>
+                        <Input 
+                            id="annualLeave"
+                            type="number"
+                            value={formData.annualLeaveLimit}
+                            onChange={(e) => setFormData({...formData, annualLeaveLimit: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="carriedForward">Carried Forward (A)</Label>
+                        <Input 
+                            id="carriedForward"
+                            type="number"
+                            step="0.5"
+                            value={formData.carriedForward}
+                            onChange={(e) => setFormData({...formData, carriedForward: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="additionalLeave">Additional (Raya/Special)</Label>
+                        <Input 
+                            id="additionalLeave"
+                            type="number"
+                            step="0.5"
+                            value={formData.additionalLeave}
+                            onChange={(e) => setFormData({...formData, additionalLeave: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="space-y-2">
-                <Label htmlFor="annualLeave">Annual Leave Limit (Days)</Label>
+                <Label htmlFor="unpaidLeave">Unpaid Leave Taken</Label>
                 <Input 
-                  id="annualLeave"
+                  id="unpaidLeave"
                   type="number"
-                  value={formData.annualLeaveLimit}
-                  onChange={(e) => setFormData({...formData, annualLeaveLimit: e.target.value})}
+                  step="0.5"
+                  value={formData.unpaidLeave}
+                  onChange={(e) => setFormData({...formData, unpaidLeave: e.target.value})}
                   className="bg-secondary/30 border-border"
-                  required
                 />
               </div>
               <div className="space-y-2">

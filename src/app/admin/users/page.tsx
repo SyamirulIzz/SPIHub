@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2, Edit3, DollarSign } from "lucide-react"
+import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2, Edit3, DollarSign, CalendarRange } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
@@ -53,7 +53,7 @@ export default function UserManagementPage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-foreground">Personnel Directory</h1>
-          <p className="text-muted-foreground mt-1">Manage company staff records, roles, and benefits.</p>
+          <p className="text-muted-foreground mt-1">Manage company staff records, roles, and leave balances.</p>
         </div>
         <Button 
           asChild
@@ -71,19 +71,19 @@ export default function UserManagementPage() {
           <CardHeader className="bg-secondary/20 border-b border-border py-4">
              <CardTitle className="text-lg font-headline flex items-center gap-2">
                <ShieldCheck className="text-accent w-5 h-5" />
-               Role-Based Access Control (RBAC)
+               Staff Master List & RBAC
              </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader className="bg-secondary/10">
                 <TableRow>
-                  <TableHead className="w-[300px]">Employee</TableHead>
-                  <TableHead>Department</TableHead>
+                  <TableHead className="w-[280px]">Employee</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Basic Salary</TableHead>
-                  <TableHead>Leave Limit</TableHead>
-                  <TableHead>Claim Limit</TableHead>
+                  <TableHead>Salary (RM)</TableHead>
+                  <TableHead className="text-center">CF Leave (A)</TableHead>
+                  <TableHead className="text-center">Addl Leave</TableHead>
+                  <TableHead className="text-center">Annual Limit</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
@@ -98,16 +98,11 @@ export default function UserManagementPage() {
                              {user.name.charAt(0)}
                            </div>
                            <div className="flex flex-col">
-                             <span className="font-bold text-foreground">{user.name}</span>
+                             <span className="font-bold text-foreground text-xs">{user.name}</span>
                              <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                               <Mail className="w-2.5 h-2.5" /> {user.email}
+                               <Building2 className="w-2.5 h-2.5" /> {dept?.name}
                              </span>
                            </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                          <Building2 className="w-3.5 h-3.5" /> {dept?.name}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -121,12 +116,11 @@ export default function UserManagementPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm font-bold text-emerald-500">
-                        RM {user.salary?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                        {user.salary?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                       </TableCell>
-                      <TableCell className="text-sm font-semibold">{user.annualLeaveLimit} Days</TableCell>
-                      <TableCell className="text-sm font-semibold text-accent">
-                        RM {user.medicalClaimLimit.toLocaleString()}
-                      </TableCell>
+                      <TableCell className="text-center font-bold text-accent">{user.carriedForward || 0}</TableCell>
+                      <TableCell className="text-center text-xs">{user.additionalLeave || 0}</TableCell>
+                      <TableCell className="text-center text-xs font-semibold">{user.annualLeaveLimit}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -137,7 +131,7 @@ export default function UserManagementPage() {
                           <DropdownMenuContent align="end" className="bg-card border-border">
                             <DropdownMenuItem asChild>
                               <Link href={`/admin/users/${user.id}/edit`} className="text-xs font-medium focus:text-accent flex items-center gap-2">
-                                <Edit3 className="w-3.5 h-3.5" /> Edit Profile
+                                <Edit3 className="w-3.5 h-3.5" /> Edit Profile & Leave
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAction("Deaktivasi Akaun", user.name)} className="text-xs font-medium text-red-500 focus:bg-red-500/10">Deactivate Account</DropdownMenuItem>

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, UserCog, Shield, Building, Briefcase, Save, DollarSign } from "lucide-react"
+import { ArrowLeft, UserCog, Shield, Building, Briefcase, Save, DollarSign, Calendar } from "lucide-react"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,7 +30,10 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     role: "STAFF",
     annualLeaveLimit: "14",
     medicalClaimLimit: "1000",
-    salary: "0"
+    salary: "0",
+    carriedForward: "0",
+    additionalLeave: "0",
+    unpaidLeave: "0"
   })
 
   useEffect(() => {
@@ -47,7 +50,10 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         role: userToEdit.role,
         annualLeaveLimit: userToEdit.annualLeaveLimit.toString(),
         medicalClaimLimit: userToEdit.medicalClaimLimit.toString(),
-        salary: (userToEdit.salary || 0).toString()
+        salary: (userToEdit.salary || 0).toString(),
+        carriedForward: (userToEdit.carriedForward || 0).toString(),
+        additionalLeave: (userToEdit.additionalLeave || 0).toString(),
+        unpaidLeave: (userToEdit.unpaidLeave || 0).toString()
       })
     }
   }, [id])
@@ -73,6 +79,9 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
           annualLeaveLimit: parseInt(formData.annualLeaveLimit),
           medicalClaimLimit: parseInt(formData.medicalClaimLimit),
           salary: parseFloat(formData.salary),
+          carriedForward: parseFloat(formData.carriedForward),
+          additionalLeave: parseFloat(formData.additionalLeave),
+          unpaidLeave: parseFloat(formData.unpaidLeave),
           role: formData.role as any
         }
       }
@@ -100,7 +109,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         </Button>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Edit Staff Profile</h1>
-          <p className="text-sm text-muted-foreground mt-1">Kemaskini rekod dan akses sistem kakitangan.</p>
+          <p className="text-sm text-muted-foreground mt-1">Kemaskini rekod, akses, dan baki cuti kakitangan.</p>
         </div>
       </header>
 
@@ -201,16 +210,59 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border-t border-border pt-6 mt-6">
+                <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" /> Official Leave Balances
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="annualLeave">Yearly Entitlement</Label>
+                        <Input 
+                            id="annualLeave"
+                            type="number"
+                            value={formData.annualLeaveLimit}
+                            onChange={(e) => setFormData({...formData, annualLeaveLimit: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="carriedForward">Carried Forward (A)</Label>
+                        <Input 
+                            id="carriedForward"
+                            type="number"
+                            step="0.5"
+                            value={formData.carriedForward}
+                            onChange={(e) => setFormData({...formData, carriedForward: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                            placeholder="Balance from last year"
+                        />
+                        <p className="text-[10px] text-muted-foreground italic">Baki cuti tahun lepas (2025).</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="additionalLeave">Additional (Raya/Special)</Label>
+                        <Input 
+                            id="additionalLeave"
+                            type="number"
+                            step="0.5"
+                            value={formData.additionalLeave}
+                            onChange={(e) => setFormData({...formData, additionalLeave: e.target.value})}
+                            className="bg-secondary/30 border-border"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="space-y-2">
-                <Label htmlFor="annualLeave">Annual Leave Limit (Days)</Label>
+                <Label htmlFor="unpaidLeave">Unpaid Leave Taken</Label>
                 <Input 
-                  id="annualLeave"
+                  id="unpaidLeave"
                   type="number"
-                  value={formData.annualLeaveLimit}
-                  onChange={(e) => setFormData({...formData, annualLeaveLimit: e.target.value})}
+                  step="0.5"
+                  value={formData.unpaidLeave}
+                  onChange={(e) => setFormData({...formData, unpaidLeave: e.target.value})}
                   className="bg-secondary/30 border-border"
-                  required
                 />
               </div>
               <div className="space-y-2">
