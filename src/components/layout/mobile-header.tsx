@@ -5,13 +5,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
 
-export function MobileHeader() {
+export function MobileHeader({ className }: { className?: string }) {
   const { currentUser, isLoaded } = useCurrentUser()
 
   if (!isLoaded) return null
 
   return (
-    <header className="md:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4">
+    <header className={cn("md:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 print:hidden", className)}>
       <div className="flex items-center gap-2">
         <SidebarTrigger className="text-muted-foreground" />
         <div className="flex items-center gap-1.5 ml-2">

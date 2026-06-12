@@ -99,7 +99,7 @@ const items = [
   },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
   const { state } = useSidebar()
   const { currentUser, switchUser, logout, isLoaded } = useCurrentUser()
@@ -107,7 +107,7 @@ export function AppSidebar() {
   if (!isLoaded || !currentUser) return null
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-2xl">
+    <Sidebar collapsible="icon" className={cn("border-r border-sidebar-border shadow-2xl print:hidden", className)}>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="bg-white h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg border border-border overflow-hidden">

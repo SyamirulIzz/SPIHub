@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -45,11 +46,11 @@ const navItems = [
   },
 ]
 
-export function BottomNav() {
+export function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname()
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-border bg-background/95 backdrop-blur-md flex items-center justify-around px-2 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.3)]">
+    <nav className={cn("md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-border bg-background/95 backdrop-blur-md flex items-center justify-around px-2 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.3)] print:hidden", className)}>
       {navItems.map((item) => {
         const isActive = pathname === item.url
         return (

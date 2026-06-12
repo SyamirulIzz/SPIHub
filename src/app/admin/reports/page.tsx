@@ -169,7 +169,7 @@ export default function AdminReportsPage() {
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700 print:p-0">
+    <div className="p-8 space-y-8 animate-in fade-in duration-700 print:p-0 print:space-y-0">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
@@ -209,8 +209,8 @@ export default function AdminReportsPage() {
         </div>
       </header>
 
-      {/* Top High-Level Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4">
+      {/* Top High-Level Stats - Hidden on Print */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 print:hidden">
         <StatSummaryCard 
           title="Monthly Payroll" 
           value={`RM ${reportsData?.totalMonthlyPayroll.toLocaleString()}`} 
@@ -224,7 +224,7 @@ export default function AdminReportsPage() {
         <StatSummaryCard title="Pending Approvals" value={(syncedLeaves.filter(l => l.status === 'PENDING').length + syncedClaims.filter(c => c.status === 'PENDING').length).toString()} icon={Clock} trend="Needs Action" color="text-amber-500" />
       </div>
 
-      <Tabs defaultValue="leave" className="space-y-6">
+      <Tabs defaultValue="leave" className="space-y-6 print:space-y-0">
         <TabsList className="bg-secondary/30 border border-border p-1 h-12 print:hidden">
           <TabsTrigger value="leave" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Palmtree className="w-4 h-4" /> LEAVE RECORD
@@ -238,7 +238,7 @@ export default function AdminReportsPage() {
         </TabsList>
 
         {/* Tab 1: Official Leave Record */}
-        <TabsContent value="leave">
+        <TabsContent value="leave" className="print:m-0">
           <Card className="bg-card border-border shadow-2xl overflow-hidden print:shadow-none print:border-none">
             <CardHeader className="bg-secondary/10 border-b border-border text-center py-6">
               <h2 className="text-lg font-bold font-headline uppercase tracking-widest">SYSTEM PROTOCOL INFORMATION SDN BHD</h2>
@@ -289,10 +289,10 @@ export default function AdminReportsPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab 2: Financial Analytics */}
-        <TabsContent value="finance">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:grid-cols-3">
-            <Card className="bg-card border-border shadow-lg print:shadow-none">
+        {/* Tab 2: Financial Analytics - Hidden on Print */}
+        <TabsContent value="finance" className="print:hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-card border-border shadow-lg">
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Wallet className="w-4 h-4 text-primary" /> Payroll Distribution
@@ -321,7 +321,7 @@ export default function AdminReportsPage() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden print:shadow-none print:md:col-span-2">
+            <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden">
                <CardHeader className="bg-secondary/10 border-b border-border">
                   <CardTitle className="text-sm font-bold">Payroll & Benefit Master List</CardTitle>
                </CardHeader>
@@ -356,10 +356,10 @@ export default function AdminReportsPage() {
           </div>
         </TabsContent>
 
-        {/* Tab 3: Operational Health */}
-        <TabsContent value="ops">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2">
-              <Card className="bg-card border-border print:shadow-none">
+        {/* Tab 3: Operational Health - Hidden on Print */}
+        <TabsContent value="ops" className="print:hidden">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="text-lg font-headline flex items-center gap-2">
                     <FileText className="w-5 h-5 text-indigo-500" /> Site Deployment Overview
@@ -385,7 +385,7 @@ export default function AdminReportsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border overflow-hidden print:shadow-none">
+              <Card className="bg-card border-border overflow-hidden">
                 <CardHeader className="bg-secondary/10 border-b border-border">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Field Staff
@@ -418,7 +418,7 @@ export default function AdminReportsPage() {
 function StatSummaryCard({ title, value, icon: Icon, trend, color, link }: any) {
   const content = (
     <Card className={cn(
-      "bg-card border-border hover:border-primary/50 transition-all shadow-lg print:shadow-none print:border",
+      "bg-card border-border hover:border-primary/50 transition-all shadow-lg print:hidden",
       link && "cursor-pointer"
     )}>
       <CardContent className="pt-6">
@@ -426,11 +426,11 @@ function StatSummaryCard({ title, value, icon: Icon, trend, color, link }: any) 
           <div className="space-y-1">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
             <div className={cn("text-2xl font-bold font-headline", color)}>{value}</div>
-            <p className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold print:hidden">
+            <p className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold">
                {trend}
             </p>
           </div>
-          <div className={cn("p-2.5 rounded-xl bg-secondary/50 border border-border shadow-inner print:hidden", color)}>
+          <div className={cn("p-2.5 rounded-xl bg-secondary/50 border border-border shadow-inner", color)}>
             <Icon className="w-5 h-5" />
           </div>
         </div>
