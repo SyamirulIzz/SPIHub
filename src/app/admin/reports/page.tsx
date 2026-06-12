@@ -28,10 +28,12 @@ import {
   Download,
   FileSpreadsheet,
   FileDown,
-  TrendingDown
+  TrendingDown,
+  ArrowUpRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 export default function AdminReportsPage() {
   const router = useRouter()
@@ -129,44 +131,6 @@ export default function AdminReportsPage() {
     }, 1000);
   };
 
-  const handleExportExcel = () => {
-    if (!reportsData) return;
-
-    toast({
-      title: "Mengeksport ke Excel",
-      description: "Data sedang ditukar ke format CSV/Excel.",
-    });
-
-    // Generate CSV content
-    const headers = ["No", "Name", "CF 2025", "Additional", "Prorated June 2026", "Total Entitlement", "Taken", "Current Balance", "Unpaid Leave"];
-    const rows = reportsData.leaveRecords.map((r, i) => [
-      i + 1,
-      r.name,
-      r.cf,
-      r.additional,
-      r.proratedEntitlement,
-      r.totalEntitlement,
-      r.taken,
-      r.balance,
-      r.unpaid
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(e => e.join(","))
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `SPI_Leave_Report_June_2026.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
@@ -182,6 +146,12 @@ export default function AdminReportsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Button asChild variant="outline" className="border-border gap-2">
+            <Link href="/admin/payroll">
+              <Wallet className="w-4 h-4" />
+              Manage Payroll
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-lg">
@@ -194,23 +164,22 @@ export default function AdminReportsPage() {
                 <FileDown className="w-4 h-4 text-red-500" />
                 Export as PDF
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-                Export as Excel
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Badge className="bg-primary/20 text-primary border-primary/30 h-7 px-3">ADMIN ACCESS</Badge>
-          <div className="text-right">
-             <p className="text-[10px] text-muted-foreground font-bold uppercase">Report Date</p>
-             <p className="text-xs font-bold">09 June 2026</p>
-          </div>
         </div>
       </header>
 
       {/* Top High-Level Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4">
-        <StatSummaryCard title="Monthly Payroll" value={`RM ${reportsData?.totalMonthlyPayroll.toLocaleString()}`} icon={Wallet} trend="Basic Salary Outflow" color="text-primary" />
+        <StatSummaryCard 
+          title="Monthly Payroll" 
+          value={`RM ${reportsData?.totalMonthlyPayroll.toLocaleString()}`} 
+          icon={Wallet} 
+          trend="Total Gross Salary" 
+          color="text-primary" 
+          link="/admin/payroll"
+        />
         <StatSummaryCard title="Claims Approved" value={`RM ${reportsData?.totalClaimsApproved.toLocaleString()}`} icon={DollarSign} trend="+4.5% vs Last Month" color="text-emerald-500" />
         <StatSummaryCard title="Staff Count" value={syncedUsers.length.toString()} icon={Users} trend="Active Payroll" color="text-indigo-500" />
         <StatSummaryCard title="Pending Approvals" value={(syncedLeaves.filter(l => l.status === 'PENDING').length + syncedClaims.filter(c => c.status === 'PENDING').length).toString()} icon={Clock} trend="Needs Action" color="text-amber-500" />
@@ -297,6 +266,11 @@ export default function AdminReportsPage() {
                     <span className="text-primary font-headline text-lg">RM {reportsData?.totalMonthlyPayroll.toLocaleString()}</span>
                   </div>
                   <Progress value={100} className="h-2" />
+                  <Button asChild variant="link" className="p-0 h-auto text-[10px] text-accent">
+                    <Link href="/admin/payroll" className="flex items-center gap-1">
+                      View Full Payroll Module <ArrowUpRight className="w-3 h-3" />
+                    </Link>
+                  </Button>
                 </div>
                 
                 <div className="pt-4 space-y-4 border-t border-border">
@@ -402,9 +376,12 @@ export default function AdminReportsPage() {
   )
 }
 
-function StatSummaryCard({ title, value, icon: Icon, trend, color }: any) {
-  return (
-    <Card className="bg-card border-border hover:border-primary/50 transition-all shadow-lg print:shadow-none print:border">
+function StatSummaryCard({ title, value, icon: Icon, trend, color, link }: any) {
+  const content = (
+    <Card className={cn(
+      "bg-card border-border hover:border-primary/50 transition-all shadow-lg print:shadow-none print:border",
+      link && "cursor-pointer"
+    )}>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -421,6 +398,12 @@ function StatSummaryCard({ title, value, icon: Icon, trend, color }: any) {
       </CardContent>
     </Card>
   )
+
+  if (link) {
+    return <Link href={link}>{content}</Link>
+  }
+
+  return content;
 }
 
 function CategoryExpenseRow({ label, amount, color, total }: any) {

@@ -13,7 +13,8 @@ import {
   ChevronRight,
   LogOut,
   Briefcase,
-  BarChart3
+  BarChart3,
+  Banknote
 } from "lucide-react"
 import { 
   Sidebar, 
@@ -49,7 +50,13 @@ const items = [
     roles: ['ADMIN']
   },
   {
-    title: "Centralized Calendar",
+    title: "Payroll Management",
+    url: "/admin/payroll",
+    icon: Banknote,
+    roles: ['ADMIN']
+  },
+  {
+    title: "Shared Calendar",
     url: "/calendar",
     icon: CalendarDays,
     roles: ['ADMIN', 'HOD', 'STAFF']
