@@ -6,13 +6,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LEAVE_REQUESTS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye, ShieldAlert } from "lucide-react"
+import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye, ShieldAlert, HelpCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import Image from "next/image"
 
 export default function LeavePage() {
@@ -67,7 +73,8 @@ export default function LeavePage() {
       balance,
       cf,
       additional,
-      proratedEntitlement
+      proratedEntitlement,
+      annualLimit: currentUser.annualLeaveLimit
     };
   }, [currentUser, requests, mounted]);
 
@@ -106,46 +113,77 @@ export default function LeavePage() {
         </Button>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-indigo-600/10 border-indigo-600/20 shadow-lg">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total Entitlement</p>
-                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.totalEntitlement} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Incl. CF ({leaveStats?.cf}) + Raya ({leaveStats?.additional}) + Prorated</p>
+      <TooltipProvider delayDuration={200}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="bg-indigo-600/10 border-indigo-600/20 shadow-lg cursor-help group transition-all hover:bg-indigo-600/20">
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total Entitlement</p>
+                        <HelpCircle className="w-3 h-3 text-indigo-400 opacity-50 group-hover:opacity-100" />
+                      </div>
+                      <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.totalEntitlement} Days</div>
+                      <p className="text-[10px] text-muted-foreground mt-1 italic">Hover for breakdown</p>
+                    </div>
+                    <Palmtree className="text-indigo-500 w-8 h-8 opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
+                  </div>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent className="bg-card border-border p-4 shadow-2xl min-w-[200px]">
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 border-b border-border pb-1">Detailed Breakdown</p>
+                <div className="grid grid-cols-2 gap-y-2 text-xs">
+                  <span className="text-muted-foreground">CF Leave (A):</span>
+                  <span className="text-right font-bold">{leaveStats?.cf} Days</span>
+                  
+                  <span className="text-muted-foreground">Addl Leave:</span>
+                  <span className="text-right font-bold">{leaveStats?.additional} Days</span>
+                  
+                  <span className="text-muted-foreground">Annual Limit:</span>
+                  <span className="text-right font-bold">{leaveStats?.annualLimit} Days</span>
+                  
+                  <span className="text-muted-foreground">Prorated (Jun):</span>
+                  <span className="text-right font-bold">{leaveStats?.proratedEntitlement} Days</span>
+                </div>
+                <div className="pt-2 border-t border-border flex justify-between items-center text-xs font-bold text-indigo-400">
+                  <span>Total (A + Prorated + Addl)</span>
+                  <span>{leaveStats?.totalEntitlement} Days</span>
+                </div>
               </div>
-              <Palmtree className="text-indigo-500 w-8 h-8 opacity-40" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-emerald-600/10 border-emerald-600/20 shadow-lg">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Taken (Approved)</p>
-                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.taken} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Utilized Balance as at 06/2026</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Card className="bg-emerald-600/10 border-emerald-600/20 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Taken (Approved)</p>
+                  <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.taken} Days</div>
+                  <p className="text-[10px] text-muted-foreground mt-1 italic">Utilized Balance as at 06/2026</p>
+                </div>
+                <CheckCircle2 className="text-emerald-500 w-8 h-8 opacity-40" />
               </div>
-              <CheckCircle2 className="text-emerald-500 w-8 h-8 opacity-40" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-amber-600/10 border-amber-600/20 shadow-lg">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining Balance</p>
-                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.balance} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Available as at June 2026</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-amber-600/10 border-amber-600/20 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining Balance</p>
+                  <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.balance} Days</div>
+                  <p className="text-[10px] text-muted-foreground mt-1 italic">Available as at June 2026</p>
+                </div>
+                <Clock className="text-amber-500 w-8 h-8 opacity-40" />
               </div>
-              <Clock className="text-amber-500 w-8 h-8 opacity-40" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
 
       <Card className="bg-card border-border overflow-hidden">
         <CardHeader className="bg-secondary/10 border-b border-border py-4 flex flex-row items-center justify-between">
