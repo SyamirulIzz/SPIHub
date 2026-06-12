@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -35,7 +34,7 @@ export default function ProjectsPage() {
 
   if (!isLoaded || !mounted) return null
 
-  const isAdminOrHod = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+  const isAdmin = currentUser.role === 'ADMIN'
 
   const filteredProjects = projectList.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,7 +48,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Project Directory</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage and track all company project portfolios.</p>
         </div>
-        {isAdminOrHod && (
+        {isAdmin && (
           <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold gap-2 shadow-xl shadow-primary/20">
             <Link href="/projects/new">
               <Plus className="w-4 h-4" />
@@ -131,7 +130,7 @@ export default function ProjectsPage() {
                                 <ExternalLink className="w-3.5 h-3.5" /> View Details
                               </Link>
                             </DropdownMenuItem>
-                            {isAdminOrHod && (
+                            {isAdmin && (
                               <DropdownMenuItem asChild>
                                 <Link href={`/projects/${project.id}/edit`} className="text-xs font-medium gap-2 cursor-pointer">
                                   <Edit2 className="w-3.5 h-3.5" /> Edit Project

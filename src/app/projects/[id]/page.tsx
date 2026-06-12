@@ -1,4 +1,3 @@
-
 "use client"
 
 import { use, useState, useEffect } from "react"
@@ -52,7 +51,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     )
   }
 
-  const isAdminOrHod = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+  const isAdmin = currentUser.role === 'ADMIN'
   
   // Simulated stats for this project
   const projectTickets = TICKETS.filter(t => t.projectId === project.id)
@@ -80,7 +79,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
             <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">{project.name}</h1>
           </div>
-          {isAdminOrHod && (
+          {isAdmin && (
             <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold gap-2">
               <Link href={`/projects/${project.id}/edit`}>
                 <Edit className="w-4 h-4" />

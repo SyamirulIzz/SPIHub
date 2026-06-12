@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -32,12 +31,12 @@ export default function NewProjectPage() {
   }, [])
 
   useEffect(() => {
-    if (isLoaded && (currentUser.role !== 'ADMIN' && currentUser.role !== 'HOD')) {
+    if (isLoaded && currentUser.role !== 'ADMIN') {
       router.push("/projects")
     }
   }, [isLoaded, currentUser.role, router])
 
-  if (!isLoaded || !mounted || (currentUser.role !== 'ADMIN' && currentUser.role !== 'HOD')) return null
+  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
