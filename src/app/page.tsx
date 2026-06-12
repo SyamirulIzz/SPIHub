@@ -71,6 +71,8 @@ export default function Dashboard() {
   const activeProjectsCount = PROJECTS.filter(p => p.status === 'ACTIVE').length
   const staffOnSiteCount = syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').length
 
+  const isAdmin = currentUser.role === 'ADMIN'
+
   return (
     <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -81,27 +83,29 @@ export default function Dashboard() {
           </p>
         </div>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-xl border border-border max-w-fit cursor-help transition-all hover:bg-secondary/50">
-                <TrendingUp className="text-accent w-4 h-4" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1">
-                    Company KPI <Info className="w-2.5 h-2.5 opacity-50" />
-                  </span>
-                  <span className="text-xs font-bold text-foreground">{kpiEfficiency}% Efficiency</span>
+        {isAdmin && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-xl border border-border max-w-fit cursor-help transition-all hover:bg-secondary/50">
+                  <TrendingUp className="text-accent w-4 h-4" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1">
+                      Company KPI <Info className="w-2.5 h-2.5 opacity-50" />
+                    </span>
+                    <span className="text-xs font-bold text-foreground">{kpiEfficiency}% Efficiency</span>
+                  </div>
                 </div>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="bg-card border-border p-3 max-w-xs">
-              <p className="text-[10px] font-bold uppercase text-accent mb-1">Nota Pengiraan:</p>
-              <p className="text-[10px] leading-relaxed text-muted-foreground">
-                Kecekapan dikira berdasarkan nisbah penyelesaian tiket bantuan dan status penyiapan log pergerakan site kakitangan secara real-time.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+              </TooltipTrigger>
+              <TooltipContent className="bg-card border-border p-3 max-w-xs">
+                <p className="text-[10px] font-bold uppercase text-accent mb-1">Nota Pengiraan:</p>
+                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  Kecekapan dikira berdasarkan nisbah penyelesaian tiket bantuan dan status penyiapan log pergerakan site kakitangan secara real-time.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
