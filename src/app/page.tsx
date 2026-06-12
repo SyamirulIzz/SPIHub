@@ -79,26 +79,38 @@ export default function Dashboard() {
 
   // Dynamic Quick Stats calculation based on role
   const quickStats = useMemo(() => {
-    if (!mounted || !isLoaded) return { leave: 0, claims: 0, leaveLabel: "", claimsLabel: "", claimsProgress: 0 };
+    if (!mounted || !isLoaded || !currentUser) return { leave: 0, claims: 0, leaveLabel: "", claimsLabel: "", claimsProgress: 0 };
 
     const isAdminOrHod = currentUser.role === 'ADMIN' || currentUser.role === 'HOD';
 
-    // 1. Leave Utilization Logic
+    // 1. Leave Utilization Logic - SYNCED with official report formula
+    const currentMonth = 6; // Simulation month
     let leavePercent = 0;
-    let leaveLabel = "Leave Utilization";
+    let leaveLabel = "Leave Balance Status";
+
     if (isAdminOrHod) {
+      // Logic for all staff as seen in CEO reports
       const totalTaken = syncedLeaves
         .filter(l => l.status === 'APPROVED')
         .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
-      const totalLimit = USERS.reduce((sum, u) => sum + u.annualLeaveLimit, 0);
-      leavePercent = Math.min(100, Math.round((totalTaken / totalLimit) * 100));
+      
+      const totalPossibleEntitlement = USERS.reduce((sum, u) => {
+        const prorated = Math.round((u.annualLeaveLimit / 12) * currentMonth);
+        return sum + (u.carriedForward || 0) + prorated + (u.additionalLeave || 0);
+      }, 0);
+
+      leavePercent = totalPossibleEntitlement > 0 ? Math.min(100, Math.round((totalTaken / totalPossibleEntitlement) * 100)) : 0;
       leaveLabel = "Team Leave Utilization";
     } else {
+      // Individual logic for current staff
+      const prorated = Math.round((currentUser.annualLeaveLimit / 12) * currentMonth);
+      const totalPossible = (currentUser.carriedForward || 0) + prorated + (currentUser.additionalLeave || 0);
       const myTaken = syncedLeaves
         .filter(l => l.userId === currentUser.id && l.status === 'APPROVED')
         .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
-      leavePercent = Math.min(100, Math.round((myTaken / currentUser.annualLeaveLimit) * 100));
-      leaveLabel = "My Leave Utilization";
+      
+      leavePercent = totalPossible > 0 ? Math.min(100, Math.round((myTaken / totalPossible) * 100)) : 0;
+      leaveLabel = "My Leave Usage (as of June)";
     }
 
     // 2. Claims Logic
@@ -129,7 +141,7 @@ export default function Dashboard() {
     };
   }, [mounted, isLoaded, currentUser, syncedLeaves, syncedClaims]);
   
-  if (!isLoaded || !mounted) return null
+  if (!isLoaded || !mounted || !currentUser) return null
 
   const pendingClaimsCount = syncedClaims.filter(c => c.status === 'PENDING').length
   const openTicketsCount = syncedTickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length
