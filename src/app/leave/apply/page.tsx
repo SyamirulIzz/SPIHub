@@ -23,8 +23,8 @@ export default function ApplyLeavePage() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [startDate, setStartDate] = useState<Date>()
-  const [endDate, setEndDate] = useState<Date>()
+  const [startDate, setStartDate] = useState<Date | undefined>()
+  const [endDate, setEndDate] = useState<Date | undefined>()
   const [leaveType, setLeaveType] = useState<string>("")
   const [reason, setReason] = useState("")
 
@@ -130,6 +130,7 @@ export default function ApplyLeavePage() {
                 <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal bg-secondary/30 border-border",
@@ -145,10 +146,8 @@ export default function ApplyLeavePage() {
                       mode="single"
                       selected={startDate}
                       onSelect={(date) => {
-                        if (date) {
-                          setStartDate(date)
-                          setIsStartOpen(false)
-                        }
+                        setStartDate(date)
+                        setIsStartOpen(false)
                       }}
                       initialFocus
                     />
@@ -162,6 +161,7 @@ export default function ApplyLeavePage() {
                 <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal bg-secondary/30 border-border",
@@ -177,10 +177,8 @@ export default function ApplyLeavePage() {
                       mode="single"
                       selected={endDate}
                       onSelect={(date) => {
-                        if (date) {
-                          setEndDate(date)
-                          setIsEndOpen(false)
-                        }
+                        setEndDate(date)
+                        setIsEndOpen(false)
                       }}
                       initialFocus
                     />

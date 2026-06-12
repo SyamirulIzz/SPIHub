@@ -25,7 +25,7 @@ export default function ClaimsPage() {
   const [mounted, setMounted] = useState(false)
   const [claimsList, setClaimsList] = useState(CLAIMS)
   const [isAdding, setIsAdding] = useState(false)
-  const [claimDate, setClaimDate] = useState<Date>()
+  const [claimDate, setClaimDate] = useState<Date | undefined>()
   const [category, setCategory] = useState("")
   const [amount, setAmount] = useState("")
   const [desc, setDesc] = useState("")
@@ -69,7 +69,14 @@ export default function ClaimsPage() {
 
   const handleAddClaim = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!claimDate || !category || !amount) return
+    if (!claimDate || !category || !amount) {
+      toast({
+        title: "Ralat",
+        description: "Sila lengkapkan semua maklumat permohonan.",
+        variant: "destructive"
+      })
+      return
+    }
 
     const newClaim = {
       id: `claim-${Date.now()}`,
@@ -128,9 +135,13 @@ export default function ClaimsPage() {
                   <Label>Date</Label>
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("justify-start text-left font-normal bg-secondary/30 border-border text-xs", !claimDate && "text-muted-foreground")}>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className={cn("justify-start text-left font-normal bg-secondary/30 border-border text-xs", !claimDate && "text-muted-foreground")}
+                      >
                         <CalendarIcon className="mr-2 h-3 w-3" />
-                        {claimDate ? format(claimDate, "dd/MM/yy") : <span>Date</span>}
+                        {claimDate ? format(claimDate, "dd/MM/yy") : <span>Pick Date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
@@ -138,10 +149,8 @@ export default function ClaimsPage() {
                         mode="single" 
                         selected={claimDate} 
                         onSelect={(date) => {
-                          if (date) {
-                            setClaimDate(date)
-                            setIsCalendarOpen(false)
-                          }
+                          setClaimDate(date)
+                          setIsCalendarOpen(false)
                         }} 
                         initialFocus 
                       />
