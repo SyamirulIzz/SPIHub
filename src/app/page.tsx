@@ -27,6 +27,7 @@ import {
 
 export default function Dashboard() {
   const { currentUser, isLoaded } = useCurrentUser()
+  const [syncedUsers, setSyncedUsers] = useState(USERS)
   const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
   const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
@@ -36,12 +37,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     setMounted(true)
+    const savedUsers = localStorage.getItem('simulated_users')
     const savedClaims = localStorage.getItem('simulated_claims')
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
     const savedMovements = localStorage.getItem('simulated_movements')
     const savedTickets = localStorage.getItem('simulated_tickets')
     const savedProjects = localStorage.getItem('simulated_projects')
     
+    if (savedUsers) setSyncedUsers(JSON.parse(savedUsers))
     if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
     if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
     if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
@@ -62,19 +65,16 @@ export default function Dashboard() {
   const kpiEfficiency = useMemo(() => {
     if (!mounted) return 0;
     
-    // 1. Ticket Efficiency (Resolved/Closed vs Total)
     const totalTickets = syncedTickets.length;
     const resolvedTickets = syncedTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
     const ticketRate = totalTickets > 0 ? (resolvedTickets / totalTickets) : 1;
 
-    // 2. Movement Efficiency (Completed vs Total)
     const totalMovements = syncedMovements.length;
     const completedMovements = syncedMovements.filter(m => m.status === 'COMPLETED').length;
     const movementRate = totalMovements > 0 ? (completedMovements / totalMovements) : 1;
 
-    // Purata Kecekapan (Diberikan pemberat atau purata mudah)
     const average = ((ticketRate + movementRate) / 2) * 100;
-    return Math.round(average * 10) / 10; // 1 decimal place
+    return Math.round(average * 10) / 10;
   }, [syncedTickets, syncedMovements, mounted]);
 
   // Dynamic Quick Stats calculation based on role
@@ -82,19 +82,16 @@ export default function Dashboard() {
     if (!mounted || !isLoaded || !currentUser) return { leave: 0, claims: 0, leaveLabel: "", claimsLabel: "", claimsProgress: 0 };
 
     const isAdminOrHod = currentUser.role === 'ADMIN' || currentUser.role === 'HOD';
-
-    // 1. Leave Utilization Logic - SYNCED with official report formula
-    const currentMonth = 6; // Simulation month
+    const currentMonth = 6; 
     let leavePercent = 0;
     let leaveLabel = "Leave Balance Status";
 
     if (isAdminOrHod) {
-      // Logic for all staff as seen in CEO reports
       const totalTaken = syncedLeaves
         .filter(l => l.status === 'APPROVED')
         .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
       
-      const totalPossibleEntitlement = USERS.reduce((sum, u) => {
+      const totalPossibleEntitlement = syncedUsers.reduce((sum, u) => {
         const prorated = Math.round((u.annualLeaveLimit / 12) * currentMonth);
         return sum + (u.carriedForward || 0) + prorated + (u.additionalLeave || 0);
       }, 0);
@@ -102,18 +99,17 @@ export default function Dashboard() {
       leavePercent = totalPossibleEntitlement > 0 ? Math.min(100, Math.round((totalTaken / totalPossibleEntitlement) * 100)) : 0;
       leaveLabel = "Team Leave Utilization";
     } else {
-      // Individual logic for current staff
-      const prorated = Math.round((currentUser.annualLeaveLimit / 12) * currentMonth);
-      const totalPossible = (currentUser.carriedForward || 0) + prorated + (currentUser.additionalLeave || 0);
+      const liveUser = syncedUsers.find(u => u.id === currentUser.id) || currentUser;
+      const prorated = Math.round((liveUser.annualLeaveLimit / 12) * currentMonth);
+      const totalPossible = (liveUser.carriedForward || 0) + prorated + (liveUser.additionalLeave || 0);
       const myTaken = syncedLeaves
-        .filter(l => l.userId === currentUser.id && l.status === 'APPROVED')
+        .filter(l => l.userId === liveUser.id && l.status === 'APPROVED')
         .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
       
       leavePercent = totalPossible > 0 ? Math.min(100, Math.round((myTaken / totalPossible) * 100)) : 0;
       leaveLabel = "My Leave Usage (as of June)";
     }
 
-    // 2. Claims Logic
     let claimsValue = 0;
     let claimsLabel = "Claims Processed";
     let claimsProgress = 0;
@@ -122,7 +118,6 @@ export default function Dashboard() {
         .filter(c => c.status === 'APPROVED')
         .reduce((sum, c) => sum + c.amount, 0);
       claimsLabel = "Total Approved Claims";
-      // Using an arbitrary 50k target for company-wide visualization
       claimsProgress = Math.min(100, Math.round((claimsValue / 50000) * 100));
     } else {
       claimsValue = syncedClaims
@@ -139,7 +134,7 @@ export default function Dashboard() {
       claimsLabel,
       claimsProgress
     };
-  }, [mounted, isLoaded, currentUser, syncedLeaves, syncedClaims]);
+  }, [mounted, isLoaded, currentUser, syncedLeaves, syncedClaims, syncedUsers]);
   
   if (!isLoaded || !mounted || !currentUser) return null
 
@@ -211,7 +206,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-3">
               {syncedMovements.slice(0, 5).map((mov) => {
-                const user = USERS.find(u => u.id === mov.userId)
+                const user = syncedUsers.find(u => u.id === mov.userId)
                 return (
                   <div key={mov.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-border">
                     <div className="flex items-center gap-3">

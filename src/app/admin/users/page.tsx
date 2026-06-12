@@ -29,6 +29,7 @@ export default function UserManagementPage() {
       setStaffList(JSON.parse(savedUsers))
     } else {
       setStaffList(USERS)
+      localStorage.setItem('simulated_users', JSON.stringify(USERS))
     }
   }, [])
 

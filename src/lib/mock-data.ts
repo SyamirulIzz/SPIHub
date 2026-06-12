@@ -112,7 +112,7 @@ export const MOVEMENTS: StaffMovement[] = [
     endDate: '2024-05-15T17:00:00',
     allDay: false,
     destination: 'AADK HQ, Kajang',
-    purpose: 'System Deployment',
+    purpose: 'System Installation',
     description: 'Deploying version 2.1 to production servers.',
     category: 'SITE_VISIT',
     contactPerson: 'En. Ibrahim',
@@ -121,7 +121,7 @@ export const MOVEMENTS: StaffMovement[] = [
     claimable: true,
     movementType: 'OUT',
     status: 'COMPLETED',
-    approvedBy: 'Ahmad Manager',
+    approvedBy: 'AHMAD FAHMI BIN SULAIMAN',
     evidenceUrl: 'https://picsum.photos/seed/mov1/800/600'
   },
   {
@@ -140,7 +140,8 @@ export const MOVEMENTS: StaffMovement[] = [
     transportation: 'MOTORCYCLE',
     claimable: true,
     movementType: 'OUT',
-    status: 'PENDING'
+    status: 'APPROVED',
+    approvedBy: 'AHMAD FAHMI BIN SULAIMAN'
   },
   {
     id: 'mov-3',
@@ -159,7 +160,7 @@ export const MOVEMENTS: StaffMovement[] = [
     claimable: true,
     movementType: 'OUT',
     status: 'APPROVED',
-    approvedBy: 'Siti HOD',
+    approvedBy: 'GULSHIRA BT ABD SAMAT KHAN',
     evidenceUrl: 'https://picsum.photos/seed/mov3/800/600'
   }
 ];
