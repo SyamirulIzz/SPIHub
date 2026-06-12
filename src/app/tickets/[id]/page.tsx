@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,16 +20,19 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  Eye
+  Eye,
+  Edit
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
+import { useToast } from "@/hooks/use-toast"
 
 export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
   const { isLoaded } = useCurrentUser()
+  const { toast } = useToast()
   const [ticketList, setTicketList] = useState(TICKETS)
   const [mounted, setMounted] = useState(false)
 
@@ -56,6 +60,18 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
   const project = PROJECTS.find(p => p.id === ticket.projectId)
   const creator = USERS.find(u => u.id === ticket.createdBy)
   const assignee = USERS.find(u => u.id === ticket.assignedTo)
+
+  const handleCloseTicket = () => {
+    const updatedTickets = ticketList.map(t => 
+      t.id === ticket.id ? { ...t, status: 'Closed' as any } : t
+    )
+    setTicketList(updatedTickets)
+    localStorage.setItem('simulated_tickets', JSON.stringify(updatedTickets))
+    toast({
+      title: "Tiket Ditutup",
+      description: `Tiket ${ticket.id} telah berjaya ditutup.`
+    })
+  }
 
   const mockTimeline = [
     { date: "2024-05-10 11:20", user: creator?.name || 'Unknown', action: "Created ticket", detail: "Initial report submitted." },
@@ -88,8 +104,15 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
             <h1 className="text-3xl font-bold font-headline text-foreground">{ticket.subject}</h1>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="border-border">Edit Ticket</Button>
-            <Button className="bg-primary text-white font-bold">Close Ticket</Button>
+            <Button variant="outline" className="border-border gap-2" asChild>
+              <Link href={`/tickets/${ticket.id}/edit`}>
+                <Edit className="w-4 h-4" />
+                Edit Ticket
+              </Link>
+            </Button>
+            {ticket.status !== 'Closed' && (
+              <Button onClick={handleCloseTicket} className="bg-primary text-white font-bold">Close Ticket</Button>
+            )}
           </div>
         </div>
       </header>
@@ -200,9 +223,9 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase">Status</label>
                 <div className="flex items-center gap-2">
-                  {ticket.status === 'Resolved' ? (
+                  {ticket.status === 'Resolved' || ticket.status === 'Closed' ? (
                     <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-bold">
-                      <CheckCircle2 className="w-3 h-3 mr-1" /> RESOLVED
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> {ticket.status.toUpperCase()}
                     </Badge>
                   ) : (
                     <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold">
