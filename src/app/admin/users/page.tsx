@@ -28,7 +28,6 @@ export default function UserManagementPage() {
     if (savedUsers) {
       setStaffList(JSON.parse(savedUsers))
     } else {
-      // If no saved users, ensure mock data with salaries is set
       setStaffList(USERS)
     }
   }, [])
