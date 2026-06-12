@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MOVEMENTS, PROJECTS, USERS } from "@/lib/mock-data"
-import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter, MoreVertical, Edit2, XCircle, FileText, CheckCircle2, ShieldCheck, Eye } from "lucide-react"
+import { MapPin, Plus, Truck, Users, Briefcase, ExternalLink, Filter, MoreVertical, Edit2, XCircle, FileText, CheckCircle2, ShieldCheck, Eye, ShieldAlert } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -36,9 +36,9 @@ export default function MovementsPage() {
     }
   }, [movementLogs, mounted])
 
-  if (!isLoaded || !mounted) return null
+  if (!isLoaded || !mounted || !currentUser) return null
 
-  const canApproveMovements = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
+  const isManagement = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
   const handleStatusUpdate = (id: string, status: 'APPROVED' | 'CANCELLED' | 'COMPLETED', userName: string) => {
     setMovementLogs(prev => prev.map(mov => 
@@ -95,6 +95,12 @@ export default function MovementsPage() {
                   const user = USERS.find(u => u.id === mov.userId)
                   const project = PROJECTS.find(p => p.id === mov.projectId)
                   const dateObj = new Date(mov.startDate)
+                  
+                  // Hierarchical Approval Logic:
+                  // ADMIN can approve anything.
+                  // HOD can only approve requests from STAFF.
+                  const canCurrentApproveThis = (currentUser.role === 'ADMIN' && currentUser.id !== user?.id) || 
+                                               (currentUser.role === 'HOD' && user?.role === 'STAFF');
                   
                   return (
                     <TableRow key={mov.id} className="hover:bg-secondary/20 group">
@@ -172,26 +178,35 @@ export default function MovementsPage() {
                               </Dialog>
                             )}
                             
-                            {canApproveMovements && mov.status === 'PENDING' && (
+                            {mov.status === 'PENDING' && (
                               <>
-                                <Button 
-                                  onClick={() => handleStatusUpdate(mov.id, 'APPROVED', user?.name || '')}
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
-                                  title="Approve"
-                                >
-                                  <CheckCircle2 className="w-4 h-4" />
-                                </Button>
-                                <Button 
-                                  onClick={() => handleStatusUpdate(mov.id, 'CANCELLED', user?.name || '')}
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-7 w-7 text-red-500 hover:bg-red-500/10"
-                                  title="Reject"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
+                                {canCurrentApproveThis ? (
+                                  <>
+                                    <Button 
+                                      onClick={() => handleStatusUpdate(mov.id, 'APPROVED', user?.name || '')}
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                                      title="Approve"
+                                    >
+                                      <CheckCircle2 className="w-4 h-4" />
+                                    </Button>
+                                    <Button 
+                                      onClick={() => handleStatusUpdate(mov.id, 'CANCELLED', user?.name || '')}
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                                      title="Reject"
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </Button>
+                                  </>
+                                ) : currentUser.id !== user?.id && isManagement ? (
+                                  <div className="h-7 px-2 flex items-center gap-1.5 rounded bg-secondary/50 border border-border">
+                                    <ShieldAlert className="w-3 h-3 text-muted-foreground" />
+                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Restricted</span>
+                                  </div>
+                                ) : null}
                               </>
                             )}
                             

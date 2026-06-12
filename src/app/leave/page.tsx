@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -5,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LEAVE_REQUESTS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye } from "lucide-react"
+import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye, ShieldAlert } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -34,7 +35,7 @@ export default function LeavePage() {
     }
   }, [requests, mounted])
 
-  if (!isLoaded || !mounted) return null
+  if (!isLoaded || !mounted || !currentUser) return null
 
   const isManagement = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
 
@@ -150,6 +151,13 @@ export default function LeavePage() {
               {visibleRequests.map((leave) => {
                 const user = USERS.find(u => u.id === leave.userId)
                 const totalDays = calculateDays(leave.startDate, leave.endDate)
+                
+                // Hierarchical Approval Logic:
+                // ADMIN can approve anything.
+                // HOD can only approve requests from STAFF.
+                const canCurrentApproveThis = (currentUser.role === 'ADMIN' && currentUser.id !== user?.id) || 
+                                             (currentUser.role === 'HOD' && user?.role === 'STAFF');
+
                 return (
                   <TableRow key={leave.id} className="hover:bg-secondary/20 transition-colors">
                     <TableCell>
@@ -157,7 +165,10 @@ export default function LeavePage() {
                           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
                             {user?.name.charAt(0)}
                           </div>
-                          <span className="text-xs font-bold">{user?.name}</span>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold">{user?.name}</span>
+                            <span className="text-[9px] text-muted-foreground uppercase">{user?.role}</span>
+                          </div>
                        </div>
                     </TableCell>
                     <TableCell>
@@ -206,26 +217,35 @@ export default function LeavePage() {
                           </Dialog>
                         )}
                         
-                        {isManagement && leave.status === 'PENDING' && (
+                        {leave.status === 'PENDING' && (
                           <div className="flex gap-1">
-                             <Button 
-                               onClick={() => handleApproval(leave.id, 'APPROVED', user?.name || '')} 
-                               variant="ghost" 
-                               size="icon" 
-                               className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
-                               title="Approve"
-                             >
-                               <CheckCircle2 className="w-4 h-4" />
-                             </Button>
-                             <Button 
-                               onClick={() => handleApproval(leave.id, 'REJECTED', user?.name || '')} 
-                               variant="ghost" 
-                               size="icon" 
-                               className="h-7 w-7 text-red-500 hover:bg-red-500/10"
-                               title="Reject"
-                             >
-                               <XCircle className="w-4 h-4" />
-                             </Button>
+                             {canCurrentApproveThis ? (
+                               <>
+                                 <Button 
+                                   onClick={() => handleApproval(leave.id, 'APPROVED', user?.name || '')} 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="h-7 w-7 text-emerald-500 hover:bg-emerald-500/10"
+                                   title="Approve"
+                                 >
+                                   <CheckCircle2 className="w-4 h-4" />
+                                 </Button>
+                                 <Button 
+                                   onClick={() => handleApproval(leave.id, 'REJECTED', user?.name || '')} 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="h-7 w-7 text-red-500 hover:bg-red-500/10"
+                                   title="Reject"
+                                 >
+                                   <XCircle className="w-4 h-4" />
+                                 </Button>
+                               </>
+                             ) : currentUser.id !== user?.id && isManagement ? (
+                               <div className="h-7 px-2 flex items-center gap-1.5 rounded bg-secondary/50 border border-border">
+                                 <ShieldAlert className="w-3 h-3 text-muted-foreground" />
+                                 <span className="text-[9px] font-bold text-muted-foreground uppercase">Review Restricted</span>
+                               </div>
+                             ) : null}
                           </div>
                         )}
                       </div>
@@ -248,9 +268,9 @@ export default function LeavePage() {
       <div className="p-4 rounded-xl bg-accent/5 border border-accent/20 flex items-start gap-4">
         <Info className="w-5 h-5 text-accent mt-0.5" />
         <div>
-          <h4 className="text-sm font-bold text-accent">Leave Policy Reminder</h4>
+          <h4 className="text-sm font-bold text-accent">Hierarchy Policy Reminder</h4>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Hanya HOD dan CEO yang boleh meluluskan cuti. Sijil Sakit (MC) wajib disertakan untuk permohonan Medical Leave.
+            Hanya <span className="text-foreground font-bold">Admin (CEO/HR)</span> yang boleh meluluskan cuti untuk semua staf dan HOD. <span className="text-foreground font-bold">HOD</span> hanya dibenarkan meluluskan cuti untuk pengguna bertaraf Staff sahaja.
           </p>
         </div>
       </div>
