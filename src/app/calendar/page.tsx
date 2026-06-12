@@ -32,6 +32,7 @@ import {
 export default function CalendarPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
+  const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
@@ -39,6 +40,10 @@ export default function CalendarPage() {
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
     if (savedLeaves) {
       setSyncedLeaves(JSON.parse(savedLeaves))
+    }
+    const savedMovements = localStorage.getItem('simulated_movements')
+    if (savedMovements) {
+      setSyncedMovements(JSON.parse(savedMovements))
     }
   }, [])
 
@@ -89,7 +94,8 @@ export default function CalendarPage() {
                     const dayNum = i + 1;
                     const dateStr = `2024-05-${dayNum.toString().padStart(2, '0')}`;
                     
-                    const dayMovements = MOVEMENTS.filter(m => m.startDate.startsWith(dateStr));
+                    // Menunjukkan semua pergerakan tanpa mengira status (termasuk PENDING)
+                    const dayMovements = syncedMovements.filter(m => m.startDate.startsWith(dateStr));
                     const dayLeaves = syncedLeaves.filter(l => l.startDate.startsWith(dateStr) && l.status === 'APPROVED');
 
                     return (
@@ -109,14 +115,21 @@ export default function CalendarPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <DialogTrigger asChild>
-                                      <div className="cursor-pointer text-[8px] md:text-[9px] px-1.5 py-0.5 md:py-1 rounded bg-primary/20 border-l-2 border-primary text-primary-foreground font-medium truncate hover:bg-primary/30 transition-colors">
+                                      <div className={cn(
+                                        "cursor-pointer text-[8px] md:text-[9px] px-1.5 py-0.5 md:py-1 rounded border-l-2 font-medium truncate transition-colors",
+                                        mov.status === 'PENDING' 
+                                          ? "bg-amber-500/10 border-amber-500 text-amber-500 hover:bg-amber-500/20" 
+                                          : "bg-primary/20 border-primary text-primary-foreground hover:bg-primary/30"
+                                      )}>
                                         {user?.name}: {mov.destination}
+                                        {mov.status === 'PENDING' && " (P)"}
                                       </div>
                                     </DialogTrigger>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="bg-card border-border text-[10px]">
                                     <p className="font-bold">{user?.name}</p>
                                     <p className="text-muted-foreground">{mov.destination}</p>
+                                    <p className={cn("mt-1 font-bold", mov.status === 'PENDING' ? "text-amber-500" : "text-primary")}>Status: {mov.status}</p>
                                   </TooltipContent>
                                 </Tooltip>
                                 <DialogContent className="bg-card border-border sm:max-w-[400px]">
@@ -142,9 +155,20 @@ export default function CalendarPage() {
                                         </div>
                                       </div>
                                     </div>
-                                    <div className="space-y-1">
-                                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Destination</p>
-                                      <p className="text-sm font-semibold">{mov.destination}</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-1">
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Destination</p>
+                                        <p className="text-sm font-semibold">{mov.destination}</p>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground">Status</p>
+                                        <Badge className={cn(
+                                          "text-[9px] font-bold px-2 py-0.5",
+                                          mov.status === 'PENDING' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-primary/10 text-primary"
+                                        )}>
+                                          {mov.status}
+                                        </Badge>
+                                      </div>
                                     </div>
                                     <div className="space-y-1">
                                       <p className="text-[10px] uppercase font-bold text-muted-foreground">Purpose</p>
