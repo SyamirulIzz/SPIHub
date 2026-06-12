@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -29,7 +28,6 @@ export default function ApplyLeavePage() {
   const [leaveType, setLeaveType] = useState<string>("")
   const [reason, setReason] = useState("")
 
-  // Popover states to close them after selection
   const [isStartOpen, setIsStartOpen] = useState(false)
   const [isEndOpen, setIsEndOpen] = useState(false)
 
@@ -147,8 +145,10 @@ export default function ApplyLeavePage() {
                       mode="single"
                       selected={startDate}
                       onSelect={(date) => {
-                        setStartDate(date)
-                        setIsStartOpen(false)
+                        if (date) {
+                          setStartDate(date)
+                          setIsStartOpen(false)
+                        }
                       }}
                       initialFocus
                     />
@@ -177,8 +177,10 @@ export default function ApplyLeavePage() {
                       mode="single"
                       selected={endDate}
                       onSelect={(date) => {
-                        setEndDate(date)
-                        setIsEndOpen(false)
+                        if (date) {
+                          setEndDate(date)
+                          setIsEndOpen(false)
+                        }
                       }}
                       initialFocus
                     />

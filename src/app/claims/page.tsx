@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -50,10 +49,8 @@ export default function ClaimsPage() {
   if (!isLoaded || !mounted) return null
 
   const isAdmin = currentUser.role === 'ADMIN'
-  const canProcessClaims = isAdmin // Only Admin can approve based on your request
+  const canProcessClaims = isAdmin 
 
-  // Filter claims based on role
-  // Admin sees all, HOD and Staff see only their own
   const visibleClaims = isAdmin 
     ? claimsList 
     : claimsList.filter(c => c.userId === currentUser.id)
@@ -141,8 +138,10 @@ export default function ClaimsPage() {
                         mode="single" 
                         selected={claimDate} 
                         onSelect={(date) => {
-                          setClaimDate(date)
-                          setIsCalendarOpen(false)
+                          if (date) {
+                            setClaimDate(date)
+                            setIsCalendarOpen(false)
+                          }
                         }} 
                         initialFocus 
                       />

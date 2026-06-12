@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -38,7 +37,6 @@ export default function LogMovementPage() {
   const [transportation, setTransportation] = useState("")
   const [claimable, setClaimable] = useState(false)
 
-  // Popover states to close after selection
   const [isStartOpen, setIsStartOpen] = useState(false)
   const [isEndOpen, setIsEndOpen] = useState(false)
 
@@ -77,7 +75,7 @@ export default function LogMovementPage() {
       claimable: claimable,
       movementType: 'OUT' as any,
       status: 'PENDING' as any,
-      evidenceUrl: 'https://picsum.photos/seed/upload/800/600' // Simulated upload
+      evidenceUrl: 'https://picsum.photos/seed/upload/800/600'
     }
     
     const updatedMovements = [newMovement, ...savedMovements]
@@ -171,8 +169,10 @@ export default function LogMovementPage() {
                         mode="single"
                         selected={startDate}
                         onSelect={(date) => {
-                          setStartDate(date)
-                          setIsStartOpen(false)
+                          if (date) {
+                            setStartDate(date)
+                            setIsStartOpen(false)
+                          }
                         }}
                         initialFocus
                       />
@@ -209,8 +209,10 @@ export default function LogMovementPage() {
                         mode="single"
                         selected={endDate}
                         onSelect={(date) => {
-                          setEndDate(date)
-                          setIsEndOpen(false)
+                          if (date) {
+                            setEndDate(date)
+                            setIsEndOpen(false)
+                          }
                         }}
                         initialFocus
                       />
