@@ -10,7 +10,7 @@ import { PROJECTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Briefcase, Plus, Search, Filter, MoreVertical, Edit2, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/utils"
+import { cn } from "@/lib/utils"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -117,27 +117,29 @@ export default function ProjectsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-card border-border">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/projects/${project.id}`} className="text-xs font-medium gap-2 cursor-pointer">
-                              <ExternalLink className="w-3.5 h-3.5" /> View Details
-                            </Link>
-                          </DropdownMenuItem>
-                          {isAdminOrHod && (
+                      <div className="flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-card border-border">
                             <DropdownMenuItem asChild>
-                              <Link href={`/projects/${project.id}/edit`} className="text-xs font-medium gap-2 cursor-pointer">
-                                <Edit2 className="w-3.5 h-3.5" /> Edit Project
+                              <Link href={`/projects/${project.id}`} className="text-xs font-medium gap-2 cursor-pointer">
+                                <ExternalLink className="w-3.5 h-3.5" /> View Details
                               </Link>
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            {isAdminOrHod && (
+                              <DropdownMenuItem asChild>
+                                <Link href={`/projects/${project.id}/edit`} className="text-xs font-medium gap-2 cursor-pointer">
+                                  <Edit2 className="w-3.5 h-3.5" /> Edit Project
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
