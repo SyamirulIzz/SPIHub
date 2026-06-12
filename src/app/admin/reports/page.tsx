@@ -27,7 +27,8 @@ import {
   Calendar,
   Download,
   FileSpreadsheet,
-  FileDown
+  FileDown,
+  TrendingDown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -107,13 +108,15 @@ export default function AdminReportsPage() {
       .filter(c => c.status === 'APPROVED')
       .reduce((sum, c) => sum + c.amount, 0);
 
+    const totalMonthlyPayroll = syncedUsers.reduce((sum, u) => sum + (u.salary || 0), 0);
+
     const categoryExpenses = {
       MEDICAL: syncedClaims.filter(c => c.category === 'MEDICAL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
       TRAVEL: syncedClaims.filter(c => c.category === 'TRAVEL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
       GENERAL: syncedClaims.filter(c => c.category === 'GENERAL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
     };
 
-    return { leaveRecords, totalClaimsApproved, categoryExpenses };
+    return { leaveRecords, totalClaimsApproved, categoryExpenses, totalMonthlyPayroll };
   }, [mounted, syncedUsers, syncedLeaves, syncedClaims]);
 
   const handleExportPDF = () => {
@@ -207,9 +210,9 @@ export default function AdminReportsPage() {
 
       {/* Top High-Level Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4">
+        <StatSummaryCard title="Monthly Payroll" value={`RM ${reportsData?.totalMonthlyPayroll.toLocaleString()}`} icon={Wallet} trend="Basic Salary Outflow" color="text-primary" />
         <StatSummaryCard title="Claims Approved" value={`RM ${reportsData?.totalClaimsApproved.toLocaleString()}`} icon={DollarSign} trend="+4.5% vs Last Month" color="text-emerald-500" />
         <StatSummaryCard title="Staff Count" value={syncedUsers.length.toString()} icon={Users} trend="Active Payroll" color="text-indigo-500" />
-        <StatSummaryCard title="Active Assignments" value={syncedMovements.filter(m => m.status === 'APPROVED').length.toString()} icon={MapPin} trend="On-Site Deployment" color="text-cyan-500" />
         <StatSummaryCard title="Pending Approvals" value={(syncedLeaves.filter(l => l.status === 'PENDING').length + syncedClaims.filter(c => c.status === 'PENDING').length).toString()} icon={Clock} trend="Needs Action" color="text-amber-500" />
       </div>
 
@@ -218,7 +221,7 @@ export default function AdminReportsPage() {
           <TabsTrigger value="leave" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Palmtree className="w-4 h-4" /> LEAVE RECORD
           </TabsTrigger>
-          <TabsTrigger value="claims" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsTrigger value="finance" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Wallet className="w-4 h-4" /> FINANCIAL ANALYTICS
           </TabsTrigger>
           <TabsTrigger value="ops" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -279,44 +282,57 @@ export default function AdminReportsPage() {
         </TabsContent>
 
         {/* Tab 2: Financial Analytics */}
-        <TabsContent value="claims">
+        <TabsContent value="finance">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:grid-cols-3">
             <Card className="bg-card border-border shadow-lg print:shadow-none">
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-emerald-500" /> Expenses by Category
+                  <Wallet className="w-4 h-4 text-primary" /> Payroll Distribution
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <CategoryExpenseRow label="Medical Claims" amount={reportsData?.categoryExpenses.MEDICAL || 0} color="bg-red-500" total={reportsData?.totalClaimsApproved || 1} />
-                <CategoryExpenseRow label="Travel & Fuel" amount={reportsData?.categoryExpenses.TRAVEL || 0} color="bg-blue-500" total={reportsData?.totalClaimsApproved || 1} />
-                <CategoryExpenseRow label="General / Misc" amount={reportsData?.categoryExpenses.GENERAL || 0} color="bg-amber-500" total={reportsData?.totalClaimsApproved || 1} />
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[11px] font-bold">
+                    <span>Total Monthly Basic Salary</span>
+                    <span className="text-primary font-headline text-lg">RM {reportsData?.totalMonthlyPayroll.toLocaleString()}</span>
+                  </div>
+                  <Progress value={100} className="h-2" />
+                </div>
+                
+                <div className="pt-4 space-y-4 border-t border-border">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Claim Breakdown</p>
+                  <CategoryExpenseRow label="Medical Claims" amount={reportsData?.categoryExpenses.MEDICAL || 0} color="bg-red-500" total={reportsData?.totalClaimsApproved || 1} />
+                  <CategoryExpenseRow label="Travel & Fuel" amount={reportsData?.categoryExpenses.TRAVEL || 0} color="bg-blue-500" total={reportsData?.totalClaimsApproved || 1} />
+                  <CategoryExpenseRow label="General / Misc" amount={reportsData?.categoryExpenses.GENERAL || 0} color="bg-amber-500" total={reportsData?.totalClaimsApproved || 1} />
+                </div>
               </CardContent>
             </Card>
 
             <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden print:shadow-none print:md:col-span-2">
                <CardHeader className="bg-secondary/10 border-b border-border">
-                  <CardTitle className="text-sm font-bold">Approved Financial Outflow</CardTitle>
+                  <CardTitle className="text-sm font-bold">Payroll & Benefit Master List</CardTitle>
                </CardHeader>
                <CardContent className="p-0">
                   <Table>
                     <TableHeader className="bg-secondary/5">
                       <TableRow>
-                        <TableHead className="text-[10px]">Staff</TableHead>
-                        <TableHead className="text-[10px]">Category</TableHead>
-                        <TableHead className="text-[10px]">Date</TableHead>
-                        <TableHead className="text-right text-[10px]">Amount</TableHead>
+                        <TableHead className="text-[10px]">Staff Name</TableHead>
+                        <TableHead className="text-[10px]">Position</TableHead>
+                        <TableHead className="text-right text-[10px]">Basic Salary</TableHead>
+                        <TableHead className="text-right text-[10px]">Total Claims</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {syncedClaims.filter(c => c.status === 'APPROVED').map(claim => {
-                        const user = syncedUsers.find(u => u.id === claim.userId)
+                      {syncedUsers.map(user => {
+                        const userClaimsTotal = syncedClaims
+                          .filter(c => c.userId === user.id && c.status === 'APPROVED')
+                          .reduce((sum, c) => sum + c.amount, 0);
                         return (
-                          <TableRow key={claim.id} className="text-[11px] border-b border-border/30">
-                            <TableCell className="font-bold">{user?.name}</TableCell>
-                            <TableCell><Badge variant="outline" className="text-[9px]">{claim.category}</Badge></TableCell>
-                            <TableCell>{claim.date}</TableCell>
-                            <TableCell className="text-right font-bold text-emerald-500">RM {claim.amount.toFixed(2)}</TableCell>
+                          <TableRow key={user.id} className="text-[11px] border-b border-border/30">
+                            <TableCell className="font-bold">{user.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{user.position}</TableCell>
+                            <TableCell className="text-right font-bold text-primary">RM {user.salary?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</TableCell>
+                            <TableCell className="text-right font-bold text-emerald-500">RM {userClaimsTotal.toFixed(2)}</TableCell>
                           </TableRow>
                         )
                       })}

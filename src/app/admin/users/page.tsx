@@ -27,6 +27,9 @@ export default function UserManagementPage() {
     const savedUsers = localStorage.getItem('simulated_users')
     if (savedUsers) {
       setStaffList(JSON.parse(savedUsers))
+    } else {
+      // If no saved users, ensure mock data with salaries is set
+      setStaffList(USERS)
     }
   }, [])
 
