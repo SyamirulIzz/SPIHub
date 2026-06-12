@@ -1,0 +1,211 @@
+
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useCurrentUser } from "@/hooks/use-current-user"
+import { useToast } from "@/hooks/use-toast"
+import { ArrowLeft, UserPlus, Shield, Building, Briefcase } from "lucide-react"
+import { USERS, DEPARTMENTS } from "@/lib/mock-data"
+
+export default function NewStaffPage() {
+  const router = useRouter()
+  const { currentUser, isLoaded } = useCurrentUser()
+  const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    position: "",
+    departmentId: "",
+    role: "STAFF",
+    annualLeaveLimit: "14",
+    medicalClaimLimit: "1000"
+  })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isLoaded || !mounted) return null
+
+  if (currentUser.role !== 'ADMIN') {
+    router.push("/")
+    return null
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.name || !formData.email || !formData.departmentId) {
+      toast({
+        title: "Ralat",
+        description: "Sila lengkapkan butiran wajib staf.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const currentUsers = JSON.parse(localStorage.getItem('simulated_users') || JSON.stringify(USERS))
+    const newUser = {
+      ...formData,
+      id: `user-${Date.now()}`,
+      annualLeaveLimit: parseInt(formData.annualLeaveLimit),
+      medicalClaimLimit: parseInt(formData.medicalClaimLimit),
+      role: formData.role as any
+    }
+
+    const updatedUsers = [...currentUsers, newUser]
+    localStorage.setItem('simulated_users', JSON.stringify(updatedUsers))
+
+    setTimeout(() => {
+      toast({
+        title: "Pendaftaran Berjaya",
+        description: `Staf ${formData.name} telah didaftarkan ke dalam sistem.`,
+      })
+      setIsSubmitting(false)
+      router.push("/admin/users")
+    }, 1000)
+  }
+
+  return (
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+      <header className="space-y-4">
+        <Button variant="ghost" onClick={() => router.push("/admin/users")} className="gap-2 -ml-2 text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Directory
+        </Button>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Onboard New Staff</h1>
+          <p className="text-sm text-muted-foreground mt-1">Daftarkan rekod kakitangan baru ke dalam ekosistem SPI HUB.</p>
+        </div>
+      </header>
+
+      <form onSubmit={handleSubmit}>
+        <Card className="bg-card border-border shadow-2xl overflow-hidden">
+          <CardHeader className="bg-secondary/20 border-b border-border">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              Staff Profile Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name"
+                  placeholder="e.g. Muhammad Ali"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input 
+                  id="email"
+                  type="email"
+                  placeholder="ali@systemprotocol.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="position" className="flex items-center gap-2">
+                  <Briefcase className="w-3.5 h-3.5" /> Position / Title
+                </Label>
+                <Input 
+                  id="position"
+                  placeholder="e.g. Software Engineer"
+                  value={formData.position}
+                  onChange={(e) => setFormData({...formData, position: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="department" className="flex items-center gap-2">
+                  <Building className="w-3.5 h-3.5" /> Department
+                </Label>
+                <Select required onValueChange={(val) => setFormData({...formData, departmentId: val})}>
+                  <SelectTrigger id="department" className="bg-secondary/30 border-border">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    {DEPARTMENTS.map(dept => (
+                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="role" className="flex items-center gap-2">
+                  <Shield className="w-3.5 h-3.5" /> System Role (RBAC)
+                </Label>
+                <Select defaultValue="STAFF" onValueChange={(val) => setFormData({...formData, role: val})}>
+                  <SelectTrigger id="role" className="bg-secondary/30 border-border font-bold">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    <SelectItem value="STAFF">STAFF (Basic Access)</SelectItem>
+                    <SelectItem value="HOD">HOD (Approval Access)</SelectItem>
+                    <SelectItem value="ADMIN">ADMIN (Full Control)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="annualLeave">Annual Leave Limit (Days)</Label>
+                <Input 
+                  id="annualLeave"
+                  type="number"
+                  value={formData.annualLeaveLimit}
+                  onChange={(e) => setFormData({...formData, annualLeaveLimit: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="medicalClaim">Medical Claim Limit (RM)</Label>
+              <Input 
+                id="medicalClaim"
+                type="number"
+                value={formData.medicalClaimLimit}
+                onChange={(e) => setFormData({...formData, medicalClaimLimit: e.target.value})}
+                className="bg-secondary/30 border-border"
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">
+            <Button type="button" variant="outline" onClick={() => router.push("/admin/users")} className="w-full md:flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="w-full md:flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
+              {isSubmitting ? "Processing..." : "Register Staff Member"}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </div>
+  )
+}

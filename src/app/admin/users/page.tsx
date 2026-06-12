@@ -13,14 +13,20 @@ import { redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 
 export default function UserManagementPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [staffList, setStaffList] = useState(USERS)
 
   useEffect(() => {
     setMounted(true)
+    const savedUsers = localStorage.getItem('simulated_users')
+    if (savedUsers) {
+      setStaffList(JSON.parse(savedUsers))
+    }
   }, [])
 
   if (!isLoaded || !mounted) return null
@@ -44,11 +50,13 @@ export default function UserManagementPage() {
           <p className="text-muted-foreground mt-1">Manage company staff records, roles, and benefits.</p>
         </div>
         <Button 
-          onClick={() => handleAction("Onboarding", "Staf Baru")}
+          asChild
           className="bg-primary hover:bg-primary/90 text-white font-bold gap-2 shadow-xl shadow-primary/20"
         >
-          <UserPlus className="w-4 h-4" />
-          Onboard New Staff
+          <Link href="/admin/users/new">
+            <UserPlus className="w-4 h-4" />
+            Onboard New Staff
+          </Link>
         </Button>
       </header>
 
@@ -73,7 +81,7 @@ export default function UserManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {USERS.map((user) => {
+                {staffList.map((user) => {
                   const dept = DEPARTMENTS.find(d => d.id === user.departmentId)
                   return (
                     <TableRow key={user.id} className="hover:bg-secondary/20 group transition-colors">
