@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -11,7 +10,7 @@ import { PROJECTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Briefcase, Plus, Search, Filter, MoreVertical, Edit2, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -125,12 +124,16 @@ export default function ProjectsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-card border-border">
-                          <DropdownMenuItem className="text-xs font-medium gap-2">
-                            <ExternalLink className="w-3.5 h-3.5" /> View Details
+                          <DropdownMenuItem asChild>
+                            <Link href={`/projects/${project.id}`} className="text-xs font-medium gap-2 cursor-pointer">
+                              <ExternalLink className="w-3.5 h-3.5" /> View Details
+                            </Link>
                           </DropdownMenuItem>
                           {isAdminOrHod && (
-                            <DropdownMenuItem className="text-xs font-medium gap-2">
-                              <Edit2 className="w-3.5 h-3.5" /> Edit Project
+                            <DropdownMenuItem asChild>
+                              <Link href={`/projects/${project.id}/edit`} className="text-xs font-medium gap-2 cursor-pointer">
+                                <Edit2 className="w-3.5 h-3.5" /> Edit Project
+                              </Link>
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
