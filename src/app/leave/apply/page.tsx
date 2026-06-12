@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,10 +24,41 @@ export default function ApplyLeavePage() {
   const [endDate, setEndDate] = useState("")
   const [leaveType, setLeaveType] = useState<string>("")
   const [reason, setReason] = useState("")
+  const [requests, setRequests] = useState(LEAVE_REQUESTS)
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('simulated_leave_requests')
+    if (saved) {
+      setRequests(JSON.parse(saved))
+    }
   }, [])
+
+  // Helper function to calculate duration in days
+  const calculateDays = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  }
+
+  // Calculate current available balance (Synced with Report logic)
+  const availableBalance = useMemo(() => {
+    if (!currentUser || !mounted) return 0;
+    
+    const currentMonth = 6; // June as at simulation date
+    const proratedEntitlement = Math.round((currentUser.annualLeaveLimit / 12) * currentMonth);
+    const cf = currentUser.carriedForward || 0;
+    const additional = currentUser.additionalLeave || 0;
+    
+    const taken = requests
+      .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
+      .reduce((total, r) => total + calculateDays(r.startDate, r.endDate), 0);
+      
+    const totalEntitlement = cf + proratedEntitlement + additional;
+    return totalEntitlement - taken;
+  }, [currentUser, requests, mounted]);
 
   if (!isLoaded || !mounted) return null
 
@@ -43,7 +75,6 @@ export default function ApplyLeavePage() {
     
     setIsSubmitting(true)
     
-    const savedRequests = JSON.parse(localStorage.getItem('simulated_leave_requests') || JSON.stringify(LEAVE_REQUESTS))
     const newRequest = {
       id: `leave-${Date.now()}`,
       userId: currentUser.id,
@@ -55,7 +86,7 @@ export default function ApplyLeavePage() {
       mcUrl: leaveType === 'MEDICAL' ? 'https://picsum.photos/seed/uploadedmc/600/800' : undefined
     }
     
-    const updatedRequests = [newRequest, ...savedRequests]
+    const updatedRequests = [newRequest, ...requests]
     localStorage.setItem('simulated_leave_requests', JSON.stringify(updatedRequests))
 
     setTimeout(() => {
@@ -106,9 +137,9 @@ export default function ApplyLeavePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>AL available Balance</Label>
+                <Label>Current Balance Available</Label>
                 <Input 
-                  value={`${currentUser.annualLeaveLimit} Days`} 
+                  value={`${availableBalance} Days`} 
                   disabled 
                   className="bg-secondary/10 border-border font-bold text-accent"
                 />

@@ -10,7 +10,7 @@ import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Info, Eye, Shie
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
@@ -35,6 +35,42 @@ export default function LeavePage() {
     }
   }, [requests, mounted])
 
+  // Helper function to calculate duration in days
+  const calculateDays = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  }
+
+  // Unified Leave Stats Logic (Synced with Report)
+  const leaveStats = useMemo(() => {
+    if (!currentUser || !mounted) return null;
+    
+    // Prorated calculation as at June (Month 6)
+    const currentMonth = 6;
+    const proratedEntitlement = Math.round((currentUser.annualLeaveLimit / 12) * currentMonth);
+    const cf = currentUser.carriedForward || 0;
+    const additional = currentUser.additionalLeave || 0;
+    
+    const taken = requests
+      .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
+      .reduce((total, r) => total + calculateDays(r.startDate, r.endDate), 0);
+      
+    const totalEntitlement = cf + proratedEntitlement + additional;
+    const balance = totalEntitlement - taken;
+    
+    return {
+      totalEntitlement,
+      taken,
+      balance,
+      cf,
+      additional,
+      proratedEntitlement
+    };
+  }, [currentUser, requests, mounted]);
+
   if (!isLoaded || !mounted || !currentUser) return null
 
   const isManagement = currentUser.role === 'ADMIN' || currentUser.role === 'HOD'
@@ -54,19 +90,6 @@ export default function LeavePage() {
       variant: status === 'REJECTED' ? "destructive" : "default",
     })
   }
-
-  // Helper function to calculate duration in days
-  const calculateDays = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays;
-  }
-
-  const takenDays = requests
-    .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
-    .reduce((total, r) => total + calculateDays(r.startDate, r.endDate), 0)
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -88,9 +111,9 @@ export default function LeavePage() {
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Annual Leave</p>
-                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Total Allowance per Year</p>
+                <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total Entitlement</p>
+                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.totalEntitlement} Days</div>
+                <p className="text-[10px] text-muted-foreground mt-1 italic">Incl. CF ({leaveStats?.cf}) + Raya ({leaveStats?.additional}) + Prorated</p>
               </div>
               <Palmtree className="text-indigo-500 w-8 h-8 opacity-40" />
             </div>
@@ -102,8 +125,8 @@ export default function LeavePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Taken (Approved)</p>
-                <div className="text-3xl font-bold font-headline mt-1">{takenDays} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Utilized Balance</p>
+                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.taken} Days</div>
+                <p className="text-[10px] text-muted-foreground mt-1 italic">Utilized Balance as at 06/2026</p>
               </div>
               <CheckCircle2 className="text-emerald-500 w-8 h-8 opacity-40" />
             </div>
@@ -114,9 +137,9 @@ export default function LeavePage() {
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining</p>
-                <div className="text-3xl font-bold font-headline mt-1">{Math.max(0, currentUser.annualLeaveLimit - takenDays)} Days</div>
-                <p className="text-[10px] text-muted-foreground mt-1 italic">Available to apply</p>
+                <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining Balance</p>
+                <div className="text-3xl font-bold font-headline mt-1">{leaveStats?.balance} Days</div>
+                <p className="text-[10px] text-muted-foreground mt-1 italic">Available as at June 2026</p>
               </div>
               <Clock className="text-amber-500 w-8 h-8 opacity-40" />
             </div>
@@ -152,9 +175,6 @@ export default function LeavePage() {
                 const user = USERS.find(u => u.id === leave.userId)
                 const totalDays = calculateDays(leave.startDate, leave.endDate)
                 
-                // Hierarchical Approval Logic:
-                // ADMIN can approve anything.
-                // HOD can only approve requests from STAFF.
                 const canCurrentApproveThis = (currentUser.role === 'ADMIN' && currentUser.id !== user?.id) || 
                                              (currentUser.role === 'HOD' && user?.role === 'STAFF');
 
