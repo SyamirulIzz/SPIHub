@@ -130,10 +130,6 @@ export default function PayrollManagementPage() {
     document.body.removeChild(link);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
@@ -255,6 +251,9 @@ function PayslipDialog({ data }: { data: any }) {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl bg-white text-black p-0 overflow-hidden border-none">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Payslip for {data.name} - June 2026</DialogTitle>
+        </DialogHeader>
         <div className="p-8 space-y-8 min-h-[800px] flex flex-col print:p-0 print:m-0">
           {/* Header */}
           <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6">
