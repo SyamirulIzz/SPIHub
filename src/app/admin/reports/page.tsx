@@ -181,12 +181,14 @@ export default function AdminReportsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button asChild variant="outline" className="border-border gap-2">
-            <Link href="/admin/payroll">
-              <Wallet className="w-4 h-4" />
-              Manage Payroll
-            </Link>
-          </Button>
+          {activeTab === "finance" && (
+            <Button asChild variant="outline" className="border-border gap-2">
+              <Link href="/admin/payroll">
+                <Wallet className="w-4 h-4" />
+                Manage Payroll
+              </Link>
+            </Button>
+          )}
           
           {activeTab === "leave" && (
             <DropdownMenu>
