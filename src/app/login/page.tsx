@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { Lock, Mail, ArrowRight, ShieldCheck, Zap } from "lucide-react"
+import { Lock, Mail, ArrowRight, ShieldCheck, Zap, Info } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -58,7 +58,6 @@ export default function LoginPage() {
         <div className="text-center space-y-4">
           <div className="inline-flex h-28 w-28 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-primary/20 mb-2 border border-border overflow-hidden">
             <div className="relative h-20 w-20 flex items-center justify-center">
-               {/* Custom SVG Logo inspired by the provided image */}
                <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20" stroke="#1E3A8A" strokeWidth="6" strokeLinecap="round"/>
                   <path d="M35 55C35 45 45 38 55 38C65 38 72 45 72 55C72 65 62 72 50 72C38 72 28 65 28 55" stroke="#1E3A8A" strokeWidth="3" strokeDasharray="2 4"/>
@@ -88,22 +87,37 @@ export default function LoginPage() {
                 <Label htmlFor="email">Work Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input 
+                  <input 
                     id="email" 
                     type="email" 
                     placeholder="name@systemprotocol.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-secondary/30 border-border"
+                    className="flex h-10 w-full rounded-md border border-input bg-secondary/30 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 border-border"
                     required
                   />
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-secondary/20 border border-border flex items-start gap-3">
-                <ShieldCheck className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  Akses dihadkan kepada kakitangan System Protocol Information Sdn Bhd sahaja.
-                </p>
+
+              <div className="p-3 rounded-lg bg-secondary/20 border border-border space-y-2">
+                <div className="flex items-center gap-2">
+                  <Info className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Demo Accounts:</span>
+                </div>
+                <div className="grid grid-cols-1 gap-1 text-[9px] text-muted-foreground">
+                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("ahmad@systemprotocol.com")}>
+                    <span>Admin: ahmad@systemprotocol.com</span>
+                    <Badge variant="outline" className="text-[8px] py-0 px-1 border-primary/30">CEO</Badge>
+                  </div>
+                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("siti@systemprotocol.com")}>
+                    <span>HOD: siti@systemprotocol.com</span>
+                    <Badge variant="outline" className="text-[8px] py-0 px-1">Manager</Badge>
+                  </div>
+                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("musa@systemprotocol.com")}>
+                    <span>Staff: musa@systemprotocol.com</span>
+                    <Badge variant="outline" className="text-[8px] py-0 px-1">Senior</Badge>
+                  </div>
+                </div>
               </div>
             </CardContent>
             <CardFooter>
