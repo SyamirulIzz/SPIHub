@@ -26,7 +26,7 @@ export const USERS: User[] = [
     position: 'CEO / Management',
     annualLeaveLimit: 21,
     medicalClaimLimit: 2000,
-    salary: 15500,
+    salary: 18500,
     carriedForward: 25,
     additionalLeave: 0,
     unpaidLeave: 0
@@ -40,7 +40,7 @@ export const USERS: User[] = [
     position: 'Head of Engineering',
     annualLeaveLimit: 21,
     medicalClaimLimit: 1500,
-    salary: 9200,
+    salary: 10200,
     carriedForward: 5,
     additionalLeave: 0,
     unpaidLeave: 0
@@ -54,7 +54,7 @@ export const USERS: User[] = [
     position: 'Senior Developer',
     annualLeaveLimit: 21,
     medicalClaimLimit: 1000,
-    salary: 6800,
+    salary: 7500,
     carriedForward: 22.5,
     additionalLeave: 1,
     unpaidLeave: 0
@@ -68,7 +68,7 @@ export const USERS: User[] = [
     position: 'Operations Officer',
     annualLeaveLimit: 21,
     medicalClaimLimit: 1000,
-    salary: 4200,
+    salary: 4800,
     carriedForward: 35,
     additionalLeave: 1,
     unpaidLeave: 0
@@ -82,7 +82,7 @@ export const USERS: User[] = [
     position: 'Frontend Engineer',
     annualLeaveLimit: 16,
     medicalClaimLimit: 1000,
-    salary: 5100,
+    salary: 5400,
     carriedForward: 0,
     additionalLeave: 1,
     unpaidLeave: 0
@@ -96,7 +96,7 @@ export const USERS: User[] = [
     position: 'Backend Specialist',
     annualLeaveLimit: 14,
     medicalClaimLimit: 1000,
-    salary: 5350,
+    salary: 5650,
     carriedForward: 0,
     additionalLeave: 0,
     unpaidLeave: 0
