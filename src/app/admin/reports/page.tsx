@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -237,9 +236,6 @@ export default function AdminReportsPage() {
           <TabsTrigger value="finance" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Wallet className="w-4 h-4" /> FINANCIAL ANALYTICS
           </TabsTrigger>
-          <TabsTrigger value="ops" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
-            <Briefcase className="w-4 h-4" /> OPERATIONAL HEALTH
-          </TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Official Leave Record */}
@@ -359,61 +355,6 @@ export default function AdminReportsPage() {
                </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        {/* Tab 3: Operational Health - Hidden on Print */}
-        <TabsContent value="ops" className="print:hidden">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg font-headline flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-500" /> Site Deployment Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                   <div className="space-y-4">
-                      {['SITE_VISIT', 'CLIENT_MEETING', 'LOGISTIC', 'OUTSTATION'].map(cat => {
-                        const count = syncedMovements.filter(m => m.category === cat).length;
-                        const total = syncedMovements.length || 1;
-                        const percent = (count / total) * 100;
-                        return (
-                          <div key={cat} className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                              <span>{cat.replace('_', ' ')}</span>
-                              <span>{count} Assignments ({Math.round(percent)}%)</span>
-                            </div>
-                            <Progress value={percent} className="h-1.5" />
-                          </div>
-                        )
-                      })}
-                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border overflow-hidden">
-                <CardHeader className="bg-secondary/10 border-b border-border">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Field Staff
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableBody>
-                      {syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').map(mov => {
-                        const user = syncedUsers.find(u => u.id === mov.userId)
-                        return (
-                          <TableRow key={mov.id} className="text-[11px]">
-                            <TableCell className="font-bold">{user?.name}</TableCell>
-                            <TableCell className="text-muted-foreground">{mov.destination}</TableCell>
-                            <TableCell className="text-right"><Badge className="bg-primary/10 text-primary text-[9px]">{mov.status}</Badge></TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-           </div>
         </TabsContent>
       </Tabs>
     </div>
