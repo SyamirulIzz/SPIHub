@@ -49,12 +49,13 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     }
   }, [id])
 
-  if (!isLoaded || !mounted) return null
+  useEffect(() => {
+    if (isLoaded && currentUser.role !== 'ADMIN') {
+      router.push("/")
+    }
+  }, [isLoaded, currentUser.role, router])
 
-  if (currentUser.role !== 'ADMIN') {
-    router.push("/")
-    return null
-  }
+  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -149,16 +150,18 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
                 <Label htmlFor="department" className="flex items-center gap-2">
                   <Building className="w-3.5 h-3.5" /> Department
                 </Label>
-                <Select value={formData.departmentId} onValueChange={(val) => setFormData({...formData, departmentId: val})}>
-                  <SelectTrigger id="department" className="bg-secondary/30 border-border">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border">
-                    {DEPARTMENTS.map(dept => (
-                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Select value={formData.departmentId} onValueChange={(val) => setFormData({...formData, departmentId: val})}>
+                    <SelectTrigger id="department" className="bg-secondary/30 border-border">
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      {DEPARTMENTS.map(dept => (
+                        <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 

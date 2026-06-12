@@ -30,12 +30,13 @@ export default function UserManagementPage() {
     }
   }, [])
 
-  if (!isLoaded || !mounted) return null
+  useEffect(() => {
+    if (isLoaded && currentUser.role !== 'ADMIN') {
+      router.push("/")
+    }
+  }, [isLoaded, currentUser.role, router])
 
-  if (currentUser.role !== 'ADMIN') {
-    router.push("/")
-    return null
-  }
+  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
 
   const handleAction = (action: string, userName: string) => {
     toast({

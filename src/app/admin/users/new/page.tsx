@@ -34,12 +34,13 @@ export default function NewStaffPage() {
     setMounted(true)
   }, [])
 
-  if (!isLoaded || !mounted) return null
+  useEffect(() => {
+    if (isLoaded && currentUser.role !== 'ADMIN') {
+      router.push("/")
+    }
+  }, [isLoaded, currentUser.role, router])
 
-  if (currentUser.role !== 'ADMIN') {
-    router.push("/")
-    return null
-  }
+  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
