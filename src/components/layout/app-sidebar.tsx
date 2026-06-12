@@ -96,8 +96,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-2xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="bg-primary h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-            <span className="text-primary-foreground font-bold font-headline text-lg">S</span>
+          <div className="bg-white h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg border border-border overflow-hidden">
+            <svg viewBox="0 0 100 100" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20" stroke="#1E3A8A" strokeWidth="8" strokeLinecap="round"/>
+              <circle cx="28" cy="55" r="5" fill="#EF4444" />
+              <circle cx="65" cy="30" r="5" fill="#EF4444" />
+            </svg>
           </div>
           {state !== "collapsed" && (
             <div className="flex flex-col">

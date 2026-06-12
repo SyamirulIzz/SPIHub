@@ -56,14 +56,15 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] space-y-8 relative z-10 animate-in fade-in zoom-in-95 duration-700">
         <div className="text-center space-y-4">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-primary/80 shadow-2xl shadow-primary/40 mb-2 border border-white/10">
-            <div className="relative h-14 w-14 flex items-center justify-center">
-               <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-               <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-accent rounded-full border-2 border-primary"></div>
+          <div className="inline-flex h-28 w-28 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-primary/20 mb-2 border border-border overflow-hidden">
+            <div className="relative h-20 w-20 flex items-center justify-center">
+               {/* Custom SVG Logo inspired by the provided image */}
+               <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20" stroke="#1E3A8A" strokeWidth="6" strokeLinecap="round"/>
+                  <path d="M35 55C35 45 45 38 55 38C65 38 72 45 72 55C72 65 62 72 50 72C38 72 28 65 28 55" stroke="#1E3A8A" strokeWidth="3" strokeDasharray="2 4"/>
+                  <circle cx="28" cy="55" r="4" fill="#EF4444" />
+                  <circle cx="65" cy="30" r="4" fill="#EF4444" />
+               </svg>
             </div>
           </div>
           <div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -14,8 +15,11 @@ export function MobileHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="text-muted-foreground" />
         <div className="flex items-center gap-1.5 ml-2">
-          <div className="bg-primary h-6 w-6 rounded flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-[10px] font-headline">S</span>
+          <div className="bg-white h-6 w-6 rounded flex items-center justify-center shrink-0 border border-border">
+            <svg viewBox="0 0 100 100" className="w-4 h-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20" stroke="#1E3A8A" strokeWidth="10" strokeLinecap="round"/>
+              <circle cx="28" cy="55" r="6" fill="#EF4444" />
+            </svg>
           </div>
           <span className="font-bold text-sm font-headline tracking-tight text-accent">SPI HUB</span>
         </div>
