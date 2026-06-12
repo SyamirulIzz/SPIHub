@@ -143,9 +143,6 @@ export default function LeavePage() {
                   <span className="text-muted-foreground">Addl Leave:</span>
                   <span className="text-right font-bold">{leaveStats?.additional} Days</span>
                   
-                  <span className="text-muted-foreground">Annual Limit:</span>
-                  <span className="text-right font-bold">{leaveStats?.annualLimit} Days</span>
-                  
                   <span className="text-muted-foreground">Prorated (Jun):</span>
                   <span className="text-right font-bold">{leaveStats?.proratedEntitlement} Days</span>
                 </div>
