@@ -1,52 +1,59 @@
+'use client';
 
-"use client"
-
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useCurrentUser } from "@/hooks/use-current-user"
-import { useToast } from "@/hooks/use-toast"
-import { Lock, Mail, ArrowRight, ShieldCheck, Zap, Info } from "lucide-react"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useToast } from '@/hooks/use-toast';
+import { Lock, Mail, ArrowRight, ShieldCheck, Zap, Info } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { login, currentUser, isLoaded } = useCurrentUser()
-  const { toast } = useToast()
-  const [email, setEmail] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const { login, currentUser, isLoaded } = useCurrentUser();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isLoaded && currentUser) {
-      router.push("/")
+      router.push('/');
     }
-  }, [isLoaded, currentUser, router])
+  }, [isLoaded, currentUser, router]);
 
-  if (!isLoaded || currentUser) return null
+  if (!isLoaded || currentUser) return null;
 
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
-    const success = login(email)
+    const success = login(email);
 
     if (success) {
       toast({
-        title: "Log Masuk Berjaya",
-        description: "Selamat datang ke SPI HUB.",
-      })
-      router.push("/")
+        title: 'Log Masuk Berjaya',
+        description: 'Selamat datang ke SPI HUB.',
+      });
+      router.push('/');
     } else {
       toast({
-        title: "Ralat Log Masuk",
-        description: "Emel tidak ditemui dalam sistem. Sila hubungi Admin.",
-        variant: "destructive",
-      })
-      setIsSubmitting(false)
+        title: 'Ralat Log Masuk',
+        description: 'Emel tidak ditemui dalam sistem. Sila hubungi Admin.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -58,19 +65,40 @@ export default function LoginPage() {
         <div className="text-center space-y-4">
           <div className="inline-flex h-28 w-28 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-primary/20 mb-2 border border-border overflow-hidden">
             <div className="relative h-20 w-20 flex items-center justify-center">
-               <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20" stroke="#1E3A8A" strokeWidth="6" strokeLinecap="round"/>
-                  <path d="M35 55C35 45 45 38 55 38C65 38 72 45 72 55C72 65 62 72 50 72C38 72 28 65 28 55" stroke="#1E3A8A" strokeWidth="3" strokeDasharray="2 4"/>
-                  <circle cx="28" cy="55" r="4" fill="#EF4444" />
-                  <circle cx="65" cy="30" r="4" fill="#EF4444" />
-               </svg>
+              <svg
+                viewBox="0 0 100 100"
+                className="w-full h-full"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M30 50C30 35 45 25 60 25C75 25 85 35 85 50C85 65 70 75 50 75C30 75 15 60 15 45C15 30 30 20 45 20"
+                  stroke="#1E3A8A"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M35 55C35 45 45 38 55 38C65 38 72 45 72 55C72 65 62 72 50 72C38 72 28 65 28 55"
+                  stroke="#1E3A8A"
+                  strokeWidth="3"
+                  strokeDasharray="2 4"
+                />
+                <circle cx="28" cy="55" r="4" fill="#EF4444" />
+                <circle cx="65" cy="30" r="4" fill="#EF4444" />
+              </svg>
             </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold font-headline tracking-tighter text-foreground">SPI HUB</h1>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">System Protocol Information</p>
+            <h1 className="text-3xl font-bold font-headline tracking-tighter text-foreground">
+              SPI HUB
+            </h1>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
+              System Protocol Information
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">Internal HR & Operations Management System</p>
+          <p className="text-sm text-muted-foreground">
+            Internal HR & Operations Management System
+          </p>
         </div>
 
         <Card className="bg-card border-border shadow-2xl border-t-4 border-t-primary">
@@ -79,7 +107,9 @@ export default function LoginPage() {
               <Lock className="w-4 h-4 text-primary" />
               Staff Login
             </CardTitle>
-            <CardDescription>Masukkan emel korporat anda untuk akses.</CardDescription>
+            <CardDescription>
+              Masukkan emel korporat anda untuk akses.
+            </CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
@@ -87,10 +117,10 @@ export default function LoginPage() {
                 <Label htmlFor="email">Work Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input 
-                    id="email" 
-                    type="email" 
-                    placeholder="name@systemprotocol.com" 
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="name@systemprotocol.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex h-10 w-full rounded-md border border-input bg-secondary/30 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 border-border"
@@ -102,27 +132,51 @@ export default function LoginPage() {
               <div className="p-3 rounded-lg bg-secondary/20 border border-border space-y-2">
                 <div className="flex items-center gap-2">
                   <Info className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Demo Accounts:</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                    Demo Accounts:
+                  </span>
                 </div>
                 <div className="grid grid-cols-1 gap-1 text-[9px] text-muted-foreground">
-                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("ahmad@systemprotocol.com")}>
+                  <div
+                    className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors"
+                    onClick={() => setEmail('ahmad@systemprotocol.com')}
+                  >
                     <span>Admin: ahmad@systemprotocol.com</span>
-                    <Badge variant="outline" className="text-[8px] py-0 px-1 border-primary/30">CEO</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[8px] py-0 px-1 border-primary/30"
+                    >
+                      CEO
+                    </Badge>
                   </div>
-                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("siti@systemprotocol.com")}>
+                  <div
+                    className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors"
+                    onClick={() => setEmail('siti@systemprotocol.com')}
+                  >
                     <span>HOD: siti@systemprotocol.com</span>
-                    <Badge variant="outline" className="text-[8px] py-0 px-1">Manager</Badge>
+                    <Badge variant="outline" className="text-[8px] py-0 px-1">
+                      Manager
+                    </Badge>
                   </div>
-                  <div className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors" onClick={() => setEmail("musa@systemprotocol.com")}>
+                  <div
+                    className="flex justify-between items-center hover:text-foreground cursor-pointer transition-colors"
+                    onClick={() => setEmail('musa@systemprotocol.com')}
+                  >
                     <span>Staff: musa@systemprotocol.com</span>
-                    <Badge variant="outline" className="text-[8px] py-0 px-1">Senior</Badge>
+                    <Badge variant="outline" className="text-[8px] py-0 px-1">
+                      Senior
+                    </Badge>
                   </div>
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 text-white font-bold gap-2 py-6">
-                {isSubmitting ? "Authenticating..." : "Login to Workspace"}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-bold gap-2 py-6"
+              >
+                {isSubmitting ? 'Authenticating...' : 'Login to Workspace'}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </CardFooter>
@@ -133,19 +187,24 @@ export default function LoginPage() {
           <div className="flex items-center justify-center gap-6">
             <div className="flex flex-col items-center gap-1 opacity-50">
               <Zap className="w-4 h-4 text-accent" />
-              <span className="text-[10px] uppercase font-bold tracking-widest">Real-time</span>
+              <span className="text-[10px] uppercase font-bold tracking-widest">
+                Real-time
+              </span>
             </div>
             <div className="h-4 w-px bg-border"></div>
             <div className="flex flex-col items-center gap-1 opacity-50">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              <span className="text-[10px] uppercase font-bold tracking-widest">Secure</span>
+              <span className="text-[10px] uppercase font-bold tracking-widest">
+                Secure
+              </span>
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground mt-8">
-            &copy; {new Date().getFullYear()} System Protocol Information Sdn Bhd. <br /> All Rights Reserved.
+            &copy; {new Date().getFullYear()} System Protocol Information Sdn
+            Bhd. <br /> All Rights Reserved.
           </p>
         </footer>
       </div>
     </div>
-  )
+  );
 }
