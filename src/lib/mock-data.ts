@@ -59,16 +59,6 @@ export const USERS: User[] = [
     medicalClaimLimit: 1000
   },
   { 
-    id: 'user-5', 
-    name: 'Farah HR', 
-    email: 'farah@systemprotocol.com', 
-    role: 'HOD', 
-    departmentId: 'dept-4',
-    position: 'HR Manager',
-    annualLeaveLimit: 18,
-    medicalClaimLimit: 1200
-  },
-  { 
     id: 'user-6', 
     name: 'Lim Frontend', 
     email: 'lim@systemprotocol.com', 
@@ -85,16 +75,6 @@ export const USERS: User[] = [
     role: 'STAFF', 
     departmentId: 'dept-1',
     position: 'Backend Specialist',
-    annualLeaveLimit: 14,
-    medicalClaimLimit: 1000
-  },
-  { 
-    id: 'user-8', 
-    name: 'Hafiz Finance', 
-    email: 'hafiz@systemprotocol.com', 
-    role: 'STAFF', 
-    departmentId: 'dept-5',
-    position: 'Accountant',
     annualLeaveLimit: 14,
     medicalClaimLimit: 1000
   },
@@ -237,7 +217,7 @@ export const LEAVE_REQUESTS: LeaveRequest[] = [
   },
   {
     id: 'leave-5',
-    userId: 'user-8',
+    userId: 'user-3',
     leaveType: 'MEDICAL',
     startDate: '2024-05-12',
     endDate: '2024-05-13',
@@ -284,7 +264,7 @@ export const TICKETS: ProjectTicket[] = [
     id: 'tick-4',
     projectId: 'proj-2',
     createdBy: 'user-1',
-    assignedTo: 'user-5',
+    assignedTo: 'user-2',
     subject: 'HR Dashboard Layout Shift',
     description: 'The charts are overlapping the sidebar on Firefox.',
     severity: 'Medium',
@@ -347,7 +327,7 @@ export const CLAIMS: ReimbursementClaim[] = [
   },
   {
     id: 'claim-5',
-    userId: 'user-8',
+    userId: 'user-3',
     date: '2024-05-15',
     amount: 15.00,
     category: 'GENERAL',
