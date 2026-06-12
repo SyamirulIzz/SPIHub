@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
   const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
+  const [syncedTickets, setSyncedTickets] = useState(TICKETS)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -28,16 +30,18 @@ export default function Dashboard() {
     const savedClaims = localStorage.getItem('simulated_claims')
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
     const savedMovements = localStorage.getItem('simulated_movements')
+    const savedTickets = localStorage.getItem('simulated_tickets')
     
     if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
     if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
     if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
+    if (savedTickets) setSyncedTickets(JSON.parse(savedTickets))
   }, [])
   
   if (!isLoaded || !mounted) return null
 
   const pendingClaimsCount = syncedClaims.filter(c => c.status === 'PENDING').length
-  const openTicketsCount = TICKETS.filter(t => t.status !== 'Resolved').length
+  const openTicketsCount = syncedTickets.filter(t => t.status !== 'Resolved' && t.status !== 'Closed').length
   const activeProjectsCount = PROJECTS.filter(p => p.status === 'ACTIVE').length
   const staffOnSiteCount = syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').length
 
@@ -82,10 +86,10 @@ export default function Dashboard() {
                   <div key={mov.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-border">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">
-                        {user?.name.charAt(0)}
+                        {user?.name?.charAt(0) || '?'}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground truncate">{user?.name}</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{user?.name || 'Unknown'}</p>
                         <p className="text-[10px] text-muted-foreground truncate">{mov.destination}</p>
                       </div>
                     </div>

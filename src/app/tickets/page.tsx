@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,13 +17,23 @@ export default function TicketsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summary, setSummary] = useState<ProjectTicketSummaryOutput | null>(null)
+  const [ticketList, setTicketList] = useState(TICKETS)
+  const [mounted, setMounted] = useState(false)
 
-  if (!isLoaded) return null
+  useEffect(() => {
+    setMounted(true)
+    const savedTickets = localStorage.getItem('simulated_tickets')
+    if (savedTickets) {
+      setTicketList(JSON.parse(savedTickets))
+    }
+  }, [])
+
+  if (!isLoaded || !mounted) return null
 
   const handleSummarize = async () => {
     setIsSummarizing(true)
     try {
-      const ticketsInput = TICKETS.map(t => ({
+      const ticketsInput = ticketList.map(t => ({
         ticketId: t.id,
         subject: t.subject,
         description: t.description,
@@ -63,9 +73,11 @@ export default function TicketsPage() {
               {isSummarizing ? "Analyzing Issues..." : "AI Executive Summary"}
             </Button>
           )}
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold gap-2">
-            <Plus className="w-4 h-4" />
-            Create Ticket
+          <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold gap-2">
+            <Link href="/tickets/new">
+              <Plus className="w-4 h-4" />
+              Create Ticket
+            </Link>
           </Button>
         </div>
       </header>
@@ -152,7 +164,7 @@ export default function TicketsPage() {
           </div>
 
           <div className="space-y-3">
-            {TICKETS.map(ticket => {
+            {ticketList.map(ticket => {
               const assigned = USERS.find(u => u.id === ticket.assignedTo)
               return (
                 <Link key={ticket.id} href={`/tickets/${ticket.id}`}>

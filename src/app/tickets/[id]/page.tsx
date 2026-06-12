@@ -1,7 +1,7 @@
 
 "use client"
 
-import { use } from "react"
+import { use, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -26,10 +26,20 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
   const { id } = use(params)
   const router = useRouter()
   const { isLoaded } = useCurrentUser()
-  
-  if (!isLoaded) return null
+  const [ticketList, setTicketList] = useState(TICKETS)
+  const [mounted, setMounted] = useState(false)
 
-  const ticket = TICKETS.find(t => t.id === id)
+  useEffect(() => {
+    setMounted(true)
+    const savedTickets = localStorage.getItem('simulated_tickets')
+    if (savedTickets) {
+      setTicketList(JSON.parse(savedTickets))
+    }
+  }, [])
+  
+  if (!isLoaded || !mounted) return null
+
+  const ticket = ticketList.find(t => t.id === id)
   
   if (!ticket) {
     return (
@@ -45,9 +55,9 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
   const assignee = USERS.find(u => u.id === ticket.assignedTo)
 
   const mockTimeline = [
-    { date: "2024-05-10 11:20", user: creator?.name, action: "Created ticket", detail: "Initial report submitted." },
+    { date: "2024-05-10 11:20", user: creator?.name || 'Unknown', action: "Created ticket", detail: "Initial report submitted." },
     { date: "2024-05-10 14:00", user: "System", action: "Status changed", detail: "Status set to 'In Progress'." },
-    { date: "2024-05-11 09:30", user: assignee?.name, action: "Commented", detail: "Investigating server logs for timeout patterns." },
+    { date: assignee ? "2024-05-11 09:30" : "N/A", user: assignee?.name || 'System', action: "Update", detail: assignee ? "Investigating issues." : "Pending assignment." },
   ]
 
   return (
@@ -169,16 +179,16 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
                 <label className="text-[10px] font-bold text-muted-foreground uppercase">Created By</label>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
-                    {creator?.name.charAt(0)}
+                    {creator?.name?.charAt(0) || '?'}
                   </div>
-                  {creator?.name}
+                  {creator?.name || 'Unknown'}
                 </div>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase">Assigned To</label>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="h-6 w-6 rounded-full bg-accent/20 flex items-center justify-center text-[10px] font-bold text-accent border border-accent/30">
-                    {assignee?.name.charAt(0)}
+                    {assignee?.name?.charAt(0) || 'U'}
                   </div>
                   {assignee?.name || "Unassigned"}
                 </div>
