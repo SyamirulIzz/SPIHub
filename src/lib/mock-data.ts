@@ -1,3 +1,4 @@
+
 import { User, Department, Project, StaffMovement, LeaveRequest, ProjectTicket, ReimbursementClaim } from './types';
 
 export const DEPARTMENTS: Department[] = [
@@ -18,63 +19,81 @@ export const PROJECTS: Project[] = [
 export const USERS: User[] = [
   { 
     id: 'user-1', 
-    name: 'Ahmad Manager', 
+    name: 'AHMAD FAHMI BIN SULAIMAN', 
     email: 'ahmad@systemprotocol.com', 
     role: 'ADMIN', 
     departmentId: 'dept-3',
     position: 'CEO / Management',
-    annualLeaveLimit: 25,
-    medicalClaimLimit: 2000
+    annualLeaveLimit: 21,
+    medicalClaimLimit: 2000,
+    carriedForward: 25,
+    additionalLeave: 0,
+    unpaidLeave: 0
   },
   { 
     id: 'user-2', 
-    name: 'Siti HOD', 
+    name: 'GULSHIRA BT ABD SAMAT KHAN', 
     email: 'siti@systemprotocol.com', 
     role: 'HOD', 
     departmentId: 'dept-1',
     position: 'Head of Engineering',
-    annualLeaveLimit: 20,
-    medicalClaimLimit: 1500
+    annualLeaveLimit: 21,
+    medicalClaimLimit: 1500,
+    carriedForward: 5,
+    additionalLeave: 0,
+    unpaidLeave: 0
   },
   { 
     id: 'user-3', 
-    name: 'Musa Staff', 
+    name: 'MOHAMAD SYAZANI BAHARUDDIN', 
     email: 'musa@systemprotocol.com', 
     role: 'STAFF', 
     departmentId: 'dept-1',
     position: 'Senior Developer',
-    annualLeaveLimit: 14,
-    medicalClaimLimit: 1000
+    annualLeaveLimit: 21,
+    medicalClaimLimit: 1000,
+    carriedForward: 22.5,
+    additionalLeave: 1,
+    unpaidLeave: 0
   },
   { 
     id: 'user-4', 
-    name: 'Zul Logistic', 
+    name: 'MUHAMMAD LUQMAN BIN MOHD RAHIM', 
     email: 'zul@systemprotocol.com', 
     role: 'STAFF', 
     departmentId: 'dept-2',
     position: 'Operations Officer',
-    annualLeaveLimit: 14,
-    medicalClaimLimit: 1000
+    annualLeaveLimit: 21,
+    medicalClaimLimit: 1000,
+    carriedForward: 35,
+    additionalLeave: 1,
+    unpaidLeave: 0
   },
   { 
     id: 'user-6', 
-    name: 'Lim Frontend', 
+    name: 'AMINUDDIN BIN MOHD', 
     email: 'lim@systemprotocol.com', 
     role: 'STAFF', 
     departmentId: 'dept-1',
     position: 'Frontend Engineer',
-    annualLeaveLimit: 14,
-    medicalClaimLimit: 1000
+    annualLeaveLimit: 16,
+    medicalClaimLimit: 1000,
+    carriedForward: 0,
+    additionalLeave: 1,
+    unpaidLeave: 0
   },
   { 
     id: 'user-7', 
-    name: 'Devi Backend', 
+    name: 'SITI MAISARAH BT AB KHALIL', 
     email: 'devi@systemprotocol.com', 
     role: 'STAFF', 
     departmentId: 'dept-1',
     position: 'Backend Specialist',
     annualLeaveLimit: 14,
-    medicalClaimLimit: 1000
+    medicalClaimLimit: 1000,
+    carriedForward: 0,
+    additionalLeave: 0,
+    unpaidLeave: 0
   },
 ];
 

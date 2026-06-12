@@ -1,3 +1,4 @@
+
 export type UserRole = 'ADMIN' | 'HOD' | 'STAFF';
 
 export interface Department {
@@ -14,6 +15,10 @@ export interface User {
   position: string;
   annualLeaveLimit: number;
   medicalClaimLimit: number;
+  // New fields for official leave record
+  carriedForward?: number;
+  additionalLeave?: number;
+  unpaidLeave?: number;
 }
 
 export interface Project {

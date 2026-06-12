@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { USERS, DEPARTMENTS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
+import { USERS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
 import { 
   BarChart3, 
   Users, 
@@ -18,11 +18,11 @@ import {
   Palmtree, 
   TrendingUp, 
   FileText, 
-  AlertCircle,
+  DollarSign,
+  MapPin,
   Clock,
   CheckCircle2,
-  DollarSign,
-  MapPin
+  Calendar
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -36,7 +36,6 @@ export default function AdminReportsPage() {
   const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
   const [syncedMovements, setSyncedMovements] = useState(MOVEMENTS)
-  const [syncedTickets, setSyncedTickets] = useState(TICKETS)
 
   useEffect(() => {
     setMounted(true)
@@ -44,13 +43,11 @@ export default function AdminReportsPage() {
     const savedClaims = localStorage.getItem('simulated_claims')
     const savedLeaves = localStorage.getItem('simulated_leave_requests')
     const savedMovements = localStorage.getItem('simulated_movements')
-    const savedTickets = localStorage.getItem('simulated_tickets')
     
     if (savedUsers) setSyncedUsers(JSON.parse(savedUsers))
     if (savedClaims) setSyncedClaims(JSON.parse(savedClaims))
     if (savedLeaves) setSyncedLeaves(JSON.parse(savedLeaves))
     if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
-    if (savedTickets) setSyncedTickets(JSON.parse(savedTickets))
   }, [])
 
   useEffect(() => {
@@ -72,202 +69,177 @@ export default function AdminReportsPage() {
   const reportsData = useMemo(() => {
     if (!mounted) return null;
 
-    // 1. Leave Balance Per User
-    const leaveBalances = syncedUsers.map(user => {
+    // Prorated entitlement calculation (Example: June is month 6 of 12)
+    const currentMonth = 6;
+    
+    const leaveRecords = syncedUsers.map(user => {
       const taken = syncedLeaves
         .filter(l => l.userId === user.id && l.status === 'APPROVED')
         .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
+      
+      const cf = user.carriedForward || 0;
+      const additional = user.additionalLeave || 0;
+      const annualLimit = user.annualLeaveLimit;
+      const proratedEntitlement = Math.round((annualLimit / 12) * currentMonth);
+      const totalEntitlement = cf + proratedEntitlement;
+      const balance = totalEntitlement - taken;
+      
       return {
         ...user,
+        cf,
+        additional,
+        proratedEntitlement,
+        totalEntitlement,
         taken,
-        balance: Math.max(0, user.annualLeaveLimit - taken)
+        balance,
+        unpaid: user.unpaidLeave || 0
       }
     });
 
-    // 2. Financial Summary
     const totalClaimsApproved = syncedClaims
       .filter(c => c.status === 'APPROVED')
       .reduce((sum, c) => sum + c.amount, 0);
-    const totalClaimsPending = syncedClaims
-      .filter(c => c.status === 'PENDING')
-      .reduce((sum, c) => sum + c.amount, 0);
-    
+
     const categoryExpenses = {
       MEDICAL: syncedClaims.filter(c => c.category === 'MEDICAL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
       TRAVEL: syncedClaims.filter(c => c.category === 'TRAVEL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
       GENERAL: syncedClaims.filter(c => c.category === 'GENERAL' && c.status === 'APPROVED').reduce((sum, c) => sum + c.amount, 0),
     };
 
-    // 3. Operational Performance
-    const resolvedTickets = syncedTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
-    const ticketRate = syncedTickets.length > 0 ? (resolvedTickets / syncedTickets.length) * 100 : 0;
-    
-    const completedMovements = syncedMovements.filter(m => m.status === 'COMPLETED').length;
-    const movementRate = syncedMovements.length > 0 ? (completedMovements / syncedMovements.length) * 100 : 0;
-
-    return { leaveBalances, totalClaimsApproved, totalClaimsPending, categoryExpenses, ticketRate, movementRate };
-  }, [mounted, syncedUsers, syncedLeaves, syncedClaims, syncedTickets, syncedMovements]);
+    return { leaveRecords, totalClaimsApproved, categoryExpenses };
+  }, [mounted, syncedUsers, syncedLeaves, syncedClaims]);
 
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-headline text-foreground flex items-center gap-3">
-            <BarChart3 className="text-primary w-8 h-8" />
-            Executive Dashboard & Reports
-          </h1>
-          <p className="text-muted-foreground mt-1">Laporan strategik untuk pemantauan prestasi dan sumber syarikat.</p>
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+            <BarChart3 className="text-primary w-7 h-7" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold font-headline text-foreground tracking-tight">Executive Dashboard</h1>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">System Protocol Information Sdn Bhd</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 bg-secondary/30 p-2 rounded-lg border border-border">
-          <Badge className="bg-primary/20 text-primary border-primary/30">CEO Access Only</Badge>
-          <span className="text-[10px] text-muted-foreground uppercase font-bold px-2">Confidential</span>
+        <div className="flex items-center gap-3">
+          <Badge className="bg-primary/20 text-primary border-primary/30 h-7 px-3">ADMIN ACCESS</Badge>
+          <div className="text-right">
+             <p className="text-[10px] text-muted-foreground font-bold uppercase">Report Date</p>
+             <p className="text-xs font-bold">09 June 2026</p>
+          </div>
         </div>
       </header>
 
       {/* Top High-Level Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatSummaryCard 
-          title="Total Claims (Approved)" 
-          value={`RM ${reportsData?.totalClaimsApproved.toLocaleString()}`} 
-          icon={DollarSign} 
-          trend="+4.5% vs last month"
-          color="text-emerald-500"
-        />
-        <StatSummaryCard 
-          title="Avg. Ticket Resolution" 
-          value={`${reportsData?.ticketRate.toFixed(1)}%`} 
-          icon={CheckCircle2} 
-          trend="Operational Efficiency"
-          color="text-indigo-500"
-        />
-        <StatSummaryCard 
-          title="Staff Utilization" 
-          value={`${reportsData?.movementRate.toFixed(1)}%`} 
-          icon={TrendingUp} 
-          trend="Site Deployment Rate"
-          color="text-cyan-500"
-        />
-        <StatSummaryCard 
-          title="Active Personnel" 
-          value={syncedUsers.length.toString()} 
-          icon={Users} 
-          trend="Total Headcount"
-          color="text-amber-500"
-        />
+        <StatSummaryCard title="Claims Approved" value={`RM ${reportsData?.totalClaimsApproved.toLocaleString()}`} icon={DollarSign} trend="+4.5% vs Last Month" color="text-emerald-500" />
+        <StatSummaryCard title="Staff Count" value={syncedUsers.length.toString()} icon={Users} trend="Active Payroll" color="text-indigo-500" />
+        <StatSummaryCard title="Active Assignments" value={syncedMovements.filter(m => m.status === 'APPROVED').length.toString()} icon={MapPin} trend="On-Site Deployment" color="text-cyan-500" />
+        <StatSummaryCard title="Pending Approvals" value={(syncedLeaves.filter(l => l.status === 'PENDING').length + syncedClaims.filter(c => c.status === 'PENDING').length).toString()} icon={Clock} trend="Needs Action" color="text-amber-500" />
       </div>
 
       <Tabs defaultValue="leave" className="space-y-6">
-        <TabsList className="bg-secondary/30 border border-border p-1">
-          <TabsTrigger value="leave" className="gap-2 text-xs font-bold">
-            <Palmtree className="w-3.5 h-3.5" /> Staff Leave Balance
+        <TabsList className="bg-secondary/30 border border-border p-1 h-12">
+          <TabsTrigger value="leave" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+            <Palmtree className="w-4 h-4" /> LEAVE RECORD
           </TabsTrigger>
-          <TabsTrigger value="claims" className="gap-2 text-xs font-bold">
-            <Wallet className="w-3.5 h-3.5" /> Financial Analytics
+          <TabsTrigger value="claims" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+            <Wallet className="w-4 h-4" /> FINANCIAL ANALYTICS
           </TabsTrigger>
-          <TabsTrigger value="ops" className="gap-2 text-xs font-bold">
-            <Briefcase className="w-3.5 h-3.5" /> Operational Health
+          <TabsTrigger value="ops" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
+            <Briefcase className="w-4 h-4" /> OPERATIONAL HEALTH
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Staff Leave Balance */}
+        {/* Tab 1: Official Leave Record */}
         <TabsContent value="leave">
           <Card className="bg-card border-border shadow-2xl overflow-hidden">
-            <CardHeader className="bg-secondary/10 border-b border-border">
-              <CardTitle className="text-lg font-headline">Analisis Baki Cuti Kakitangan</CardTitle>
-              <CardDescription>Baki cuti tahunan (Annual Leave) terkumpul untuk tujuan penyelarasan sumber.</CardDescription>
+            <CardHeader className="bg-secondary/10 border-b border-border text-center py-6">
+              <h2 className="text-lg font-bold font-headline uppercase tracking-widest">SYSTEM PROTOCOL INFORMATION SDN BHD</h2>
+              <p className="text-md font-bold mt-1">Leave Record</p>
+              <p className="text-sm font-bold text-accent uppercase">Jun-2026</p>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-secondary/5">
-                  <TableRow>
-                    <TableHead>Employee Name</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead className="text-center">Limit (Days)</TableHead>
-                    <TableHead className="text-center">Taken</TableHead>
-                    <TableHead className="text-center">Balance</TableHead>
-                    <TableHead className="w-[200px]">Utilization</TableHead>
+              <Table className="border-collapse">
+                <TableHeader className="bg-secondary/30">
+                  <TableRow className="border-y-2 border-border/50">
+                    <TableHead className="w-[40px] border-r text-center font-bold text-[10px] text-foreground">No</TableHead>
+                    <TableHead className="w-[280px] border-r font-bold text-[10px] text-foreground">Name</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Balance Leave <br/>carried from 2025 (A)</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Additional <br/>Leave (Raya)</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Entitlement Leave <br/>as at JUNE 2026 (Prorated) B</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1 bg-primary/5">Total Leave <br/>entitlement (A+B)</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Total Leave <br/>Taken as at 06/2026</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[10px] text-foreground leading-tight px-1 bg-accent/5">Balance Leave <br/>as at JUNE 2026</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[10px] text-foreground px-1">Unpaid Leave</TableHead>
+                    <TableHead className="text-center font-bold text-[10px] text-foreground px-1">Entitlement <br/>Leave per year</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reportsData?.leaveBalances.map((user) => {
-                    const usagePercent = (user.taken / user.annualLeaveLimit) * 100;
-                    return (
-                      <TableRow key={user.id} className="hover:bg-secondary/20 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                              {user.name.charAt(0)}
-                            </div>
-                            <span className="font-bold text-xs">{user.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-[10px] text-muted-foreground uppercase font-medium">{user.position}</TableCell>
-                        <TableCell className="text-center font-bold text-xs">{user.annualLeaveLimit}</TableCell>
-                        <TableCell className="text-center text-xs text-red-500 font-bold">{user.taken}</TableCell>
-                        <TableCell className="text-center text-xs text-emerald-500 font-extrabold">{user.balance}</TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-[9px] font-bold text-muted-foreground">
-                              <span>{Math.round(usagePercent)}% used</span>
-                            </div>
-                            <Progress value={usagePercent} className="h-1.5" />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
+                  {reportsData?.leaveRecords.map((record, index) => (
+                    <TableRow key={record.id} className="hover:bg-secondary/20 transition-colors border-b border-border/50">
+                      <TableCell className="border-r text-center text-[10px] py-2">{index + 1}</TableCell>
+                      <TableCell className="border-r font-bold text-[10px] py-2 uppercase tracking-tighter">{record.name}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2 font-medium">{record.cf}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2">{record.additional || ""}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2">{record.proratedEntitlement}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2 font-bold bg-primary/5">{record.totalEntitlement}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2 text-red-500 font-bold">{record.taken}</TableCell>
+                      <TableCell className="border-r text-center text-[12px] py-2 font-extrabold text-emerald-500 bg-accent/5">{record.balance}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2">{record.unpaid || 0}</TableCell>
+                      <TableCell className="text-center text-[11px] py-2 font-bold">{record.annualLeaveLimit}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
+            <div className="p-4 bg-secondary/5 border-t border-border flex justify-between items-center">
+               <p className="text-[10px] font-bold text-muted-foreground">**Data as at 09/06/2026</p>
+               <div className="flex gap-4">
+                  <Badge variant="outline" className="text-[9px] border-emerald-500/20 text-emerald-500">Auto-Calculated</Badge>
+                  <Badge variant="outline" className="text-[9px] border-primary/20 text-primary">HR Official Format</Badge>
+               </div>
+            </div>
           </Card>
         </TabsContent>
 
         {/* Tab 2: Financial Analytics */}
         <TabsContent value="claims">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1 bg-card border-border shadow-lg">
+            <Card className="bg-card border-border shadow-lg">
               <CardHeader>
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-emerald-500" />
-                  Expenses by Category
+                  <DollarSign className="w-4 h-4 text-emerald-500" /> Expenses by Category
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <CategoryExpenseRow label="Medical Claims" amount={reportsData?.categoryExpenses.MEDICAL || 0} color="bg-red-500" total={reportsData?.totalClaimsApproved || 1} />
                 <CategoryExpenseRow label="Travel & Fuel" amount={reportsData?.categoryExpenses.TRAVEL || 0} color="bg-blue-500" total={reportsData?.totalClaimsApproved || 1} />
                 <CategoryExpenseRow label="General / Misc" amount={reportsData?.categoryExpenses.GENERAL || 0} color="bg-amber-500" total={reportsData?.totalClaimsApproved || 1} />
-                
-                <div className="pt-4 mt-4 border-t border-border">
-                   <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">Liability Exposure</p>
-                   <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                      <span className="text-xs font-bold text-amber-500">Pending Approval</span>
-                      <span className="text-sm font-extrabold">RM {reportsData?.totalClaimsPending.toLocaleString()}</span>
-                   </div>
-                </div>
               </CardContent>
             </Card>
 
             <Card className="md:col-span-2 bg-card border-border shadow-lg overflow-hidden">
                <CardHeader className="bg-secondary/10 border-b border-border">
-                  <CardTitle className="text-sm font-bold">Recent Approved Reimbursements</CardTitle>
+                  <CardTitle className="text-sm font-bold">Approved Financial Outflow</CardTitle>
                </CardHeader>
                <CardContent className="p-0">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-secondary/5">
                       <TableRow>
-                        <TableHead>Staff</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-[10px]">Staff</TableHead>
+                        <TableHead className="text-[10px]">Category</TableHead>
+                        <TableHead className="text-[10px]">Date</TableHead>
+                        <TableHead className="text-right text-[10px]">Amount</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {syncedClaims.filter(c => c.status === 'APPROVED').slice(0, 8).map(claim => {
+                      {syncedClaims.filter(c => c.status === 'APPROVED').map(claim => {
                         const user = syncedUsers.find(u => u.id === claim.userId)
                         return (
-                          <TableRow key={claim.id} className="text-[11px]">
+                          <TableRow key={claim.id} className="text-[11px] border-b border-border/30">
                             <TableCell className="font-bold">{user?.name}</TableCell>
                             <TableCell><Badge variant="outline" className="text-[9px]">{claim.category}</Badge></TableCell>
                             <TableCell>{claim.date}</TableCell>
@@ -288,39 +260,7 @@ export default function AdminReportsPage() {
               <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="text-lg font-headline flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-500" />
-                    Helpdesk Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-secondary/20 border border-border text-center">
-                       <p className="text-[10px] font-bold text-muted-foreground uppercase">Total Tickets</p>
-                       <p className="text-2xl font-bold mt-1">{syncedTickets.length}</p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-                       <p className="text-[10px] font-bold text-emerald-500 uppercase">Resolved</p>
-                       <p className="text-2xl font-bold mt-1 text-emerald-500">{syncedTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span>Resolution Rate</span>
-                      <span>{reportsData?.ticketRate.toFixed(1)}%</span>
-                    </div>
-                    <Progress value={reportsData?.ticketRate} className="h-2 bg-indigo-500/10" />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground italic">
-                    * KPI Sasaran: 85% resolusi dalam tempoh 7 hari bekerja.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg font-headline flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-cyan-500" />
-                    Site Deployment Stats
+                    <FileText className="w-5 h-5 text-indigo-500" /> Site Deployment Overview
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -333,7 +273,7 @@ export default function AdminReportsPage() {
                           <div key={cat} className="space-y-1">
                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
                               <span>{cat.replace('_', ' ')}</span>
-                              <span>{count} Movements ({Math.round(percent)}%)</span>
+                              <span>{count} Assignments ({Math.round(percent)}%)</span>
                             </div>
                             <Progress value={percent} className="h-1.5" />
                           </div>
@@ -342,36 +282,50 @@ export default function AdminReportsPage() {
                    </div>
                 </CardContent>
               </Card>
+
+              <Card className="bg-card border-border overflow-hidden">
+                <CardHeader className="bg-secondary/10 border-b border-border">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Field Staff
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableBody>
+                      {syncedMovements.filter(m => m.status === 'APPROVED' || m.status === 'PENDING').map(mov => {
+                        const user = syncedUsers.find(u => u.id === mov.userId)
+                        return (
+                          <TableRow key={mov.id} className="text-[11px]">
+                            <TableCell className="font-bold">{user?.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{mov.destination}</TableCell>
+                            <TableCell className="text-right"><Badge className="bg-primary/10 text-primary text-[9px]">{mov.status}</Badge></TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
            </div>
         </TabsContent>
       </Tabs>
-
-      <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-4">
-         <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-         <div>
-            <h4 className="text-sm font-bold text-primary">CEO Privacy Disclaimer</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Laporan ini mengandungi data sulit syarikat termasuk butiran kewangan dan kehadiran kakitangan. Akses adalah terhad kepada Pengurusan Tertinggi sahaja untuk tujuan perancangan strategik syarikat.
-            </p>
-         </div>
-      </div>
     </div>
   )
 }
 
 function StatSummaryCard({ title, value, icon: Icon, trend, color }: any) {
   return (
-    <Card className="bg-card border-border hover:border-primary/50 transition-all">
+    <Card className="bg-card border-border hover:border-primary/50 transition-all shadow-lg">
       <CardContent className="pt-6">
         <div className="flex justify-between items-start">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
             <div className={cn("text-2xl font-bold font-headline", color)}>{value}</div>
-            <p className="text-[9px] text-muted-foreground flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5" /> {trend}
+            <p className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold">
+               {trend}
             </p>
           </div>
-          <div className={cn("p-2 rounded-lg bg-secondary/50 border border-border", color)}>
+          <div className={cn("p-2.5 rounded-xl bg-secondary/50 border border-border shadow-inner", color)}>
             <Icon className="w-5 h-5" />
           </div>
         </div>
