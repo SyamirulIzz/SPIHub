@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TICKETS, PROJECTS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Ticket, Search, Plus, Sparkles, AlertCircle, Clock, CheckCircle2, ChevronRight } from "lucide-react"
+import { Ticket, Search, Plus, Sparkles, AlertCircle, Clock, CheckCircle2, ChevronRight, FileText } from "lucide-react"
 import { summarizeProjectTickets, ProjectTicketSummaryOutput } from "@/ai/flows/summarize-project-tickets"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -180,7 +179,12 @@ export default function TicketsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
+                            {ticket.attachmentUrl && (
+                              <FileText className="w-3.5 h-3.5 text-primary shrink-0" title="Has attachment" />
+                            )}
+                          </div>
                           <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                             {new Date(ticket.createdAt).toLocaleDateString()}
                           </span>
@@ -190,9 +194,9 @@ export default function TicketsPage() {
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
-                                  {assigned?.name.charAt(0)}
+                                  {assigned?.name?.charAt(0) || 'U'}
                                 </div>
-                                <span className="text-[10px] text-muted-foreground">Assigned: <span className="text-foreground font-semibold">{assigned?.name}</span></span>
+                                <span className="text-[10px] text-muted-foreground">Assigned: <span className="text-foreground font-semibold">{assigned?.name || 'Unassigned'}</span></span>
                             </div>
                             <div className="flex items-center gap-1 text-[10px]">
                                 {ticket.status === 'Resolved' ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Clock className="w-3 h-3 text-amber-500" />}

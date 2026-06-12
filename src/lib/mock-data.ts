@@ -181,7 +181,8 @@ export const TICKETS: ProjectTicket[] = [
     description: 'Users reporting frequent session timeouts in the AADK portal.',
     severity: 'High',
     status: 'In Progress',
-    createdAt: '2024-05-10T11:20:00'
+    createdAt: '2024-05-10T11:20:00',
+    attachmentUrl: 'https://picsum.photos/seed/tick1-doc/800/600'
   },
   {
     id: 'tick-3',

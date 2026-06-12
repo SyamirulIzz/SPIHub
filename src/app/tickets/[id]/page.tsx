@@ -1,4 +1,3 @@
-
 "use client"
 
 import { use, useState, useEffect } from "react"
@@ -18,9 +17,13 @@ import {
   MessageSquare, 
   Clock, 
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  FileText,
+  Eye
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import Image from "next/image"
 
 export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -107,6 +110,45 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
             </CardContent>
           </Card>
 
+          {ticket.attachmentUrl && (
+            <Card className="bg-card border-border shadow-xl">
+              <CardHeader className="bg-secondary/10 border-b border-border">
+                <CardTitle className="text-lg font-headline flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Attachment / Document
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded bg-primary/10">
+                      <FileText className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">Screenshot_Evidence.png</p>
+                      <p className="text-[10px] text-muted-foreground">Attached with ticket creation</p>
+                    </div>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Eye className="w-4 h-4" /> View
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl bg-card border-border">
+                      <DialogHeader>
+                        <DialogTitle className="font-headline">Lampiran Tiket {ticket.id}</DialogTitle>
+                      </DialogHeader>
+                      <div className="relative aspect-video rounded-xl overflow-hidden border border-border mt-4">
+                        <Image src={ticket.attachmentUrl} alt="Ticket Attachment" fill className="object-cover" />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="bg-card border-border shadow-xl">
             <CardHeader className="bg-secondary/10 border-b border-border">
               <CardTitle className="text-lg font-headline flex items-center gap-2">
@@ -138,12 +180,6 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-border"></div>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">End of History</span>
-            <div className="flex-1 h-px bg-border"></div>
-          </div>
         </div>
 
         <div className="space-y-6">

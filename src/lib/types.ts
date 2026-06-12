@@ -65,6 +65,7 @@ export interface ProjectTicket {
   severity: 'Low' | 'Medium' | 'High';
   status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
   createdAt: string;
+  attachmentUrl?: string;
 }
 
 export interface ReimbursementClaim {

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -11,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Send, Ticket, AlertCircle, Briefcase } from "lucide-react"
+import { ArrowLeft, Send, Ticket, AlertCircle, Briefcase, Upload } from "lucide-react"
 import { PROJECTS, TICKETS } from "@/lib/mock-data"
 
 export default function NewTicketPage() {
@@ -57,7 +56,8 @@ export default function NewTicketPage() {
       description: formData.description,
       severity: formData.severity,
       status: 'Open' as any,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      attachmentUrl: 'https://picsum.photos/seed/ticket-doc/800/600' // Simulated attachment
     }
 
     const updatedTickets = [newTicket, ...currentTickets]
@@ -150,6 +150,18 @@ export default function NewTicketPage() {
                 className="min-h-[150px] bg-secondary/30 border-border"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="attachment" className="flex items-center gap-2">
+                <Upload className="w-3.5 h-3.5" /> Attachment / Document (Screenshot, Logs, etc.)
+              </Label>
+              <Input 
+                id="attachment" 
+                type="file" 
+                className="bg-secondary/30 border-border text-xs cursor-pointer file:bg-primary file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:mr-2"
+              />
+              <p className="text-[10px] text-muted-foreground italic">Muat naik bukti atau tangkapan skrin untuk membantu pasukan teknikal.</p>
             </div>
           </CardContent>
           <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">
