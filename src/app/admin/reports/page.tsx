@@ -41,7 +41,7 @@ export default function AdminReportsPage() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   
-  // Data State
+  // Data State - Sync from LocalStorage to match other pages
   const [syncedUsers, setSyncedUsers] = useState(USERS)
   const [syncedClaims, setSyncedClaims] = useState(CLAIMS)
   const [syncedLeaves, setSyncedLeaves] = useState(LEAVE_REQUESTS)
@@ -91,7 +91,9 @@ export default function AdminReportsPage() {
       const additional = user.additionalLeave || 0;
       const annualLimit = user.annualLeaveLimit;
       const proratedEntitlement = Math.round((annualLimit / 12) * currentMonth);
-      const totalEntitlement = cf + proratedEntitlement;
+      
+      // FORMULA SYNC: CF (A) + Prorated (B) + Additional (Raya)
+      const totalEntitlement = cf + proratedEntitlement + additional;
       const balance = totalEntitlement - taken;
       
       return {
@@ -131,6 +133,39 @@ export default function AdminReportsPage() {
     }, 1000);
   };
 
+  const handleExportExcel = () => {
+    toast({
+        title: "Menjana Fail Excel",
+        description: "Dokumen CSV sedang dimuat turun.",
+    });
+    
+    if (!reportsData) return;
+
+    const headers = ["No", "Name", "CF Leave", "Additional", "Prorated", "Total Entitlement", "Taken", "Balance", "Unpaid", "Annual Limit"];
+    const rows = reportsData.leaveRecords.map((r, index) => [
+        index + 1,
+        r.name,
+        r.cf,
+        r.additional,
+        r.proratedEntitlement,
+        r.totalEntitlement,
+        r.taken,
+        r.balance,
+        r.unpaid,
+        r.annualLeaveLimit
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SPI_Leave_Report_June_2026.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null;
 
   return (
@@ -163,6 +198,10 @@ export default function AdminReportsPage() {
               <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
                 <FileDown className="w-4 h-4 text-red-500" />
                 Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                Export as Excel (CSV)
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -215,7 +254,7 @@ export default function AdminReportsPage() {
                     <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Balance Leave <br/>carried from 2025 (A)</TableHead>
                     <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Additional <br/>Leave (Raya)</TableHead>
                     <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Entitlement Leave <br/>as at JUNE 2026 (Prorated) B</TableHead>
-                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1 bg-primary/5">Total Leave <br/>entitlement (A+B)</TableHead>
+                    <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1 bg-primary/5">Total Leave <br/>entitlement (A+B+Raya)</TableHead>
                     <TableHead className="border-r text-center font-bold text-[9px] text-foreground leading-tight px-1">Total Leave <br/>Taken as at 06/2026</TableHead>
                     <TableHead className="border-r text-center font-bold text-[10px] text-foreground leading-tight px-1 bg-accent/5">Balance Leave <br/>as at JUNE 2026</TableHead>
                     <TableHead className="border-r text-center font-bold text-[10px] text-foreground px-1">Unpaid Leave</TableHead>
@@ -228,7 +267,7 @@ export default function AdminReportsPage() {
                       <TableCell className="border-r text-center text-[10px] py-2">{index + 1}</TableCell>
                       <TableCell className="border-r font-bold text-[10px] py-2 uppercase tracking-tighter">{record.name}</TableCell>
                       <TableCell className="border-r text-center text-[11px] py-2 font-medium">{record.cf}</TableCell>
-                      <TableCell className="border-r text-center text-[11px] py-2">{record.additional || ""}</TableCell>
+                      <TableCell className="border-r text-center text-[11px] py-2">{record.additional || "0"}</TableCell>
                       <TableCell className="border-r text-center text-[11px] py-2">{record.proratedEntitlement}</TableCell>
                       <TableCell className="border-r text-center text-[11px] py-2 font-bold bg-primary/5">{record.totalEntitlement}</TableCell>
                       <TableCell className="border-r text-center text-[11px] py-2 text-red-500 font-bold">{record.taken}</TableCell>
