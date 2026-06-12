@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { use, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,9 +14,9 @@ import { ArrowLeft, Save, Ticket, AlertCircle, Briefcase, Upload } from "lucide-
 import { PROJECTS, TICKETS } from "@/lib/mock-data"
 
 export default function EditTicketPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
   const resolvedParams = use(params)
   const id = resolvedParams.id
+  const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)

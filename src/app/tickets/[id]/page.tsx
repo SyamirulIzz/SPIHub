@@ -1,4 +1,3 @@
-
 "use client"
 
 import { use, useState, useEffect } from "react"
@@ -30,9 +29,9 @@ import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 
 export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
   const resolvedParams = use(params)
   const id = resolvedParams.id
+  const router = useRouter()
   const { isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [ticketList, setTicketList] = useState(TICKETS)

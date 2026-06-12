@@ -14,9 +14,9 @@ import { ArrowLeft, Save, Briefcase, Info } from "lucide-react"
 import { PROJECTS } from "@/lib/mock-data"
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
   const resolvedParams = use(params)
   const id = resolvedParams.id
+  const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
@@ -43,12 +43,12 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   }, [id])
 
   useEffect(() => {
-    if (isLoaded && currentUser.role !== 'ADMIN') {
+    if (isLoaded && currentUser?.role !== 'ADMIN') {
       router.push("/projects")
     }
-  }, [isLoaded, currentUser.role, router])
+  }, [isLoaded, currentUser?.role, router])
 
-  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
+  if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -156,7 +156,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting} className="w-full md:flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2">
-              <ArrowLeft className="w-4 h-4" />
+              <Save className="w-4 h-4" />
               {isSubmitting ? "Saving..." : "Save Project Changes"}
             </Button>
           </CardFooter>

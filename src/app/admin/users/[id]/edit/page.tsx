@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, use } from "react"
@@ -14,9 +13,9 @@ import { ArrowLeft, UserCog, Shield, Building, Briefcase, Save } from "lucide-re
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
   const resolvedParams = use(params)
   const id = resolvedParams.id
+  const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
@@ -51,12 +50,12 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
   }, [id])
 
   useEffect(() => {
-    if (isLoaded && currentUser.role !== 'ADMIN') {
+    if (isLoaded && currentUser?.role !== 'ADMIN') {
       router.push("/")
     }
-  }, [isLoaded, currentUser.role, router])
+  }, [isLoaded, currentUser?.role, router])
 
-  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
+  if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

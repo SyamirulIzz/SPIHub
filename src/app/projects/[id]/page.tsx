@@ -23,9 +23,9 @@ import {
 import { cn } from "@/lib/utils"
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
   const resolvedParams = use(params)
   const id = resolvedParams.id
+  const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
   const [mounted, setMounted] = useState(false)
   const [projectList, setProjectList] = useState(PROJECTS)
@@ -51,7 +51,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     )
   }
 
-  const isAdmin = currentUser.role === 'ADMIN'
+  const isAdmin = currentUser?.role === 'ADMIN'
   
   // Simulated stats for this project
   const projectTickets = TICKETS.filter(t => t.projectId === project.id)
