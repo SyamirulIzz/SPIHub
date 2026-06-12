@@ -7,7 +7,8 @@ import {
   CalendarDays, 
   MapPin, 
   Palmtree, 
-  Ticket 
+  Ticket,
+  WalletCards
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,11 @@ const navItems = [
     title: "Leave",
     url: "/leave",
     icon: Palmtree,
+  },
+  {
+    title: "Claims",
+    url: "/claims",
+    icon: WalletCards,
   },
   {
     title: "Support",
