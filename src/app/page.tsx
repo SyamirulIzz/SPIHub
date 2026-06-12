@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { USERS, PROJECTS, TICKETS, CLAIMS, MOVEMENTS, LEAVE_REQUESTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { 
   Users, 
   Briefcase, 
@@ -14,8 +14,15 @@ import {
   WalletIcon, 
   CalendarCheck2, 
   TrendingUp,
-  MapPin
+  MapPin,
+  Info
 } from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function Dashboard() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -37,6 +44,25 @@ export default function Dashboard() {
     if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
     if (savedTickets) setSyncedTickets(JSON.parse(savedTickets))
   }, [])
+
+  // Pengiraan KPI Dinamik
+  const kpiEfficiency = useMemo(() => {
+    if (!mounted) return 0;
+    
+    // 1. Ticket Efficiency (Resolved/Closed vs Total)
+    const totalTickets = syncedTickets.length;
+    const resolvedTickets = syncedTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+    const ticketRate = totalTickets > 0 ? (resolvedTickets / totalTickets) : 1;
+
+    // 2. Movement Efficiency (Completed vs Total)
+    const totalMovements = syncedMovements.length;
+    const completedMovements = syncedMovements.filter(m => m.status === 'COMPLETED').length;
+    const movementRate = totalMovements > 0 ? (completedMovements / totalMovements) : 1;
+
+    // Purata Kecekapan (Diberikan pemberat atau purata mudah)
+    const average = ((ticketRate + movementRate) / 2) * 100;
+    return Math.round(average * 10) / 10; // 1 decimal place
+  }, [syncedTickets, syncedMovements, mounted]);
   
   if (!isLoaded || !mounted) return null
 
@@ -54,13 +80,28 @@ export default function Dashboard() {
             Hi, <span className="text-accent font-semibold">{currentUser.name}</span>. Data dikemaskini secara automatik.
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-xl border border-border max-w-fit">
-          <TrendingUp className="text-accent w-4 h-4" />
-          <div className="flex flex-col">
-            <span className="text-[10px] text-muted-foreground uppercase font-bold">Company KPI</span>
-            <span className="text-xs font-bold text-foreground">98.2% Efficiency</span>
-          </div>
-        </div>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-xl border border-border max-w-fit cursor-help transition-all hover:bg-secondary/50">
+                <TrendingUp className="text-accent w-4 h-4" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1">
+                    Company KPI <Info className="w-2.5 h-2.5 opacity-50" />
+                  </span>
+                  <span className="text-xs font-bold text-foreground">{kpiEfficiency}% Efficiency</span>
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-card border-border p-3 max-w-xs">
+              <p className="text-[10px] font-bold uppercase text-accent mb-1">Nota Pengiraan:</p>
+              <p className="text-[10px] leading-relaxed text-muted-foreground">
+                Kecekapan dikira berdasarkan nisbah penyelesaian tiket bantuan dan status penyiapan log pergerakan site kakitangan secara real-time.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
