@@ -120,7 +120,7 @@ export function AppSidebar({ className }: { className?: string }) {
           {state !== "collapsed" && (
             <div className="flex flex-col">
               <span className="font-bold text-lg font-headline tracking-tight text-foreground leading-tight">SPI HUB</span>
-              <span className="text-[10px] text-accent font-bold uppercase tracking-widest leading-none mt-0.5">System Protocol</span>
+              <span className="text-[10px] text-accent font-bold uppercase tracking-widest leading-none mt-0.5">Changing the way you works</span>
             </div>
           )}
         </div>
