@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TICKETS, PROJECTS, USERS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Ticket, Search, Plus, Sparkles, AlertCircle, Clock, CheckCircle2 } from "lucide-react"
+import { Ticket, Search, Plus, Sparkles, AlertCircle, Clock, CheckCircle2, ChevronRight } from "lucide-react"
 import { summarizeProjectTickets, ProjectTicketSummaryOutput } from "@/ai/flows/summarize-project-tickets"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 export default function TicketsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
@@ -154,39 +155,44 @@ export default function TicketsPage() {
             {TICKETS.map(ticket => {
               const assigned = USERS.find(u => u.id === ticket.assignedTo)
               return (
-                <Card key={ticket.id} className="bg-card border-border hover:border-primary/50 transition-all group">
-                  <CardContent className="p-5 flex items-start gap-5">
-                    <div className={cn(
-                      "h-10 w-10 rounded-xl shrink-0 flex items-center justify-center border",
-                      ticket.severity === 'High' ? "bg-red-500/10 border-red-500/20 text-red-500" : 
-                      ticket.severity === 'Medium' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
-                      "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                    )}>
-                      <Ticket className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {new Date(ticket.createdAt).toLocaleDateString()}
-                        </span>
+                <Link key={ticket.id} href={`/tickets/${ticket.id}`}>
+                  <Card className="bg-card border-border hover:border-primary/50 transition-all group mb-3 cursor-pointer">
+                    <CardContent className="p-5 flex items-start gap-5">
+                      <div className={cn(
+                        "h-10 w-10 rounded-xl shrink-0 flex items-center justify-center border",
+                        ticket.severity === 'High' ? "bg-red-500/10 border-red-500/20 text-red-500" : 
+                        ticket.severity === 'Medium' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                        "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                      )}>
+                        <Ticket className="w-5 h-5" />
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ticket.description}</p>
-                      <div className="flex items-center gap-4">
-                         <div className="flex items-center gap-1.5">
-                            <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
-                              {assigned?.name.charAt(0)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-bold text-foreground truncate group-hover:text-accent transition-colors">{ticket.subject}</h4>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ticket.description}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
+                                  {assigned?.name.charAt(0)}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">Assigned: <span className="text-foreground font-semibold">{assigned?.name}</span></span>
                             </div>
-                            <span className="text-[10px] text-muted-foreground">Assigned: <span className="text-foreground font-semibold">{assigned?.name}</span></span>
-                         </div>
-                         <div className="flex items-center gap-1 text-[10px]">
-                            {ticket.status === 'Resolved' ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Clock className="w-3 h-3 text-amber-500" />}
-                            <span className="text-muted-foreground">{ticket.status}</span>
-                         </div>
+                            <div className="flex items-center gap-1 text-[10px]">
+                                {ticket.status === 'Resolved' ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Clock className="w-3 h-3 text-amber-500" />}
+                                <span className="text-muted-foreground">{ticket.status}</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               )
             })}
           </div>
