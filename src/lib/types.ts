@@ -15,6 +15,7 @@ export interface User {
   position: string;
   annualLeaveLimit: number;
   medicalClaimLimit: number;
+  salary?: number;
   // New fields for official leave record
   carriedForward?: number;
   additionalLeave?: number;

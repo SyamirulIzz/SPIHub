@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2, Edit3 } from "lucide-react"
+import { UserPlus, MoreVertical, ShieldCheck, Mail, Building2, UserCircle2, Edit3, DollarSign } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
@@ -31,12 +31,12 @@ export default function UserManagementPage() {
   }, [])
 
   useEffect(() => {
-    if (isLoaded && currentUser.role !== 'ADMIN') {
+    if (isLoaded && currentUser?.role !== 'ADMIN') {
       router.push("/")
     }
-  }, [isLoaded, currentUser.role, router])
+  }, [isLoaded, currentUser?.role, router])
 
-  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
+  if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null
 
   const handleAction = (action: string, userName: string) => {
     toast({
@@ -78,6 +78,7 @@ export default function UserManagementPage() {
                   <TableHead className="w-[300px]">Employee</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Basic Salary</TableHead>
                   <TableHead>Leave Limit</TableHead>
                   <TableHead>Claim Limit</TableHead>
                   <TableHead className="text-right">Action</TableHead>
@@ -115,6 +116,9 @@ export default function UserManagementPage() {
                         )}>
                           {user.role}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm font-bold text-emerald-500">
+                        RM {user.salary?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                       </TableCell>
                       <TableCell className="text-sm font-semibold">{user.annualLeaveLimit} Days</TableCell>
                       <TableCell className="text-sm font-semibold text-accent">

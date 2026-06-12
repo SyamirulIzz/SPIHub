@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, use } from "react"
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, UserCog, Shield, Building, Briefcase, Save } from "lucide-react"
+import { ArrowLeft, UserCog, Shield, Building, Briefcase, Save, DollarSign } from "lucide-react"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
@@ -28,7 +29,8 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     departmentId: "",
     role: "STAFF",
     annualLeaveLimit: "14",
-    medicalClaimLimit: "1000"
+    medicalClaimLimit: "1000",
+    salary: "0"
   })
 
   useEffect(() => {
@@ -44,7 +46,8 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         departmentId: userToEdit.departmentId,
         role: userToEdit.role,
         annualLeaveLimit: userToEdit.annualLeaveLimit.toString(),
-        medicalClaimLimit: userToEdit.medicalClaimLimit.toString()
+        medicalClaimLimit: userToEdit.medicalClaimLimit.toString(),
+        salary: (userToEdit.salary || 0).toString()
       })
     }
   }, [id])
@@ -69,6 +72,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
           ...formData,
           annualLeaveLimit: parseInt(formData.annualLeaveLimit),
           medicalClaimLimit: parseInt(formData.medicalClaimLimit),
+          salary: parseFloat(formData.salary),
           role: formData.role as any
         }
       }
@@ -182,6 +186,23 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="salary" className="flex items-center gap-2">
+                  <DollarSign className="w-3.5 h-3.5" /> Basic Salary (RM)
+                </Label>
+                <Input 
+                  id="salary"
+                  type="number"
+                  step="0.01"
+                  value={formData.salary}
+                  onChange={(e) => setFormData({...formData, salary: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <Label htmlFor="annualLeave">Annual Leave Limit (Days)</Label>
                 <Input 
                   id="annualLeave"
@@ -192,18 +213,17 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
                   required
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="medicalClaim">Medical Claim Limit (RM)</Label>
-              <Input 
-                id="medicalClaim"
-                type="number"
-                value={formData.medicalClaimLimit}
-                onChange={(e) => setFormData({...formData, medicalClaimLimit: e.target.value})}
-                className="bg-secondary/30 border-border"
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="medicalClaim">Medical Claim Limit (RM)</Label>
+                <Input 
+                  id="medicalClaim"
+                  type="number"
+                  value={formData.medicalClaimLimit}
+                  onChange={(e) => setFormData({...formData, medicalClaimLimit: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
             </div>
           </CardContent>
           <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">

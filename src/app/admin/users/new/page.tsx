@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, UserPlus, Shield, Building, Briefcase } from "lucide-react"
+import { ArrowLeft, UserPlus, Shield, Building, Briefcase, DollarSign } from "lucide-react"
 import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function NewStaffPage() {
@@ -27,7 +27,8 @@ export default function NewStaffPage() {
     departmentId: "",
     role: "STAFF",
     annualLeaveLimit: "14",
-    medicalClaimLimit: "1000"
+    medicalClaimLimit: "1000",
+    salary: "0"
   })
 
   useEffect(() => {
@@ -35,12 +36,12 @@ export default function NewStaffPage() {
   }, [])
 
   useEffect(() => {
-    if (isLoaded && currentUser.role !== 'ADMIN') {
+    if (isLoaded && currentUser?.role !== 'ADMIN') {
       router.push("/")
     }
-  }, [isLoaded, currentUser.role, router])
+  }, [isLoaded, currentUser?.role, router])
 
-  if (!isLoaded || !mounted || currentUser.role !== 'ADMIN') return null
+  if (!isLoaded || !mounted || currentUser?.role !== 'ADMIN') return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,6 +62,7 @@ export default function NewStaffPage() {
       id: `user-${Date.now()}`,
       annualLeaveLimit: parseInt(formData.annualLeaveLimit),
       medicalClaimLimit: parseInt(formData.medicalClaimLimit),
+      salary: parseFloat(formData.salary),
       role: formData.role as any
     }
 
@@ -173,6 +175,23 @@ export default function NewStaffPage() {
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="salary" className="flex items-center gap-2">
+                  <DollarSign className="w-3.5 h-3.5" /> Basic Salary (RM)
+                </Label>
+                <Input 
+                  id="salary"
+                  type="number"
+                  step="0.01"
+                  value={formData.salary}
+                  onChange={(e) => setFormData({...formData, salary: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <Label htmlFor="annualLeave">Annual Leave Limit (Days)</Label>
                 <Input 
                   id="annualLeave"
@@ -183,18 +202,17 @@ export default function NewStaffPage() {
                   required
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="medicalClaim">Medical Claim Limit (RM)</Label>
-              <Input 
-                id="medicalClaim"
-                type="number"
-                value={formData.medicalClaimLimit}
-                onChange={(e) => setFormData({...formData, medicalClaimLimit: e.target.value})}
-                className="bg-secondary/30 border-border"
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="medicalClaim">Medical Claim Limit (RM)</Label>
+                <Input 
+                  id="medicalClaim"
+                  type="number"
+                  value={formData.medicalClaimLimit}
+                  onChange={(e) => setFormData({...formData, medicalClaimLimit: e.target.value})}
+                  className="bg-secondary/30 border-border"
+                  required
+                />
+              </div>
             </div>
           </CardContent>
           <CardFooter className="bg-secondary/10 border-t border-border p-6 flex flex-col md:flex-row justify-between gap-4">
