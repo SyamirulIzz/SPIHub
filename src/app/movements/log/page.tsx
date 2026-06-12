@@ -174,6 +174,9 @@ export default function LogMovementPage() {
                             setIsStartOpen(false)
                           }
                         }}
+                        captionLayout="dropdown"
+                        startMonth={new Date(2020, 0)}
+                        endMonth={new Date(2030, 11)}
                         initialFocus
                       />
                     </PopoverContent>
@@ -214,6 +217,9 @@ export default function LogMovementPage() {
                             setIsEndOpen(false)
                           }
                         }}
+                        captionLayout="dropdown"
+                        startMonth={new Date(2020, 0)}
+                        endMonth={new Date(2030, 11)}
                         initialFocus
                       />
                     </PopoverContent>

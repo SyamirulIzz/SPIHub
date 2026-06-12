@@ -149,6 +149,9 @@ export default function ApplyLeavePage() {
                         setStartDate(date)
                         setIsStartOpen(false)
                       }}
+                      captionLayout="dropdown"
+                      startMonth={new Date(2020, 0)}
+                      endMonth={new Date(2030, 11)}
                       initialFocus
                     />
                   </PopoverContent>
@@ -180,6 +183,9 @@ export default function ApplyLeavePage() {
                         setEndDate(date)
                         setIsEndOpen(false)
                       }}
+                      captionLayout="dropdown"
+                      startMonth={new Date(2020, 0)}
+                      endMonth={new Date(2030, 11)}
                       initialFocus
                     />
                   </PopoverContent>
