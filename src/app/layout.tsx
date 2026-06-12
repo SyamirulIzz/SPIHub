@@ -17,16 +17,17 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded && !currentUser && pathname !== "/login") {
-      router.push("/login");
-    }
-    if (isLoaded && currentUser && pathname === "/login") {
-      router.push("/");
+    if (isLoaded) {
+      if (!currentUser && pathname !== "/login") {
+        router.replace("/login");
+      }
+      if (currentUser && pathname === "/login") {
+        router.replace("/");
+      }
     }
   }, [isLoaded, currentUser, pathname, router]);
 
-  const isLoginPage = pathname === "/login";
-
+  // Paparan loading sementara sistem memeriksa status pengguna
   if (!isLoaded) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-background">
@@ -38,6 +39,19 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isLoginPage = pathname === "/login";
+
+  // Jika tidak log masuk dan bukan di page login, jangan tunjuk apa-apa (tunggu redirect)
+  if (!currentUser && !isLoginPage) {
+    return null;
+  }
+
+  // Jika sudah log masuk tapi masih di page login, jangan tunjuk apa-apa (tunggu redirect)
+  if (currentUser && isLoginPage) {
+    return null;
+  }
+
+  // Paparan khas untuk Halaman Login (tanpa Sidebar/Nav)
   if (isLoginPage) {
     return (
       <>
@@ -47,6 +61,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Paparan utama Dashboard (dengan Sidebar/Nav)
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full flex-col md:flex-row">
