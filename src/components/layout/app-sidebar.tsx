@@ -88,43 +88,43 @@ const items = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { state } = useSidebar()
-  const { currentUser, switchUser, isLoaded } = useCurrentUser()
+  const { currentUser, switchUser, logout, isLoaded } = useCurrentUser()
   
-  if (!isLoaded) return null
+  if (!isLoaded || !currentUser) return null
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-2xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="bg-primary h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold font-headline">S</span>
+          <div className="bg-primary h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+            <span className="text-primary-foreground font-bold font-headline text-lg">S</span>
           </div>
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="font-bold text-lg font-headline tracking-tight text-accent">SPI HUB</span>
-              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">System Protocol</span>
+              <span className="font-bold text-lg font-headline tracking-tight text-foreground leading-tight">SPI HUB</span>
+              <span className="text-[10px] text-accent font-bold uppercase tracking-widest leading-none mt-0.5">System Protocol</span>
             </div>
           )}
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="mt-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">
-            Main Navigation
+          <SidebarGroupLabel className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
+            Main Workspace
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.filter(item => item.roles.includes(currentUser.role)).map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title} className="group py-5 px-4 transition-all hover:bg-sidebar-accent/50">
+                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title} className="group py-6 px-4 transition-all hover:bg-sidebar-accent/50 data-[active=true]:bg-primary/10">
                     <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className={cn(
                         "w-5 h-5 transition-colors",
-                        pathname === item.url ? "text-accent" : "text-muted-foreground group-hover:text-foreground"
+                        pathname === item.url ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                       )} />
                       <span className={cn(
-                        "font-medium",
+                        "font-semibold text-sm",
                         pathname === item.url ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
                       )}>{item.title}</span>
                     </Link>
@@ -139,41 +139,43 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-background/50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 overflow-hidden w-full text-left hover:bg-sidebar-accent p-2 rounded-lg transition-colors">
-              <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0 border border-accent/30">
+            <button className="flex items-center gap-3 overflow-hidden w-full text-left hover:bg-sidebar-accent p-2 rounded-lg transition-colors group">
+              <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0 border border-accent/30 group-hover:border-accent transition-colors">
                 <span className="text-accent font-bold text-sm">{currentUser.name.charAt(0)}</span>
               </div>
               {state !== "collapsed" && (
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-semibold truncate text-foreground">{currentUser.name}</span>
-                  <span className="text-[10px] uppercase font-bold text-accent/80 tracking-tighter">{currentUser.role}</span>
+                  <span className="text-sm font-semibold truncate text-foreground leading-none">{currentUser.name}</span>
+                  <span className="text-[9px] uppercase font-bold text-accent/80 tracking-tighter mt-1">{currentUser.role} &bull; {currentUser.position.split(' ')[0]}</span>
                 </div>
               )}
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[240px] bg-card border-border">
-            <DropdownMenuLabel>View As (Simulation)</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-[260px] bg-card border-border shadow-2xl">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Switch Profile (Demo)</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {USERS.map((u) => (
-              <DropdownMenuItem 
-                key={u.id} 
-                onClick={() => switchUser(u.id)}
-                className={cn(
-                  "flex flex-col items-start gap-1 py-2 cursor-pointer",
-                  u.id === currentUser.id && "bg-accent/10"
-                )}
-              >
-                <div className="flex items-center gap-2 w-full">
-                  <UserCircle2 className="w-4 h-4 text-accent" />
-                  <span className="font-bold text-sm">{u.name}</span>
-                </div>
-                <span className="text-[10px] text-muted-foreground ml-6 uppercase">{u.role} &bull; {u.position}</span>
-              </DropdownMenuItem>
-            ))}
+            <div className="max-h-[300px] overflow-y-auto">
+              {USERS.map((u) => (
+                <DropdownMenuItem 
+                  key={u.id} 
+                  onClick={() => switchUser(u.id)}
+                  className={cn(
+                    "flex flex-col items-start gap-1 py-2 cursor-pointer",
+                    u.id === currentUser.id && "bg-accent/10"
+                  )}
+                >
+                  <div className="flex items-center gap-2 w-full">
+                    <UserCircle2 className="w-4 h-4 text-accent" />
+                    <span className="font-bold text-sm">{u.name}</span>
+                  </div>
+                  <span className="text-[9px] text-muted-foreground ml-6 uppercase">{u.role} &bull; {u.position}</span>
+                </DropdownMenuItem>
+              ))}
+            </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 font-bold">
+            <DropdownMenuItem onClick={logout} className="text-destructive font-bold cursor-pointer hover:bg-destructive/10">
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              Keluar Sistem
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
