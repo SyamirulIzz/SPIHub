@@ -10,7 +10,6 @@ import {
 } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { CalendarDays, Info, Plus, Palmtree, MapPin, Clock, User, Briefcase } from "lucide-react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -47,18 +46,10 @@ export default function CalendarPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 animate-in slide-in-from-bottom-2 duration-500">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold font-headline text-foreground">Shared Team Calendar</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time availability and movement coordination.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Tabs defaultValue="all" className="w-full md:w-[300px]">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="all">Company View</TabsTrigger>
-              <TabsTrigger value="dept">My Department</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <p className="text-sm text-muted-foreground mt-1">Real-time availability and movement coordination for all personnel.</p>
         </div>
       </header>
 
