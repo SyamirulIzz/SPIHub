@@ -40,6 +40,7 @@ export default function AdminReportsPage() {
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState("leave")
   
   // Data State - Sync from LocalStorage to match other pages
   const [syncedUsers, setSyncedUsers] = useState(USERS)
@@ -187,24 +188,28 @@ export default function AdminReportsPage() {
               Manage Payroll
             </Link>
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-lg">
-                <Download className="w-4 h-4" />
-                Download Report
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card border-border w-48">
-              <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
-                <FileDown className="w-4 h-4 text-red-500" />
-                Export as PDF
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-                Export as Excel (CSV)
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          
+          {activeTab === "leave" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-lg animate-in fade-in slide-in-from-right-2 duration-300">
+                  <Download className="w-4 h-4" />
+                  Download Report
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-card border-border w-48">
+                <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
+                  <FileDown className="w-4 h-4 text-red-500" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                  Export as Excel (CSV)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          
           <Badge className="bg-primary/20 text-primary border-primary/30 h-7 px-3">ADMIN ACCESS</Badge>
         </div>
       </header>
@@ -224,7 +229,7 @@ export default function AdminReportsPage() {
         <StatSummaryCard title="Pending Approvals" value={(syncedLeaves.filter(l => l.status === 'PENDING').length + syncedClaims.filter(c => c.status === 'PENDING').length).toString()} icon={Clock} trend="Needs Action" color="text-amber-500" />
       </div>
 
-      <Tabs defaultValue="leave" className="space-y-6 print:space-y-0">
+      <Tabs defaultValue="leave" value={activeTab} onValueChange={setActiveTab} className="space-y-6 print:space-y-0">
         <TabsList className="bg-secondary/30 border border-border p-1 h-12 print:hidden">
           <TabsTrigger value="leave" className="gap-2 px-6 h-full font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">
             <Palmtree className="w-4 h-4" /> LEAVE RECORD
