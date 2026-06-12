@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +12,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { CalendarDays, Info, Plus, Palmtree, MapPin, Clock, User, Briefcase } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { 
@@ -47,6 +48,29 @@ export default function CalendarPage() {
     }
   }, [])
 
+  // Optimasasi: Group data by date to avoid filtering in the 31-day loop
+  const groupedData = useMemo(() => {
+    const data: Record<string, { movements: typeof MOVEMENTS, leaves: typeof LEAVE_REQUESTS }> = {}
+    
+    // Initialize 31 days of May 2024
+    for (let i = 1; i <= 31; i++) {
+      const dateStr = `2024-05-${i.toString().padStart(2, '0')}`
+      data[dateStr] = { movements: [], leaves: [] }
+    }
+
+    syncedMovements.forEach(m => {
+      const date = m.startDate.split('T')[0]
+      if (data[date]) data[date].movements.push(m)
+    })
+
+    syncedLeaves.forEach(l => {
+      const date = l.startDate
+      if (data[date] && l.status === 'APPROVED') data[date].leaves.push(l)
+    })
+
+    return data
+  }, [syncedMovements, syncedLeaves])
+
   if (!isLoaded || !mounted) return null
 
   return (
@@ -58,7 +82,7 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      <TooltipProvider>
+      <TooltipProvider delayDuration={300}>
         <div className="grid grid-cols-1 gap-6">
           <Card className="bg-card border-border shadow-2xl overflow-hidden">
             <CardHeader className="bg-secondary/20 border-b border-border py-4">
@@ -69,8 +93,12 @@ export default function CalendarPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-[10px] font-semibold">
                   <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded bg-amber-500"></div>
+                    <span className="text-muted-foreground uppercase">Pending Movement</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-primary"></div>
-                    <span className="text-muted-foreground uppercase">Staff Movement</span>
+                    <span className="text-muted-foreground uppercase">Approved Movement</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-accent"></div>
@@ -90,16 +118,12 @@ export default function CalendarPage() {
                 </div>
                 
                 <div className="grid grid-cols-7">
-                  {Array.from({ length: 31 }).map((_, i) => {
+                  {Object.entries(groupedData).map(([dateStr, dayData], i) => {
                     const dayNum = i + 1;
-                    const dateStr = `2024-05-${dayNum.toString().padStart(2, '0')}`;
-                    
-                    // Menunjukkan semua pergerakan tanpa mengira status (termasuk PENDING)
-                    const dayMovements = syncedMovements.filter(m => m.startDate.startsWith(dateStr));
-                    const dayLeaves = syncedLeaves.filter(l => l.startDate.startsWith(dateStr) && l.status === 'APPROVED');
+                    const { movements, leaves } = dayData;
 
                     return (
-                      <div key={i} className="min-h-[100px] md:min-h-[120px] p-1.5 border-r border-b border-border last:border-r-0 hover:bg-secondary/10 transition-colors group">
+                      <div key={dateStr} className="min-h-[100px] md:min-h-[120px] p-1.5 border-r border-b border-border last:border-r-0 hover:bg-secondary/10 transition-colors group">
                         <div className="flex justify-between items-start mb-2">
                           <span className={cn(
                             "text-[10px] md:text-xs font-bold w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-full",
@@ -107,7 +131,7 @@ export default function CalendarPage() {
                           )}>{dayNum}</span>
                         </div>
                         <div className="space-y-1 overflow-hidden">
-                          {dayMovements.map(mov => {
+                          {movements.map(mov => {
                             const user = USERS.find(u => u.id === mov.userId);
                             const project = PROJECTS.find(p => p.id === mov.projectId);
                             return (
@@ -186,7 +210,7 @@ export default function CalendarPage() {
                             )
                           })}
 
-                          {dayLeaves.map(leave => {
+                          {leaves.map(leave => {
                             const user = USERS.find(u => u.id === leave.userId);
                             const isSelf = user?.id === currentUser.id;
                             const canSeeDetail = currentUser.role !== 'STAFF' || isSelf;
@@ -264,7 +288,6 @@ export default function CalendarPage() {
               </CardHeader>
               <CardContent className="text-[11px] text-muted-foreground space-y-2">
                 <p>• <span className="text-foreground font-semibold">Privacy Filter:</span> Standard staff only see "[Name] - On Leave". Detailed categories (AL, MC, EL) are restricted to HODs and Management.</p>
-                <p>• <span className="text-foreground font-semibold">Mobile Tip:</span> Tekan pada sebarang entri untuk melihat butiran penuh.</p>
                 <p>• <span className="text-foreground font-semibold">Real-time Sync:</span> Kalendar ini disegerakkan secara automatik dengan modul Pengurusan Cuti dan Pergerakan.</p>
               </CardContent>
             </Card>
