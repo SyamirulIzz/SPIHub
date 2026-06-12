@@ -66,11 +66,7 @@ Discussions:
 ---
 {{/each}}
 
-Based on the information above, provide an executive summary, identify key issues, emerging trends, and assess the overall project status.
-The output should strictly adhere to the following JSON format:
-${'```json'}
-{{jsonSchema ProjectTicketSummaryOutputSchema}}
-${'```'}`,
+Based on the information above, provide an executive summary, identify key issues, emerging trends, and assess the overall project status.`,
 });
 
 const summarizeProjectTicketsFlow = ai.defineFlow(
