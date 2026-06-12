@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, use } from "react"
@@ -14,8 +15,9 @@ import { ArrowLeft, Save, Ticket, AlertCircle, Briefcase, Upload } from "lucide-
 import { PROJECTS, TICKETS } from "@/lib/mock-data"
 
 export default function EditTicketPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
   const router = useRouter()
+  const resolvedParams = use(params)
+  const id = resolvedParams.id
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)

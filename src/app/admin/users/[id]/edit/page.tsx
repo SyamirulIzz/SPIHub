@@ -15,7 +15,8 @@ import { USERS, DEPARTMENTS } from "@/lib/mock-data"
 
 export default function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const { id } = use(params)
+  const resolvedParams = use(params)
+  const id = resolvedParams.id
   const { currentUser, isLoaded } = useCurrentUser()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
