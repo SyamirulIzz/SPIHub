@@ -45,6 +45,15 @@ export default function Dashboard() {
     if (savedTickets) setSyncedTickets(JSON.parse(savedTickets))
   }, [])
 
+  // Helper function to calculate duration in days
+  const calculateDays = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  }
+
   // Pengiraan KPI Dinamik
   const kpiEfficiency = useMemo(() => {
     if (!mounted) return 0;
@@ -63,6 +72,58 @@ export default function Dashboard() {
     const average = ((ticketRate + movementRate) / 2) * 100;
     return Math.round(average * 10) / 10; // 1 decimal place
   }, [syncedTickets, syncedMovements, mounted]);
+
+  // Dynamic Quick Stats calculation based on role
+  const quickStats = useMemo(() => {
+    if (!mounted || !isLoaded) return { leave: 0, claims: 0, leaveLabel: "", claimsLabel: "", claimsProgress: 0 };
+
+    const isAdminOrHod = currentUser.role === 'ADMIN' || currentUser.role === 'HOD';
+
+    // 1. Leave Utilization Logic
+    let leavePercent = 0;
+    let leaveLabel = "Leave Utilization";
+    if (isAdminOrHod) {
+      const totalTaken = syncedLeaves
+        .filter(l => l.status === 'APPROVED')
+        .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
+      const totalLimit = USERS.reduce((sum, u) => sum + u.annualLeaveLimit, 0);
+      leavePercent = Math.min(100, Math.round((totalTaken / totalLimit) * 100));
+      leaveLabel = "Team Leave Utilization";
+    } else {
+      const myTaken = syncedLeaves
+        .filter(l => l.userId === currentUser.id && l.status === 'APPROVED')
+        .reduce((sum, l) => sum + calculateDays(l.startDate, l.endDate), 0);
+      leavePercent = Math.min(100, Math.round((myTaken / currentUser.annualLeaveLimit) * 100));
+      leaveLabel = "My Leave Utilization";
+    }
+
+    // 2. Claims Logic
+    let claimsValue = 0;
+    let claimsLabel = "Claims Processed";
+    let claimsProgress = 0;
+    if (isAdminOrHod) {
+      claimsValue = syncedClaims
+        .filter(c => c.status === 'APPROVED')
+        .reduce((sum, c) => sum + c.amount, 0);
+      claimsLabel = "Total Approved Claims";
+      // Using an arbitrary 50k target for company-wide visualization
+      claimsProgress = Math.min(100, Math.round((claimsValue / 50000) * 100));
+    } else {
+      claimsValue = syncedClaims
+        .filter(c => c.userId === currentUser.id && c.status === 'APPROVED')
+        .reduce((sum, c) => sum + c.amount, 0);
+      claimsLabel = "My Approved Claims";
+      claimsProgress = Math.min(100, Math.round((claimsValue / currentUser.medicalClaimLimit) * 100));
+    }
+
+    return { 
+      leave: leavePercent, 
+      claims: claimsValue, 
+      leaveLabel, 
+      claimsLabel,
+      claimsProgress
+    };
+  }, [mounted, isLoaded, currentUser, syncedLeaves, syncedClaims]);
   
   if (!isLoaded || !mounted) return null
 
@@ -157,20 +218,20 @@ export default function Dashboard() {
             <div className="space-y-4">
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold">
-                  <span>Leave Utilization</span>
-                  <span>65%</span>
+                  <span>{quickStats.leaveLabel}</span>
+                  <span>{quickStats.leave}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: '65%' }}></div>
+                  <div className="h-full bg-primary" style={{ width: `${quickStats.leave}%` }}></div>
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold">
-                  <span>Claims Processed</span>
-                  <span>RM 12,400</span>
+                  <span>{quickStats.claimsLabel}</span>
+                  <span>RM {quickStats.claims.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
                 <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-accent" style={{ width: '45%' }}></div>
+                  <div className="h-full bg-accent" style={{ width: `${quickStats.claimsProgress}%` }}></div>
                 </div>
               </div>
             </div>
