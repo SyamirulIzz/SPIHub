@@ -54,9 +54,18 @@ export default function LeavePage() {
     })
   }
 
+  // Helper function to calculate duration in days
+  const calculateDays = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  }
+
   const takenDays = requests
     .filter(r => r.userId === currentUser.id && r.status === 'APPROVED')
-    .length
+    .reduce((total, r) => total + calculateDays(r.startDate, r.endDate), 0)
 
   return (
     <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
@@ -105,7 +114,7 @@ export default function LeavePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Remaining</p>
-                <div className="text-3xl font-bold font-headline mt-1">{currentUser.annualLeaveLimit - takenDays} Days</div>
+                <div className="text-3xl font-bold font-headline mt-1">{Math.max(0, currentUser.annualLeaveLimit - takenDays)} Days</div>
                 <p className="text-[10px] text-muted-foreground mt-1 italic">Available to apply</p>
               </div>
               <Clock className="text-amber-500 w-8 h-8 opacity-40" />
@@ -132,6 +141,7 @@ export default function LeavePage() {
                 <TableHead>Employee</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Duration</TableHead>
+                <TableHead className="text-center">Days</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Docs & Actions</TableHead>
               </TableRow>
@@ -139,6 +149,7 @@ export default function LeavePage() {
             <TableBody>
               {visibleRequests.map((leave) => {
                 const user = USERS.find(u => u.id === leave.userId)
+                const totalDays = calculateDays(leave.startDate, leave.endDate)
                 return (
                   <TableRow key={leave.id} className="hover:bg-secondary/20 transition-colors">
                     <TableCell>
@@ -161,6 +172,9 @@ export default function LeavePage() {
                         <span>&rarr;</span>
                         <span>{leave.endDate}</span>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="text-xs font-bold text-foreground">{totalDays}</span>
                     </TableCell>
                     <TableCell>
                       <Badge className={cn(
@@ -221,7 +235,7 @@ export default function LeavePage() {
               })}
               {visibleRequests.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground italic">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground italic">
                     Tiada rekod permohonan cuti ditemui.
                   </TableCell>
                 </TableRow>
