@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ASSETS, PROJECTS, USERS, ASSET_MOVEMENTS, ASSET_DAMAGE_REPORTS } from "@/lib/mock-data"
+import { ASSETS, PROJECTS, USERS, DEPARTMENTS, ASSET_MOVEMENTS, ASSET_DAMAGE_REPORTS } from "@/lib/mock-data"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { 
   ArrowLeft, 
@@ -18,9 +18,17 @@ import {
   ShieldCheck,
   Building,
   Calendar,
-  DollarSign
+  DollarSign,
+  Download
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function AssetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -62,7 +70,7 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={handlePrint} className="bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2">
-            <Printer className="w-4 h-4" /> Cetak Borang KEW.PA
+            <Printer className="w-4 h-4" /> Cetak Borang KEW.PA-3/4
           </Button>
           <Badge className="bg-primary/20 text-primary border-primary/30 h-7 px-3 uppercase tracking-tighter">
             {asset.category === 'CAPITAL' ? 'Harta Modal' : 'Aset Bernilai Rendah'}
@@ -189,9 +197,12 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
                                 </p>
                               </div>
                            </div>
-                           <div className="text-right">
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase">Tujuan: {m.purpose}</p>
-                              <p className="text-[9px] font-mono mt-1">{new Date(m.checkoutDate).toLocaleDateString()} &rarr; {new Date(m.expectedReturnDate).toLocaleDateString()}</p>
+                           <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Tujuan: {m.purpose}</p>
+                                <p className="text-[9px] font-mono mt-1">{new Date(m.checkoutDate).toLocaleDateString()} &rarr; {new Date(m.expectedReturnDate).toLocaleDateString()}</p>
+                              </div>
+                              <KewPa9PrintDialog movement={m} asset={asset} />
                            </div>
                         </div>
                       )
@@ -238,5 +249,155 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
+  const [open, setOpen] = useState(false);
+  const applicant = USERS.find(u => u.id === movement.userId);
+  const dept = DEPARTMENTS.find(d => d.id === applicant?.departmentId);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 gap-2 border-accent text-accent hover:bg-accent/10">
+          <Printer className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-bold">Cetak PA-9</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl bg-white text-black p-0 border-none overflow-hidden">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Borang KEW.PA-9 - {asset.name}</DialogTitle>
+        </DialogHeader>
+        <div className="p-10 min-h-[1000px] flex flex-col font-serif print:p-0 print:m-0 print:w-full">
+           {/* Header Section */}
+           <div className="flex justify-between items-start text-[10px] font-bold mb-4">
+              <p>Pekeliling Perbendaharaan Malaysia</p>
+              <div className="text-right">
+                 <p>AM 2.4 Lampiran A</p>
+                 <p className="mt-4 text-xs">KEW.PA-9</p>
+              </div>
+           </div>
+
+           <div className="text-right mb-8">
+              <p className="text-[10px]">No. Permohonan: <span className="border-b border-black border-dotted px-8">REQ-{movement.id.split('-')[1]}</span></p>
+           </div>
+
+           <h1 className="text-center text-sm font-bold uppercase mb-8 tracking-wide">BORANG PERMOHONAN PERGERAKAN/ PINJAMAN ASET ALIH</h1>
+
+           {/* Table 1: Applicant Info */}
+           <table className="w-full border-collapse border-2 border-black mb-8 text-[11px]">
+              <tbody>
+                <tr>
+                   <td className="border-2 border-black p-2 w-1/4 font-bold">Nama Pemohon:</td>
+                   <td className="border-2 border-black p-2 w-1/4 uppercase">{applicant?.name}</td>
+                   <td className="border-2 border-black p-2 w-1/4 font-bold">Tujuan:</td>
+                   <td className="border-2 border-black p-2 w-1/4">{movement.purpose}</td>
+                </tr>
+                <tr>
+                   <td className="border-2 border-black p-2 font-bold">Jawatan:</td>
+                   <td className="border-2 border-black p-2 uppercase">{applicant?.position}</td>
+                   <td className="border-2 border-black p-2 font-bold">Tempat Digunakan:</td>
+                   <td className="border-2 border-black p-2 uppercase">{movement.destination}</td>
+                </tr>
+                <tr>
+                   <td className="border-2 border-black p-2 font-bold">Bahagian:</td>
+                   <td className="border-2 border-black p-2 uppercase">{dept?.name}</td>
+                   <td className="border-2 border-black p-2 font-bold">Nama Pengeluar:</td>
+                   <td className="border-2 border-black p-2">............................................</td>
+                </tr>
+              </tbody>
+           </table>
+
+           {/* Table 2: Asset Details */}
+           <table className="w-full border-collapse border-2 border-black text-[10px]">
+              <thead>
+                 <tr className="bg-slate-50">
+                    <th rowSpan={2} className="border-2 border-black p-2 w-10 text-center">Bil</th>
+                    <th rowSpan={2} className="border-2 border-black p-2">No. Siri Pendaftaran</th>
+                    <th rowSpan={2} className="border-2 border-black p-2">Keterangan Aset</th>
+                    <th colSpan={2} className="border-2 border-black p-2 text-center">Tarikh</th>
+                    <th rowSpan={2} className="border-2 border-black p-2 text-center w-20">(Lulus / Tidak Lulus)</th>
+                    <th colSpan={2} className="border-2 border-black p-2 text-center">Tarikh</th>
+                    <th rowSpan={2} className="border-2 border-black p-2 w-24">Catatan</th>
+                 </tr>
+                 <tr className="bg-slate-50">
+                    <th className="border-2 border-black p-1 text-center w-20">Peminjam</th>
+                    <th className="border-2 border-black p-1 text-center w-20">Dijangka Pulang</th>
+                    <th className="border-2 border-black p-1 text-center w-20">Dipulangkan</th>
+                    <th className="border-2 border-black p-1 text-center w-20">Diterima</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 {[1,2,3,4,5,6,7,8,9,10].map((idx) => (
+                    <tr key={idx} className="h-8">
+                       <td className="border-2 border-black text-center">{idx === 1 ? '1' : ''}</td>
+                       <td className="border-2 border-black px-2">{idx === 1 ? asset.refNo : ''}</td>
+                       <td className="border-2 border-black px-2">{idx === 1 ? asset.name : ''}</td>
+                       <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.checkoutDate).toLocaleDateString() : ''}</td>
+                       <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.expectedReturnDate).toLocaleDateString() : ''}</td>
+                       <td className="border-2 border-black text-center">{idx === 1 ? (movement.status === 'APPROVED' ? 'LULUS' : '') : ''}</td>
+                       <td className="border-2 border-black"></td>
+                       <td className="border-2 border-black"></td>
+                       <td className="border-2 border-black"></td>
+                    </tr>
+                 ))}
+              </tbody>
+           </table>
+
+           <div className="mt-8 grid grid-cols-2 gap-20">
+              <div className="space-y-12">
+                 <p className="text-[10px] font-bold">Tandatangan Pemohon</p>
+                 <div className="border-b border-black w-48"></div>
+                 <p className="text-[9px] uppercase">({applicant?.name})</p>
+                 <p className="text-[9px]">Tarikh: {new Date(movement.checkoutDate).toLocaleDateString()}</p>
+              </div>
+              <div className="space-y-12">
+                 <p className="text-[10px] font-bold">Tandatangan Pelulus</p>
+                 <div className="border-b border-black w-48"></div>
+                 <p className="text-[9px]">Nama: ............................................</p>
+                 <p className="text-[9px]">Tarikh: ............................................</p>
+              </div>
+           </div>
+
+           <div className="mt-auto pt-10 text-[8px] italic text-slate-400">
+              Borang ini dijana secara automatik melalui SPI HUB Asset Module.
+           </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 print:hidden">
+          <Button variant="outline" onClick={() => setOpen(false)} className="text-slate-600 border-slate-300">
+            Tutup
+          </Button>
+          <Button onClick={handlePrint} className="bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2">
+            <Printer className="w-4 h-4" />
+            Cetak Borang KEW.PA-9
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function StatCard({ title, value, icon: Icon, color }: any) {
+  return (
+    <Card className="bg-card border-border shadow-lg">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
+            <div className={cn("text-xl font-bold font-headline", color)}>{value}</div>
+          </div>
+          <div className={cn("p-2 rounded-lg bg-secondary/50", color)}>
+            <Icon className="w-4 h-4" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
