@@ -27,7 +27,8 @@ import {
   HelpCircle,
   ArrowRightLeft,
   User,
-  Briefcase
+  Briefcase,
+  AlertCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -196,12 +197,13 @@ export default function AssetsPage() {
           <Table>
             <TableHeader className="bg-secondary/10">
               <TableRow>
-                <TableHead className="w-[180px] text-[10px] font-bold uppercase">No. Rujukan (KEW.PA)</TableHead>
+                <TableHead className="w-[150px] text-[10px] font-bold uppercase">No. Rujukan</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Aset / Model</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Kategori</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Lokasi Semasa</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Pegawai / Staf</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Status</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase text-center">Kategori</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase">Project</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase text-center">Availability</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase">Staff</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase text-center">Status</TableHead>
                 <TableHead className="text-right text-[10px] font-bold uppercase">Tindakan</TableHead>
               </TableRow>
             </TableHeader>
@@ -220,21 +222,40 @@ export default function AssetsPage() {
                         <span className="text-[10px] text-muted-foreground">{asset.model}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge variant="outline" className="text-[9px] font-bold">
-                        {asset.category === 'CAPITAL' ? 'KEW.PA-3' : 'KEW.PA-4'}
+                        {asset.category === 'CAPITAL' ? 'PA-3' : 'PA-4'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-[10px] font-medium">
-                        <MapPin className="w-3 h-3 text-muted-foreground" />
-                        {project ? project.name : asset.location}
-                      </div>
+                      {project ? (
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary">
+                          <Briefcase className="w-3 h-3" />
+                          {project.name}
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground italic">In Store</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {isAvailable ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] font-bold px-2 py-0.5">
+                          AVAILABLE
+                        </Badge>
+                      ) : asset.status !== 'GOOD' ? (
+                        <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[9px] font-bold px-2 py-0.5">
+                          UNAVAILABLE
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[9px] font-bold px-2 py-0.5">
+                          ON LOAN
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
-                       <span className="text-[10px] font-medium">{holder?.name || 'Tersimpan'}</span>
+                       <span className="text-[10px] font-medium">{holder?.name || '-'}</span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge className={cn(
                         "text-[9px] font-bold px-2 py-0.5",
                         asset.status === 'GOOD' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
@@ -298,7 +319,7 @@ export default function AssetsPage() {
               })}
               {filteredAssets.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground italic text-sm">
+                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground italic text-sm">
                     Tiada aset ditemui untuk carian anda.
                   </TableCell>
                 </TableRow>
