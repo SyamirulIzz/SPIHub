@@ -199,7 +199,6 @@ export default function AssetsPage() {
               <TableRow>
                 <TableHead className="w-[150px] text-[10px] font-bold uppercase">No. Rujukan</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Aset / Model</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase text-center">Kategori</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Project</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase text-center">Availability</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Staff</TableHead>
@@ -221,11 +220,6 @@ export default function AssetsPage() {
                         <span className="font-bold text-xs uppercase">{asset.name}</span>
                         <span className="text-[10px] text-muted-foreground">{asset.model}</span>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="outline" className="text-[9px] font-bold">
-                        {asset.category === 'CAPITAL' ? 'PA-3' : 'PA-4'}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       {project ? (
@@ -319,7 +313,7 @@ export default function AssetsPage() {
               })}
               {filteredAssets.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground italic text-sm">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground italic text-sm">
                     Tiada aset ditemui untuk carian anda.
                   </TableCell>
                 </TableRow>
