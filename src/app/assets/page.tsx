@@ -21,14 +21,31 @@ import {
   Monitor,
   Filter,
   FileText,
-  BarChart2
+  BarChart2,
+  MoreVertical,
+  CheckCircle2,
+  Trash2,
+  AlertCircle,
+  HelpCircle,
+  Edit
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
+import { useToast } from "@/hooks/use-toast"
+import { AssetStatus } from "@/lib/types"
 
 export default function AssetsPage() {
   const router = useRouter()
   const { currentUser, isLoaded } = useCurrentUser()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [assetList, setAssetList] = useState(ASSETS)
   const [search, setSearch] = useState("")
@@ -53,6 +70,19 @@ export default function AssetsPage() {
     a.name.toLowerCase().includes(search.toLowerCase()) || 
     a.refNo.toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleStatusUpdate = (assetId: string, newStatus: AssetStatus) => {
+    const updated = assetList.map(a => 
+      a.id === assetId ? { ...a, status: newStatus } : a
+    )
+    setAssetList(updated)
+    localStorage.setItem('simulated_assets', JSON.stringify(updated))
+    
+    toast({
+      title: "Status Dikemaskini",
+      description: `Aset berjaya ditukar kepada status ${newStatus}.`,
+    })
+  }
 
   if (!isLoaded || !mounted) return null
 
@@ -152,22 +182,55 @@ export default function AssetsPage() {
                         "text-[9px] font-bold px-2 py-0.5",
                         asset.status === 'GOOD' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                         asset.status === 'DAMAGED' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                        asset.status === 'LOST' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
                         "bg-secondary text-muted-foreground"
                       )}>
                         {asset.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="h-8 gap-2 text-accent" asChild>
-                        <Link href={`/assets/${asset.id}`}>
-                          <FileText className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-bold">View Forms</span>
-                        </Link>
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-card border-border w-48">
+                          <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground">Maklumat Aset</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/assets/${asset.id}`} className="text-xs gap-2 cursor-pointer">
+                              <FileText className="w-3.5 h-3.5 text-accent" /> Lihat Borang KEW.PA
+                            </Link>
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuSeparator />
+                          
+                          <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground">Kemaskini Status</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(asset.id, 'GOOD')} className="text-xs gap-2 cursor-pointer">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Set kepada 'GOOD'
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(asset.id, 'DAMAGED')} className="text-xs gap-2 cursor-pointer">
+                            <Wrench className="w-3.5 h-3.5 text-red-500" /> Set kepada 'DAMAGED'
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(asset.id, 'LOST')} className="text-xs gap-2 cursor-pointer">
+                            <HelpCircle className="w-3.5 h-3.5 text-amber-500" /> Set kepada 'LOST'
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(asset.id, 'DISPOSED')} className="text-xs gap-2 cursor-pointer">
+                            <Trash2 className="w-3.5 h-3.5 text-slate-500" /> Set kepada 'DISPOSED'
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 )
               })}
+              {filteredAssets.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground italic text-sm">
+                    Tiada aset ditemui untuk carian anda.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
