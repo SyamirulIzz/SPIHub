@@ -153,6 +153,8 @@ export default function AssetsPage() {
 
   if (!isLoaded || !mounted) return null
 
+  const isAdminOrHod = currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD';
+
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -181,7 +183,12 @@ export default function AssetsPage() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard title="Total Asset Value" value={`RM ${stats.totalValue.toLocaleString()}`} icon={BarChart2} color="text-indigo-500" />
+        <StatCard 
+          title="Total Asset Value" 
+          value={isAdminOrHod ? `RM ${stats.totalValue.toLocaleString()}` : "RM *****"} 
+          icon={BarChart2} 
+          color="text-indigo-500" 
+        />
         <StatCard title="Ready for Project (Good)" value={stats.available.toString()} icon={CheckCircle2} color="text-emerald-500" />
         <StatCard title="Damaged Assets" value={stats.damaged.toString()} icon={Wrench} color="text-red-500" />
       </div>
