@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Save, Package, Monitor, DollarSign, Calendar, MapPin } from "lucide-react"
+import { ArrowLeft, Save, Package, Monitor, DollarSign, Calendar, MapPin, Store } from "lucide-react"
 import { ASSETS, PROJECTS } from "@/lib/mock-data"
 
 export default function NewAssetPage() {
@@ -27,7 +28,7 @@ export default function NewAssetPage() {
     category: "LOW_VALUE" as "CAPITAL" | "LOW_VALUE",
     price: "",
     purchaseDate: new Date().toISOString().split('T')[0],
-    location: "Pejabat Cyberjaya",
+    location: "Pejabat Cyberjaya (Stor)",
     projectId: "",
     status: "GOOD" as any
   })
@@ -61,11 +62,20 @@ export default function NewAssetPage() {
     setIsSubmitting(true)
 
     const currentAssets = JSON.parse(localStorage.getItem('simulated_assets') || JSON.stringify(ASSETS))
+    
+    // If project is selected, update location automatically
+    let finalLocation = formData.location;
+    if (formData.projectId && formData.projectId !== "none") {
+      const proj = syncedProjects.find(p => p.id === formData.projectId);
+      if (proj) finalLocation = `Tapak Projek: ${proj.name}`;
+    }
+
     const newAsset = {
       ...formData,
       id: `ast-${Date.now()}`,
       price: parseFloat(formData.price),
-      currentHolderId: currentUser.id // Pencipta asal sebagai pemegang sementara
+      location: finalLocation,
+      currentHolderId: (formData.projectId && formData.projectId !== "none") ? currentUser.id : undefined 
     }
 
     const updatedAssets = [...currentAssets, newAsset]
@@ -74,7 +84,7 @@ export default function NewAssetPage() {
     setTimeout(() => {
       toast({
         title: "Aset Didaftarkan",
-        description: `Aset ${formData.name} telah berjaya direkodkan ke dalam sistem (KEW.PA).`,
+        description: `Aset ${formData.name} telah berjaya direkodkan ke dalam stor.`,
       })
       setIsSubmitting(false)
       router.push("/assets")
@@ -188,11 +198,11 @@ export default function NewAssetPage() {
 
             <div className="border-t border-border pt-6 mt-6">
               <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
-                <MapPin className="w-4 h-4" /> Penempatan & Lokasi
+                <Store className="w-4 h-4" /> Penempatan Awal
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Lokasi Asal / Simpanan</Label>
+                  <Label htmlFor="location">Lokasi Stor / Pejabat</Label>
                   <Input 
                     id="location"
                     value={formData.location}
@@ -202,19 +212,19 @@ export default function NewAssetPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="project">Pautkan ke Projek (Opsional)</Label>
+                  <Label htmlFor="project">Terus Paut ke Projek? (Opsional)</Label>
                   <Select value={formData.projectId} onValueChange={(val) => setFormData({...formData, projectId: val})}>
                     <SelectTrigger id="project" className="bg-secondary/30 border-border">
-                      <SelectValue placeholder="Tiada (Simpan di Pejabat)" />
+                      <SelectValue placeholder="Simpan dalam Stor" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border">
-                      <SelectItem value="none">Tiada / Pejabat</SelectItem>
+                      <SelectItem value="none">Simpan dalam Stor (Default)</SelectItem>
                       {syncedProjects.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-[10px] text-muted-foreground italic">Pautkan jika aset ini terus dihantar ke tapak projek.</p>
+                  <p className="text-[10px] text-muted-foreground italic">Pilih projek jika aset ini ingin dikeluarkan terus semasa pendaftaran.</p>
                 </div>
               </div>
             </div>
@@ -225,7 +235,7 @@ export default function NewAssetPage() {
             </Button>
             <Button type="submit" disabled={isSubmitting} className="w-full md:flex-1 bg-primary hover:bg-primary/90 text-white font-bold gap-2 shadow-lg shadow-primary/20">
               <Save className="w-4 h-4" />
-              {isSubmitting ? "Memproses..." : "Daftar Aset"}
+              {isSubmitting ? "Memproses..." : "Daftar Masuk Stor"}
             </Button>
           </CardFooter>
         </Card>
