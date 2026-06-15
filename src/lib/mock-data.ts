@@ -304,6 +304,63 @@ export const ASSETS: Asset[] = [
     purchaseDate: '2024-02-10',
     location: 'Data Center HQ',
     status: 'DAMAGED'
+  },
+  {
+    id: 'ast-4',
+    refNo: 'SPI/HQ/2024/AST-004',
+    name: 'iPad Pro 12.9 (M2)',
+    model: 'Apple iPad Pro 2023',
+    category: 'LOW_VALUE',
+    price: 4800.00,
+    purchaseDate: '2024-03-05',
+    location: 'Pejabat Cyberjaya (Stor)',
+    status: 'GOOD'
+  },
+  {
+    id: 'ast-5',
+    refNo: 'SPI/HQ/2024/AST-005',
+    name: 'Cisco Layer 3 Switch',
+    model: 'Catalyst 9300',
+    category: 'CAPITAL',
+    price: 12500.00,
+    purchaseDate: '2024-01-20',
+    location: 'Tapak Projek Smart City',
+    projectId: 'proj-4',
+    status: 'GOOD',
+    currentHolderId: 'user-7'
+  },
+  {
+    id: 'ast-6',
+    refNo: 'SPI/HQ/2024/AST-006',
+    name: 'Brother MFC Printer',
+    model: 'MFC-L2715DW',
+    category: 'LOW_VALUE',
+    price: 1100.00,
+    purchaseDate: '2023-12-15',
+    location: 'Pejabat Cyberjaya',
+    status: 'GOOD'
+  },
+  {
+    id: 'ast-7',
+    refNo: 'SPI/HQ/2024/AST-007',
+    name: 'DJI Mavic 3 Enterprise',
+    model: 'Thermal Edition',
+    category: 'CAPITAL',
+    price: 22000.00,
+    purchaseDate: '2024-04-10',
+    location: 'Data Center HQ (Safe)',
+    status: 'GOOD'
+  },
+  {
+    id: 'ast-8',
+    refNo: 'SPI/HQ/2024/AST-008',
+    name: 'Portable Generator 3kVA',
+    model: 'Honda EU30is',
+    category: 'LOW_VALUE',
+    price: 4500.00,
+    purchaseDate: '2023-10-25',
+    location: 'Pejabat Cyberjaya (Logistik)',
+    status: 'GOOD'
   }
 ];
 
