@@ -16,7 +16,6 @@ export interface User {
   annualLeaveLimit: number;
   medicalClaimLimit: number;
   salary?: number;
-  // New fields for official leave record
   carriedForward?: number;
   additionalLeave?: number;
   unpaidLeave?: number;
@@ -83,4 +82,43 @@ export interface ReimbursementClaim {
   description: string;
   receiptUrl: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+// New Asset Management Types
+export type AssetCategory = 'CAPITAL' | 'LOW_VALUE'; // KEW.PA-3 vs KEW.PA-4
+export type AssetStatus = 'GOOD' | 'DAMAGED' | 'DISPOSED' | 'LOST';
+
+export interface Asset {
+  id: string;
+  refNo: string; // Serial/Asset ID (e.g. SPI/HOD/2024/001)
+  name: string;
+  model: string;
+  category: AssetCategory;
+  price: number;
+  purchaseDate: string;
+  location: string;
+  projectId?: string; // Linked to project site
+  status: AssetStatus;
+  currentHolderId?: string; // Who is using it
+}
+
+export interface AssetMovement {
+  id: string;
+  assetId: string;
+  userId: string;
+  projectId: string;
+  checkoutDate: string;
+  expectedReturnDate: string;
+  returnDate?: string;
+  purpose: string;
+  status: 'OUT' | 'RETURNED';
+}
+
+export interface AssetDamageReport {
+  id: string;
+  assetId: string;
+  reportedById: string;
+  damageDate: string;
+  description: string;
+  status: 'PENDING' | 'REPAIRING' | 'RESOLVED';
 }

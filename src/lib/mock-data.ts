@@ -1,5 +1,16 @@
 
-import { User, Department, Project, StaffMovement, LeaveRequest, ProjectTicket, ReimbursementClaim } from './types';
+import { 
+  User, 
+  Department, 
+  Project, 
+  StaffMovement, 
+  LeaveRequest, 
+  ProjectTicket, 
+  ReimbursementClaim,
+  Asset,
+  AssetMovement,
+  AssetDamageReport
+} from './types';
 
 export const DEPARTMENTS: Department[] = [
   { id: 'dept-1', name: 'Software Engineering' },
@@ -253,6 +264,70 @@ export const CLAIMS: ReimbursementClaim[] = [
     description: 'Grab to Client Meeting (MBSJ)',
     receiptUrl: 'https://picsum.photos/seed/claim3/600/800',
     status: 'APPROVED'
+  }
+];
+
+// Mock Asset Data
+export const ASSETS: Asset[] = [
+  {
+    id: 'ast-1',
+    refNo: 'SPI/HQ/2024/AST-001',
+    name: 'Workstation Laptop - Dell XPS 15',
+    model: 'XPS 15 9530',
+    category: 'CAPITAL',
+    price: 8500.00,
+    purchaseDate: '2024-01-15',
+    location: 'Pejabat Cyberjaya',
+    status: 'GOOD',
+    currentHolderId: 'user-3'
+  },
+  {
+    id: 'ast-2',
+    refNo: 'SPI/HQ/2024/AST-002',
+    name: 'Portable Projector - Epson EB-X06',
+    model: 'EB-X06',
+    category: 'LOW_VALUE',
+    price: 2200.00,
+    purchaseDate: '2023-11-20',
+    location: 'Tapak Projek AADK',
+    projectId: 'proj-1',
+    status: 'GOOD',
+    currentHolderId: 'user-4'
+  },
+  {
+    id: 'ast-3',
+    refNo: 'SPI/HQ/2024/AST-003',
+    name: 'Server Rack 42U',
+    model: 'SR-42U',
+    category: 'CAPITAL',
+    price: 5500.00,
+    purchaseDate: '2024-02-10',
+    location: 'Data Center HQ',
+    status: 'DAMAGED'
+  }
+];
+
+export const ASSET_MOVEMENTS: AssetMovement[] = [
+  {
+    id: 'amov-1',
+    assetId: 'ast-2',
+    userId: 'user-4',
+    projectId: 'proj-1',
+    checkoutDate: '2024-05-16T09:00:00',
+    expectedReturnDate: '2024-05-18T17:00:00',
+    purpose: 'Hardware Demo for AADK Stakeholders',
+    status: 'OUT'
+  }
+];
+
+export const ASSET_DAMAGE_REPORTS: AssetDamageReport[] = [
+  {
+    id: 'adr-1',
+    assetId: 'ast-3',
+    reportedById: 'user-2',
+    damageDate: '2024-05-12',
+    description: 'Cooling fan failure causing overheating.',
+    status: 'PENDING'
   }
 ];
 

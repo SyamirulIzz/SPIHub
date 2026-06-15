@@ -14,7 +14,8 @@ import {
   LogOut,
   Briefcase,
   BarChart3,
-  Banknote
+  Banknote,
+  Package
 } from "lucide-react"
 import { 
   Sidebar, 
@@ -54,6 +55,12 @@ const items = [
     url: "/admin/payroll",
     icon: Banknote,
     roles: ['ADMIN']
+  },
+  {
+    title: "Asset Management",
+    url: "/assets",
+    icon: Package,
+    roles: ['ADMIN', 'HOD', 'STAFF']
   },
   {
     title: "Shared Calendar",
