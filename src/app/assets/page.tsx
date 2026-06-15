@@ -291,7 +291,6 @@ export default function AssetsPage() {
                 <TableHead className="text-[10px] font-bold uppercase">Aset / Model</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Project</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase text-center">Availability</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Staff</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase text-center">Status</TableHead>
                 <TableHead className="text-right text-[10px] font-bold uppercase">Tindakan</TableHead>
               </TableRow>
@@ -299,7 +298,6 @@ export default function AssetsPage() {
             <TableBody>
               {filteredAssets.map((asset) => {
                 const project = syncedProjects.find(p => p.id === asset.projectId)
-                const holder = syncedUsers.find(u => u.id === asset.currentHolderId)
                 const isAvailable = asset.status === 'GOOD' && !asset.projectId;
 
                 return (
@@ -335,9 +333,6 @@ export default function AssetsPage() {
                           ON LOAN
                         </Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
-                       <span className="text-[10px] font-medium">{holder?.name || '-'}</span>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={cn(
@@ -413,7 +408,7 @@ export default function AssetsPage() {
               })}
               {filteredAssets.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground italic text-sm">
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic text-sm">
                     Tiada aset ditemui untuk carian anda.
                   </TableCell>
                 </TableRow>
