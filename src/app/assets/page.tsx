@@ -28,7 +28,8 @@ import {
   ArrowRightLeft,
   User,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -39,7 +40,11 @@ import {
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem
+  DropdownMenuCheckboxItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal
 } from "@/components/ui/dropdown-menu"
 import { 
   Dialog, 
@@ -68,6 +73,9 @@ export default function AssetsPage() {
   
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
+  const [projectFilter, setProjectFilter] = useState<string>("ALL")
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>("ALL")
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
 
   useEffect(() => {
     setMounted(true)
@@ -91,10 +99,27 @@ export default function AssetsPage() {
     return assetList.filter(a => {
       const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
                             a.refNo.toLowerCase().includes(search.toLowerCase())
+      
       const matchesCategory = categoryFilter === "ALL" || a.category === categoryFilter
-      return matchesSearch && matchesCategory
+      
+      const matchesProject = projectFilter === "ALL" ? true : 
+                             projectFilter === "NONE" ? !a.projectId : 
+                             a.projectId === projectFilter
+      
+      const isAvailable = a.status === 'GOOD' && !a.projectId;
+      const isOnLoan = a.status === 'GOOD' && !!a.projectId;
+      const isUnavailable = a.status !== 'GOOD';
+      
+      const matchesAvailability = availabilityFilter === "ALL" ? true :
+                                  availabilityFilter === "AVAILABLE" ? isAvailable :
+                                  availabilityFilter === "ON_LOAN" ? isOnLoan :
+                                  availabilityFilter === "UNAVAILABLE" ? isUnavailable : true
+
+      const matchesStatus = statusFilter === "ALL" ? true : a.status === statusFilter
+
+      return matchesSearch && matchesCategory && matchesProject && matchesAvailability && matchesStatus
     })
-  }, [assetList, search, categoryFilter])
+  }, [assetList, search, categoryFilter, projectFilter, availabilityFilter, statusFilter])
 
   const handleStatusUpdate = (assetId: string, newStatus: AssetStatus) => {
     const updated = assetList.map(a => 
@@ -108,6 +133,21 @@ export default function AssetsPage() {
       description: `Aset berjaya ditukar kepada status ${newStatus}.`,
     })
   }
+
+  const resetFilters = () => {
+    setCategoryFilter("ALL")
+    setProjectFilter("ALL")
+    setAvailabilityFilter("ALL")
+    setStatusFilter("ALL")
+    setSearch("")
+  }
+
+  const activeFilterCount = [
+    categoryFilter !== "ALL",
+    projectFilter !== "ALL",
+    availabilityFilter !== "ALL",
+    statusFilter !== "ALL"
+  ].filter(Boolean).length
 
   if (!isLoaded || !mounted) return null
 
@@ -159,36 +199,88 @@ export default function AssetsPage() {
              
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 text-[10px] font-bold border-border">
+                  <Button variant="outline" size="sm" className="gap-2 text-[10px] font-bold border-border relative">
                     <Filter className="w-3.5 h-3.5" /> 
-                    {categoryFilter === 'ALL' ? 'Filter Category' : 
-                     categoryFilter === 'CAPITAL' ? 'KEW.PA-3' : 'KEW.PA-4'}
+                    Filter Assets
+                    {activeFilterCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 bg-primary text-[8px]">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-card border-border w-56">
-                  <DropdownMenuLabel className="text-[10px] font-bold uppercase text-muted-foreground">Filter by Category</DropdownMenuLabel>
+                <DropdownMenuContent align="start" className="bg-card border-border w-64">
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <DropdownMenuLabel className="text-[10px] font-bold uppercase text-muted-foreground">Filter Options</DropdownMenuLabel>
+                    {activeFilterCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="h-6 px-2 text-[8px] gap-1 text-red-400 hover:text-red-500 hover:bg-red-500/10">
+                        <X className="w-2.5 h-2.5" /> Reset
+                      </Button>
+                    )}
+                  </div>
+                  
                   <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem 
-                    checked={categoryFilter === 'ALL'} 
-                    onCheckedChange={() => setCategoryFilter('ALL')}
-                    className="text-xs"
-                  >
-                    All Assets
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem 
-                    checked={categoryFilter === 'CAPITAL'} 
-                    onCheckedChange={() => setCategoryFilter('CAPITAL')}
-                    className="text-xs"
-                  >
-                    KEW.PA-3 (Harta Modal)
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem 
-                    checked={categoryFilter === 'LOW_VALUE'} 
-                    onCheckedChange={() => setCategoryFilter('LOW_VALUE')}
-                    className="text-xs"
-                  >
-                    KEW.PA-4 (Aset Nilai Rendah)
-                  </DropdownMenuCheckboxItem>
+                  
+                  {/* Availability Filter Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="text-xs">Availability</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="bg-card border-border w-48">
+                        <DropdownMenuCheckboxItem checked={availabilityFilter === 'ALL'} onCheckedChange={() => setAvailabilityFilter('ALL')} className="text-xs">All Status</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={availabilityFilter === 'AVAILABLE'} onCheckedChange={() => setAvailabilityFilter('AVAILABLE')} className="text-xs">Available (In Store)</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={availabilityFilter === 'ON_LOAN'} onCheckedChange={() => setAvailabilityFilter('ON_LOAN')} className="text-xs">On Loan (Project)</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={availabilityFilter === 'UNAVAILABLE'} onCheckedChange={() => setAvailabilityFilter('UNAVAILABLE')} className="text-xs">Unavailable (Damaged/Lost)</DropdownMenuCheckboxItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+
+                  {/* Status Filter Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="text-xs">Physical Condition</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="bg-card border-border w-48">
+                        <DropdownMenuCheckboxItem checked={statusFilter === 'ALL'} onCheckedChange={() => setStatusFilter('ALL')} className="text-xs">All Conditions</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={statusFilter === 'GOOD'} onCheckedChange={() => setStatusFilter('GOOD')} className="text-xs">Good Condition</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={statusFilter === 'DAMAGED'} onCheckedChange={() => setStatusFilter('DAMAGED')} className="text-xs">Damaged</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={statusFilter === 'LOST'} onCheckedChange={() => setStatusFilter('LOST')} className="text-xs">Lost</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={statusFilter === 'DISPOSED'} onCheckedChange={() => setStatusFilter('DISPOSED')} className="text-xs">Disposed</DropdownMenuCheckboxItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+
+                  {/* Project Filter Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="text-xs">By Project</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="bg-card border-border w-56">
+                        <DropdownMenuCheckboxItem checked={projectFilter === 'ALL'} onCheckedChange={() => setProjectFilter('ALL')} className="text-xs">All Projects</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={projectFilter === 'NONE'} onCheckedChange={() => setProjectFilter('NONE')} className="text-xs">In Store (No Project)</DropdownMenuCheckboxItem>
+                        <DropdownMenuSeparator />
+                        {syncedProjects.map(p => (
+                          <DropdownMenuCheckboxItem 
+                            key={p.id} 
+                            checked={projectFilter === p.id} 
+                            onCheckedChange={() => setProjectFilter(p.id)}
+                            className="text-xs"
+                          >
+                            {p.name}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+
+                  {/* Category Filter Submenu */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="text-xs">KEW.PA Category</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="bg-card border-border w-48">
+                        <DropdownMenuCheckboxItem checked={categoryFilter === 'ALL'} onCheckedChange={() => setCategoryFilter('ALL')} className="text-xs">All Categories</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={categoryFilter === 'CAPITAL'} onCheckedChange={() => setCategoryFilter('CAPITAL')} className="text-xs">KEW.PA-3 (Capital)</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={categoryFilter === 'LOW_VALUE'} onCheckedChange={() => setCategoryFilter('LOW_VALUE')} className="text-xs">KEW.PA-4 (Low Value)</DropdownMenuCheckboxItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
                 </DropdownMenuContent>
              </DropdownMenu>
           </div>
