@@ -97,6 +97,7 @@ export interface Asset {
   price: number;
   purchaseDate: string;
   location: string;
+  description?: string; // New field for detailed check
   projectId?: string; // Linked to project site
   status: AssetStatus;
   currentHolderId?: string; // Who is using it

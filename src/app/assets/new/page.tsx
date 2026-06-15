@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Save, Package, Monitor, DollarSign, Calendar, MapPin, Store } from "lucide-react"
+import { ArrowLeft, Save, Package, Monitor, DollarSign, Calendar, MapPin, Store, FileText } from "lucide-react"
 import { ASSETS, PROJECTS } from "@/lib/mock-data"
 
 export default function NewAssetPage() {
@@ -27,6 +28,7 @@ export default function NewAssetPage() {
     refNo: "",
     category: "LOW_VALUE" as "CAPITAL" | "LOW_VALUE",
     price: "",
+    description: "",
     purchaseDate: new Date().toISOString().split('T')[0],
     location: "Pejabat Cyberjaya (Stor)",
     projectId: "",
@@ -163,6 +165,20 @@ export default function NewAssetPage() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description" className="flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" /> Deskripsi / Spesifikasi
+              </Label>
+              <Textarea 
+                id="description"
+                placeholder="Masukkan butiran terperinci aset di sini..."
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                className="bg-secondary/30 border-border min-h-[100px]"
+              />
+              <p className="text-[10px] text-muted-foreground italic">Maklumat ini hanya dipaparkan dalam borang detail aset (KEW.PA-3/4).</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

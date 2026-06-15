@@ -115,6 +115,9 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
                          <span className="text-muted-foreground font-bold print:text-slate-600">Model/Jenama:</span>
                          <span className="col-span-2 font-bold">{asset.model}</span>
                          
+                         <span className="text-muted-foreground font-bold print:text-slate-600">Deskripsi:</span>
+                         <span className="col-span-2 text-[11px] italic">{asset.description || 'Tiada deskripsi tambahan.'}</span>
+                         
                          <span className="text-muted-foreground font-bold print:text-slate-600">No. Siri Pembuat:</span>
                          <span className="col-span-2 font-mono">SN-998822-X</span>
                       </div>
