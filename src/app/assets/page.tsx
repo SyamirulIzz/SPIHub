@@ -29,7 +29,9 @@ import {
   User,
   Briefcase,
   AlertCircle,
-  X
+  X,
+  Eye,
+  Edit
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -221,7 +223,6 @@ export default function AssetsPage() {
                   
                   <DropdownMenuSeparator />
                   
-                  {/* Availability Filter Submenu */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="text-xs">Availability</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
@@ -234,7 +235,6 @@ export default function AssetsPage() {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
-                  {/* Status Filter Submenu */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="text-xs">Physical Condition</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
@@ -248,7 +248,6 @@ export default function AssetsPage() {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
-                  {/* Project Filter Submenu */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="text-xs">By Project</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
@@ -270,7 +269,6 @@ export default function AssetsPage() {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
-                  {/* Category Filter Submenu */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="text-xs">KEW.PA Category</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
@@ -353,7 +351,7 @@ export default function AssetsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end items-center gap-2">
                         {isAvailable && (
                           <RequestAssetDialog 
                             asset={asset} 
@@ -367,6 +365,11 @@ export default function AssetsPage() {
                             }}
                           />
                         )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 border border-border/50 hover:bg-accent/10" asChild title="Check Asset">
+                           <Link href={`/assets/${asset.id}`}>
+                             <Eye className="w-4 h-4 text-accent" />
+                           </Link>
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 border border-border/50">
@@ -378,6 +381,11 @@ export default function AssetsPage() {
                             <DropdownMenuItem asChild>
                               <Link href={`/assets/${asset.id}`} className="text-xs gap-2 cursor-pointer">
                                 <FileText className="w-3.5 h-3.5 text-accent" /> Lihat Borang KEW.PA
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/assets/${asset.id}/edit`} className="text-xs gap-2 cursor-pointer">
+                                <Edit className="w-3.5 h-3.5 text-primary" /> Edit Maklumat Aset
                               </Link>
                             </DropdownMenuItem>
                             
@@ -440,7 +448,6 @@ function RequestAssetDialog({ asset, projects, users, currentUser, onSuccess }: 
     const selectedProject = projects.find(p => p.id === projectId);
     const selectedUser = users.find(u => u.id === userId);
 
-    // 1. Update Asset
     const updatedAsset = {
       ...asset,
       projectId,
@@ -448,20 +455,18 @@ function RequestAssetDialog({ asset, projects, users, currentUser, onSuccess }: 
       location: selectedProject?.name || asset.location
     };
 
-    // 2. Create Movement (KEW.PA-9)
     const newMovement = {
       id: `amov-${Date.now()}`,
       assetId: asset.id,
       userId: userId,
       projectId: projectId,
       checkoutDate: new Date().toISOString(),
-      expectedReturnDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default 1 week
+      expectedReturnDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       purpose: purpose || "Keperluan Kerja Tapak",
       status: 'OUT',
-      requestedBy: currentUser.name // Track who made the request
+      requestedBy: currentUser.name
     };
 
-    // Save to LocalStorage
     const savedMovements = JSON.parse(localStorage.getItem('simulated_asset_movements') || JSON.stringify(ASSET_MOVEMENTS));
     localStorage.setItem('simulated_asset_movements', JSON.stringify([newMovement, ...savedMovements]));
 
