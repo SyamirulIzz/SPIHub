@@ -37,7 +37,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { AssetStatus } from "@/lib/types"
@@ -49,6 +50,7 @@ export default function AssetsPage() {
   const [mounted, setMounted] = useState(false)
   const [assetList, setAssetList] = useState(ASSETS)
   const [search, setSearch] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
 
   useEffect(() => {
     setMounted(true)
@@ -66,10 +68,14 @@ export default function AssetsPage() {
     return { totalValue, damaged, capitalAssets, onProject }
   }, [assetList])
 
-  const filteredAssets = assetList.filter(a => 
-    a.name.toLowerCase().includes(search.toLowerCase()) || 
-    a.refNo.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredAssets = useMemo(() => {
+    return assetList.filter(a => {
+      const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
+                            a.refNo.toLowerCase().includes(search.toLowerCase())
+      const matchesCategory = categoryFilter === "ALL" || a.category === categoryFilter
+      return matchesSearch && matchesCategory
+    })
+  }, [assetList, search, categoryFilter])
 
   const handleStatusUpdate = (assetId: string, newStatus: AssetStatus) => {
     const updated = assetList.map(a => 
@@ -132,9 +138,41 @@ export default function AssetsPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
              </div>
-             <Button variant="outline" size="sm" className="gap-2 text-[10px] font-bold border-border">
-                <Filter className="w-3.5 h-3.5" /> Filter Category
-             </Button>
+             
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 text-[10px] font-bold border-border">
+                    <Filter className="w-3.5 h-3.5" /> 
+                    {categoryFilter === 'ALL' ? 'Filter Category' : 
+                     categoryFilter === 'CAPITAL' ? 'KEW.PA-3' : 'KEW.PA-4'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-card border-border w-56">
+                  <DropdownMenuLabel className="text-[10px] font-bold uppercase text-muted-foreground">Filter by Category</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem 
+                    checked={categoryFilter === 'ALL'} 
+                    onCheckedChange={() => setCategoryFilter('ALL')}
+                    className="text-xs"
+                  >
+                    All Assets
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem 
+                    checked={categoryFilter === 'CAPITAL'} 
+                    onCheckedChange={() => setCategoryFilter('CAPITAL')}
+                    className="text-xs"
+                  >
+                    KEW.PA-3 (Harta Modal)
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem 
+                    checked={categoryFilter === 'LOW_VALUE'} 
+                    onCheckedChange={() => setCategoryFilter('LOW_VALUE')}
+                    className="text-xs"
+                  >
+                    KEW.PA-4 (Aset Nilai Rendah)
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+             </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="p-0">
