@@ -37,20 +37,34 @@ export default function AssetMovementLogPage() {
   const [mounted, setMounted] = useState(false)
   const [search, setSearch] = useState("")
   const [movements, setMovements] = useState(ASSET_MOVEMENTS)
+  
+  // Sync states for simulation integrity
+  const [syncedAssets, setSyncedAssets] = useState(ASSETS)
+  const [syncedUsers, setSyncedUsers] = useState(USERS)
+  const [syncedProjects, setSyncedProjects] = useState(PROJECTS)
 
   useEffect(() => {
     setMounted(true)
-    const saved = localStorage.getItem('simulated_asset_movements')
-    if (saved) {
-      setMovements(JSON.parse(saved))
+    const savedMovements = localStorage.getItem('simulated_asset_movements')
+    if (savedMovements) {
+      setMovements(JSON.parse(savedMovements))
     }
+    
+    const savedAssets = localStorage.getItem('simulated_assets')
+    if (savedAssets) setSyncedAssets(JSON.parse(savedAssets))
+    
+    const savedUsers = localStorage.getItem('simulated_users')
+    if (savedUsers) setSyncedUsers(JSON.parse(savedUsers))
+    
+    const savedProjects = localStorage.getItem('simulated_projects')
+    if (savedProjects) setSyncedProjects(JSON.parse(savedProjects))
   }, [])
 
   if (!isLoaded || !mounted) return null
 
   const filteredMovements = movements.filter(m => {
-    const asset = ASSETS.find(a => a.id === m.assetId)
-    const user = USERS.find(u => u.id === m.userId)
+    const asset = syncedAssets.find(a => a.id === m.assetId)
+    const user = syncedUsers.find(u => u.id === m.userId)
     return (
       asset?.name.toLowerCase().includes(search.toLowerCase()) ||
       user?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -90,86 +104,88 @@ export default function AssetMovementLogPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-secondary/10">
-              <TableRow>
-                <TableHead className="text-[10px] font-bold uppercase">Staf / Pemohon</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Aset Dipinjam</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Destinasi / Projek</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase text-center">Tempoh Pinjaman</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase text-center">Status</TableHead>
-                <TableHead className="text-right text-[10px] font-bold uppercase">Tindakan</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredMovements.map((m) => {
-                const asset = ASSETS.find(a => a.id === m.assetId)
-                const user = USERS.find(u => u.id === m.userId)
-                const project = PROJECTS.find(p => p.id === m.projectId)
-                return (
-                  <TableRow key={m.id} className="hover:bg-secondary/20 transition-colors border-b border-border/50">
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center text-[10px] font-bold text-accent">
-                          {user?.name.charAt(0)}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-secondary/10">
+                <TableRow>
+                  <TableHead className="text-[10px] font-bold uppercase">Staf / Pemohon</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">Aset Dipinjam</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">Destinasi / Projek</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase text-center">Tempoh Pinjaman</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase text-center">Status</TableHead>
+                  <TableHead className="text-right text-[10px] font-bold uppercase">Tindakan</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredMovements.map((m) => {
+                  const asset = syncedAssets.find(a => a.id === m.assetId)
+                  const user = syncedUsers.find(u => u.id === m.userId)
+                  const project = syncedProjects.find(p => p.id === m.projectId)
+                  return (
+                    <TableRow key={m.id} className="hover:bg-secondary/20 transition-colors border-b border-border/50">
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center text-[10px] font-bold text-accent">
+                            {user?.name.charAt(0) || '?'}
+                          </div>
+                          <span className="text-[10px] font-bold uppercase">{user?.name || 'Unknown Staff'}</span>
                         </div>
-                        <span className="text-[10px] font-bold uppercase">{user?.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-foreground uppercase">{asset?.name}</span>
-                        <span className="text-[9px] text-muted-foreground font-mono">{asset?.refNo}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium flex items-center gap-1">
-                          <MapPin className="w-2.5 h-2.5 text-accent" /> {project?.name}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground italic">"{m.purpose}"</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-[9px] font-mono">
-                        {new Date(m.checkoutDate).toLocaleDateString()}
-                        <div className="text-muted-foreground">&rarr; {new Date(m.expectedReturnDate).toLocaleDateString()}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge className={cn(
-                        "text-[8px] font-bold px-1.5 py-0.5",
-                        m.status === 'RETURNED' ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
-                      )}>
-                        {m.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <KewPa9PrintDialog movement={m} asset={asset} />
-                      </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-foreground uppercase">{asset?.name || 'Unknown Asset'}</span>
+                          <span className="text-[9px] text-muted-foreground font-mono">{asset?.refNo || 'N/A'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-medium flex items-center gap-1">
+                            <MapPin className="w-2.5 h-2.5 text-accent" /> {project?.name || 'No Project'}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground italic">"{m.purpose}"</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="text-[9px] font-mono">
+                          {new Date(m.checkoutDate).toLocaleDateString()}
+                          <div className="text-muted-foreground">&rarr; {new Date(m.expectedReturnDate).toLocaleDateString()}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={cn(
+                          "text-[8px] font-bold px-1.5 py-0.5",
+                          m.status === 'RETURNED' ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
+                        )}>
+                          {m.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <KewPa9PrintDialog movement={m} asset={asset} users={syncedUsers} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+                {filteredMovements.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic text-xs">
+                      Tiada rekod pergerakan aset ditemui.
                     </TableCell>
                   </TableRow>
-                )
-              })}
-              {filteredMovements.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic text-xs">
-                    Tiada rekod pergerakan aset ditemui.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
   )
 }
 
-function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
+function KewPa9PrintDialog({ movement, asset, users }: { movement: any, asset: any, users: any[] }) {
   const [open, setOpen] = useState(false);
-  const applicant = USERS.find(u => u.id === movement.userId);
+  const applicant = users.find(u => u.id === movement.userId);
   const dept = DEPARTMENTS.find(d => d.id === applicant?.departmentId);
 
   const handlePrint = () => {
@@ -209,19 +225,19 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
               <tbody>
                 <tr>
                    <td className="border-2 border-black p-2 w-1/4 font-bold">Nama Pemohon:</td>
-                   <td className="border-2 border-black p-2 w-1/4 uppercase">{applicant?.name}</td>
+                   <td className="border-2 border-black p-2 w-1/4 uppercase">{applicant?.name || '............................................'}</td>
                    <td className="border-2 border-black p-2 w-1/4 font-bold">Tujuan:</td>
                    <td className="border-2 border-black p-2 w-1/4">{movement.purpose}</td>
                 </tr>
                 <tr>
                    <td className="border-2 border-black p-2 font-bold">Jawatan:</td>
-                   <td className="border-2 border-black p-2 uppercase">{applicant?.position}</td>
+                   <td className="border-2 border-black p-2 uppercase">{applicant?.position || '............................................'}</td>
                    <td className="border-2 border-black p-2 font-bold">Tempat Digunakan:</td>
                    <td className="border-2 border-black p-2 uppercase">{movement.destination || 'TAPAK PROJEK'}</td>
                 </tr>
                 <tr>
                    <td className="border-2 border-black p-2 font-bold">Bahagian:</td>
-                   <td className="border-2 border-black p-2 uppercase">{dept?.name}</td>
+                   <td className="border-2 border-black p-2 uppercase">{dept?.name || '............................................'}</td>
                    <td className="border-2 border-black p-2 font-bold">Nama Pengeluar:</td>
                    <td className="border-2 border-black p-2">............................................</td>
                 </tr>
@@ -256,7 +272,7 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
                        <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.checkoutDate).toLocaleDateString() : ''}</td>
                        <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.expectedReturnDate).toLocaleDateString() : ''}</td>
                        <td className="border-2 border-black text-center">{idx === 1 ? 'LULUS' : ''}</td>
-                       <td className="border-2 border-black"></td>
+                       <td className="border-2 border-black text-center">{idx === 1 && movement.status === 'RETURNED' ? new Date(movement.checkoutDate).toLocaleDateString() : ''}</td>
                        <td className="border-2 border-black"></td>
                        <td className="border-2 border-black"></td>
                     </tr>
@@ -268,7 +284,7 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
               <div className="space-y-12">
                  <p className="text-[10px] font-bold">Tandatangan Pemohon</p>
                  <div className="border-b border-black w-48"></div>
-                 <p className="text-[9px] uppercase">({applicant?.name})</p>
+                 <p className="text-[9px] uppercase">({applicant?.name || '............................................'})</p>
                  <p className="text-[9px]">Tarikh: {new Date(movement.checkoutDate).toLocaleDateString()}</p>
               </div>
               <div className="space-y-12">

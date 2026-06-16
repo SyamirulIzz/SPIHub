@@ -37,19 +37,33 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
   const { currentUser, isLoaded } = useCurrentUser()
   const [mounted, setMounted] = useState(false)
   const [asset, setAsset] = useState<any>(null)
+  
+  // Simulation sync states
+  const [syncedUsers, setSyncedUsers] = useState(USERS)
+  const [syncedProjects, setSyncedProjects] = useState(PROJECTS)
+  const [syncedMovements, setSyncedMovements] = useState(ASSET_MOVEMENTS)
 
   useEffect(() => {
     setMounted(true)
     const savedAssets = JSON.parse(localStorage.getItem('simulated_assets') || JSON.stringify(ASSETS))
     const found = savedAssets.find((a: any) => a.id === id)
     setAsset(found)
+
+    const savedUsers = localStorage.getItem('simulated_users')
+    if (savedUsers) setSyncedUsers(JSON.parse(savedUsers))
+
+    const savedProjects = localStorage.getItem('simulated_projects')
+    if (savedProjects) setSyncedProjects(JSON.parse(savedProjects))
+
+    const savedMovements = localStorage.getItem('simulated_asset_movements')
+    if (savedMovements) setSyncedMovements(JSON.parse(savedMovements))
   }, [id])
 
   if (!isLoaded || !mounted || !asset) return null
 
-  const project = PROJECTS.find(p => p.id === asset.projectId)
-  const holder = USERS.find(u => u.id === asset.currentHolderId)
-  const movements = ASSET_MOVEMENTS.filter(m => m.assetId === asset.id)
+  const project = syncedProjects.find(p => p.id === asset.projectId)
+  const holder = syncedUsers.find(u => u.id === asset.currentHolderId)
+  const movements = syncedMovements.filter(m => m.assetId === asset.id)
   const reports = ASSET_DAMAGE_REPORTS.filter(r => r.assetId === asset.id)
 
   const handlePrint = () => {
@@ -185,18 +199,18 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
                 {movements.length > 0 ? (
                   <div className="divide-y divide-border">
                     {movements.map((m: any) => {
-                      const user = USERS.find(u => u.id === m.userId)
-                      const proj = PROJECTS.find(p => p.id === m.projectId)
+                      const user = syncedUsers.find(u => u.id === m.userId)
+                      const proj = syncedProjects.find(p => p.id === m.projectId)
                       return (
                         <div key={m.id} className="p-4 flex items-center justify-between hover:bg-secondary/10 transition-colors">
                            <div className="flex items-center gap-4">
                               <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center font-bold text-accent">
-                                {user?.name.charAt(0)}
+                                {user?.name.charAt(0) || '?'}
                               </div>
                               <div>
-                                <p className="text-xs font-bold uppercase">{user?.name}</p>
+                                <p className="text-xs font-bold uppercase">{user?.name || 'Unknown Staff'}</p>
                                 <p className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-                                   <Building className="w-2.5 h-2.5" /> {proj?.name}
+                                   <Building className="w-2.5 h-2.5" /> {proj?.name || 'No Project'}
                                 </p>
                               </div>
                            </div>
@@ -205,7 +219,7 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Tujuan: {m.purpose}</p>
                                 <p className="text-[9px] font-mono mt-1">{new Date(m.checkoutDate).toLocaleDateString()} &rarr; {new Date(m.expectedReturnDate).toLocaleDateString()}</p>
                               </div>
-                              <KewPa9PrintDialog movement={m} asset={asset} />
+                              <KewPa9PrintDialog movement={m} asset={asset} users={syncedUsers} />
                            </div>
                         </div>
                       )
@@ -255,9 +269,9 @@ export default function AssetDetailPage({ params }: { params: Promise<{ id: stri
   )
 }
 
-function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
+function KewPa9PrintDialog({ movement, asset, users }: { movement: any, asset: any, users: any[] }) {
   const [open, setOpen] = useState(false);
-  const applicant = USERS.find(u => u.id === movement.userId);
+  const applicant = users.find(u => u.id === movement.userId);
   const dept = DEPARTMENTS.find(d => d.id === applicant?.departmentId);
 
   const handlePrint = () => {
@@ -297,19 +311,19 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
               <tbody>
                 <tr>
                    <td className="border-2 border-black p-2 w-1/4 font-bold">Nama Pemohon:</td>
-                   <td className="border-2 border-black p-2 w-1/4 uppercase">{applicant?.name}</td>
+                   <td className="border-2 border-black p-2 w-1/4 uppercase">{applicant?.name || '............................................'}</td>
                    <td className="border-2 border-black p-2 w-1/4 font-bold">Tujuan:</td>
                    <td className="border-2 border-black p-2 w-1/4">{movement.purpose}</td>
                 </tr>
                 <tr>
                    <td className="border-2 border-black p-2 font-bold">Jawatan:</td>
-                   <td className="border-2 border-black p-2 uppercase">{applicant?.position}</td>
+                   <td className="border-2 border-black p-2 uppercase">{applicant?.position || '............................................'}</td>
                    <td className="border-2 border-black p-2 font-bold">Tempat Digunakan:</td>
-                   <td className="border-2 border-black p-2 uppercase">{movement.destination}</td>
+                   <td className="border-2 border-black p-2 uppercase">{movement.destination || 'TAPAK PROJEK'}</td>
                 </tr>
                 <tr>
                    <td className="border-2 border-black p-2 font-bold">Bahagian:</td>
-                   <td className="border-2 border-black p-2 uppercase">{dept?.name}</td>
+                   <td className="border-2 border-black p-2 uppercase">{dept?.name || '............................................'}</td>
                    <td className="border-2 border-black p-2 font-bold">Nama Pengeluar:</td>
                    <td className="border-2 border-black p-2">............................................</td>
                 </tr>
@@ -343,8 +357,8 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
                        <td className="border-2 border-black px-2">{idx === 1 ? asset.name : ''}</td>
                        <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.checkoutDate).toLocaleDateString() : ''}</td>
                        <td className="border-2 border-black text-center">{idx === 1 ? new Date(movement.expectedReturnDate).toLocaleDateString() : ''}</td>
-                       <td className="border-2 border-black text-center">{idx === 1 ? (movement.status === 'APPROVED' ? 'LULUS' : '') : ''}</td>
-                       <td className="border-2 border-black"></td>
+                       <td className="border-2 border-black text-center">{idx === 1 ? 'LULUS' : ''}</td>
+                       <td className="border-2 border-black text-center">{idx === 1 && movement.status === 'RETURNED' ? new Date(movement.checkoutDate).toLocaleDateString() : ''}</td>
                        <td className="border-2 border-black"></td>
                        <td className="border-2 border-black"></td>
                     </tr>
@@ -356,7 +370,7 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
               <div className="space-y-12">
                  <p className="text-[10px] font-bold">Tandatangan Pemohon</p>
                  <div className="border-b border-black w-48"></div>
-                 <p className="text-[9px] uppercase">({applicant?.name})</p>
+                 <p className="text-[9px] uppercase">({applicant?.name || '............................................'})</p>
                  <p className="text-[9px]">Tarikh: {new Date(movement.checkoutDate).toLocaleDateString()}</p>
               </div>
               <div className="space-y-12">
@@ -385,22 +399,4 @@ function KewPa9PrintDialog({ movement, asset }: { movement: any, asset: any }) {
       </DialogContent>
     </Dialog>
   );
-}
-
-function StatCard({ title, value, icon: Icon, color }: any) {
-  return (
-    <Card className="bg-card border-border shadow-lg">
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
-            <div className={cn("text-xl font-bold font-headline", color)}>{value}</div>
-          </div>
-          <div className={cn("p-2 rounded-lg bg-secondary/50", color)}>
-            <Icon className="w-4 h-4" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
 }

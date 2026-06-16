@@ -374,6 +374,27 @@ export const ASSET_MOVEMENTS: AssetMovement[] = [
     expectedReturnDate: '2024-05-18T17:00:00',
     purpose: 'Hardware Demo for AADK Stakeholders',
     status: 'OUT'
+  },
+  {
+    id: 'amov-2',
+    assetId: 'ast-5',
+    userId: 'user-7',
+    projectId: 'proj-4',
+    checkoutDate: '2024-01-20T10:00:00',
+    expectedReturnDate: '2024-12-31T17:00:00',
+    purpose: 'Smart City Network Node Deployment',
+    status: 'OUT'
+  },
+  {
+    id: 'amov-3',
+    assetId: 'ast-1',
+    userId: 'user-3',
+    projectId: 'proj-2',
+    checkoutDate: '2024-05-01T09:00:00',
+    expectedReturnDate: '2024-05-05T17:00:00',
+    returnDate: '2024-05-05T16:45:00',
+    purpose: 'Internal Portal Stress Test',
+    status: 'RETURNED'
   }
 ];
 
