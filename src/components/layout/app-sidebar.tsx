@@ -1,4 +1,3 @@
-
 "use client"
 
 import { 
@@ -108,7 +107,7 @@ const items = [
 
 export function AppSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
-  const { state } = useSidebar()
+  const { state, setOpenMobile } = useSidebar()
   const { currentUser, switchUser, logout, isLoaded } = useCurrentUser()
   
   if (!isLoaded || !currentUser) return null
@@ -142,7 +141,13 @@ export function AppSidebar({ className }: { className?: string }) {
             <SidebarMenu>
               {items.filter(item => item.roles.includes(currentUser.role)).map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title} className="group py-6 px-4 transition-all hover:bg-sidebar-accent/50 data-[active=true]:bg-primary/10">
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={pathname === item.url} 
+                    tooltip={item.title} 
+                    className="group py-6 px-4 transition-all hover:bg-sidebar-accent/50 data-[active=true]:bg-primary/10"
+                    onClick={() => setOpenMobile(false)}
+                  >
                     <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className={cn(
                         "w-5 h-5 transition-colors",
