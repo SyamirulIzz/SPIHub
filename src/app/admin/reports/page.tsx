@@ -195,7 +195,7 @@ export default function AdminReportsPage() {
               <DropdownMenuTrigger asChild>
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-lg animate-in fade-in slide-in-from-right-2 duration-300">
                   <Download className="w-4 h-4" />
-                  Download Report
+                  Download Leave Report
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-card border-border w-48">
